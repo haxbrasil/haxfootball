@@ -11,7 +11,7 @@ import {
     $unsetFirstDownLine,
     $unsetLineOfScrimmage,
 } from "@meta/legacy/hooks/game";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 
 const TIME_TO_BLOCKED_PASS_STATE = ticks({ milliseconds: 200 });
 

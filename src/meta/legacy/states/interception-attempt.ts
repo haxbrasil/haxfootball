@@ -19,7 +19,7 @@ import {
 import { t } from "@lingui/core/macro";
 import { PointLike } from "@common/math/geometry";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const TIME_TO_CHECK_INTERCEPTION = ticks({ milliseconds: 100 });

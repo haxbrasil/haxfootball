@@ -53,7 +53,7 @@ import {
     DEFAULT_PUSHING_MIN_BACKFIELD_STEP,
     detectPushingFoul,
 } from "@meta/legacy/shared/pushing";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const DEFENSIVE_FOUL_PENALTY_YARDS = 5;

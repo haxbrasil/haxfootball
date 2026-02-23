@@ -11,7 +11,7 @@ import {
 } from "@runtime/runtime";
 import { Room } from "@core/room";
 import { Team, type FieldTeam, isFieldTeam } from "@runtime/models";
-import { CommandHandleResult, CommandSpec } from "@runtime/commands";
+import { CommandHandleResult, CommandSpec } from "@core/commands";
 import {
     createGlobalStore,
     type GlobalSchema,

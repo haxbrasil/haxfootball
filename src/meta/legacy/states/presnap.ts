@@ -1,6 +1,6 @@
 import { type FieldTeam, isFieldTeam, Team } from "@runtime/models";
 import type { GameStatePlayer } from "@runtime/engine";
-import { CommandHandleResult, CommandSpec } from "@runtime/commands";
+import { CommandHandleResult, CommandSpec } from "@core/commands";
 import { opposite } from "@common/game/game";
 import { parseIntegerInRange, parseTeamSide } from "@common/game/parsing";
 import {

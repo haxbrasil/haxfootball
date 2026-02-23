@@ -26,7 +26,7 @@ import {
 import { $setBallActive, $setBallInactive } from "@meta/legacy/hooks/game";
 import { $global } from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const FUMBLE_CATCHER_DISTANCE = 1.0;

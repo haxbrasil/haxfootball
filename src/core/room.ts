@@ -22,6 +22,13 @@ export type AnnouncementOptions = {
     sound?: ChatSoundString;
 };
 
+export type RegisteredCommand = {
+    name: string;
+    aliases: string[];
+    category: string;
+    description?: string;
+};
+
 const DEFAULT_STADIUM_NAMES = [
     "Classic",
     "Easy",
@@ -88,6 +95,7 @@ export class Room {
     private currentStadium: TrackedStadium | null = null;
     private previousStadium: TrackedStadium | null = null;
     private pendingStadiumName: string | null = null;
+    private registeredCommands: RegisteredCommand[] = [];
 
     constructor(private room: RoomObject) {}
 
@@ -127,6 +135,28 @@ export class Room {
 
     public invalidateCaches(): void {
         this.invalidateAllCaches();
+    }
+
+    public setCommands(commands: RegisteredCommand[]): void {
+        this.registeredCommands = commands.map((command) => ({
+            name: command.name,
+            aliases: [...command.aliases],
+            category: command.category,
+            ...(command.description
+                ? { description: command.description }
+                : {}),
+        }));
+    }
+
+    public getCommands(): RegisteredCommand[] {
+        return this.registeredCommands.map((command) => ({
+            name: command.name,
+            aliases: [...command.aliases],
+            category: command.category,
+            ...(command.description
+                ? { description: command.description }
+                : {}),
+        }));
     }
 
     public send({

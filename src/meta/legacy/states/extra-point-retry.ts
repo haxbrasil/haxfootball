@@ -27,7 +27,7 @@ import {
 } from "@meta/legacy/shared/initial-positioning";
 import { $global } from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import {
     isTooFarFromBall,

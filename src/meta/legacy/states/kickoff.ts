@@ -17,7 +17,7 @@ import {
 } from "@meta/legacy/hooks/physics";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 
 const KICKOFF_START_LINE = {
     [Team.RED]: {

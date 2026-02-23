@@ -1,10 +1,11 @@
 import { createModule } from "@core/module";
-import { COMMAND_PREFIX } from "@runtime/commands";
+import { COMMAND_PREFIX, normalizeCommandToken } from "@core/commands";
 import { t } from "@lingui/core/macro";
 import { randomBytes } from "node:crypto";
 import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
 import { env } from "@env";
+import { CommandCategory } from "../utils/commands";
 
 const ADMIN_PASSWORD = randomBytes(4).toString("hex");
 
@@ -25,13 +26,44 @@ const mainModule = createModule()
     .setCommands({
         spec: { prefix: COMMAND_PREFIX },
         commands: [
-            "admin",
-            "setpassword",
-            "clearpassword",
-            "discord",
-            "tutorial",
-            "bb",
-            "clearbans",
+            {
+                name: "admin",
+                category: CommandCategory.Hidden,
+            },
+            {
+                name: "setpassword",
+                category: CommandCategory.Admin,
+                description: t`Set the room password`,
+            },
+            {
+                name: "clearpassword",
+                category: CommandCategory.Admin,
+                description: t`Remove the room password`,
+            },
+            {
+                name: "discord",
+                category: CommandCategory.Room,
+                description: t`Show the Discord invite link`,
+            },
+            {
+                name: "tutorial",
+                category: CommandCategory.Room,
+                description: t`Show the tutorial link`,
+            },
+            {
+                name: "bb",
+                category: CommandCategory.Hidden,
+            },
+            {
+                name: "clearbans",
+                category: CommandCategory.Admin,
+                description: t`Clear all bans`,
+            },
+            {
+                name: "help",
+                category: CommandCategory.Room,
+                description: t`Show available commands or details for one command`,
+            },
         ],
     })
     .onRoomLink((room, url) => {
@@ -162,6 +194,115 @@ const mainModule = createModule()
                     color: COLOR.SUCCESS,
                     to: player.id,
                 });
+
+                return { hideMessage: true };
+            }
+            case "help": {
+                const commands = room.getCommands();
+                const [requestedCommandName] = command.args;
+
+                if (!requestedCommandName) {
+                    const gameCommands = commands.filter(
+                        (cmd) => cmd.category === CommandCategory.Game,
+                    );
+                    const roomCommands = commands.filter(
+                        (cmd) => cmd.category === CommandCategory.Room,
+                    );
+                    const adminCommands = commands.filter(
+                        (cmd) => cmd.category === CommandCategory.Admin,
+                    );
+
+                    const formatCommands = (cmds: typeof commands) =>
+                        cmds
+                            .map((cmd) => `${COMMAND_PREFIX}${cmd.name}`)
+                            .join(" ");
+
+                    room.send({
+                        message: t`📋 Available commands:`,
+                        color: COLOR.HIGHLIGHT,
+                        to: player.id,
+                        sound: "notification",
+                    });
+                    room.send({
+                        message: t`🏈 Game: ${formatCommands(gameCommands)}`,
+                        color: COLOR.HIGHLIGHT,
+                        to: player.id,
+                        sound: "notification",
+                    });
+                    room.send({
+                        message: t`💬 Room: ${formatCommands(roomCommands)}`,
+                        color: COLOR.HIGHLIGHT,
+                        to: player.id,
+                        sound: "notification",
+                    });
+
+                    if (player.admin) {
+                        room.send({
+                            message: t`🔒 Admin: ${formatCommands(adminCommands)}`,
+                            color: COLOR.HIGHLIGHT,
+                            to: player.id,
+                            sound: "notification",
+                        });
+                    }
+
+                    return { hideMessage: true };
+                }
+
+                const normalizedRequestedName = normalizeCommandToken(
+                    requestedCommandName.startsWith(COMMAND_PREFIX)
+                        ? requestedCommandName.slice(COMMAND_PREFIX.length)
+                        : requestedCommandName,
+                );
+
+                const matchedCommand = commands.find(
+                    (cmd) =>
+                        cmd.name === normalizedRequestedName ||
+                        cmd.aliases.includes(normalizedRequestedName),
+                );
+
+                const commandIsHidden =
+                    matchedCommand?.category === CommandCategory.Hidden;
+
+                const commandIsAdminOnly =
+                    matchedCommand?.category === CommandCategory.Admin;
+
+                const shouldHideCommandDescription =
+                    !matchedCommand ||
+                    commandIsHidden ||
+                    (commandIsAdminOnly && !player.admin);
+
+                if (shouldHideCommandDescription) {
+                    room.send({
+                        message: t`⚠️ Unknown command. Use !help to see available commands.`,
+                        color: COLOR.WARNING,
+                        to: player.id,
+                        sound: "notification",
+                    });
+
+                    return { hideMessage: true };
+                }
+
+                room.send({
+                    message: matchedCommand.description
+                        ? t`📘 ${COMMAND_PREFIX}${matchedCommand.name}: ${matchedCommand.description}`
+                        : t`📘 ${COMMAND_PREFIX}${matchedCommand.name}: No description available.`,
+                    color: COLOR.HIGHLIGHT,
+                    to: player.id,
+                    sound: "notification",
+                });
+
+                const formattedAliases = matchedCommand.aliases
+                    .map((alias) => `${COMMAND_PREFIX}${alias}`)
+                    .join(" ");
+
+                if (matchedCommand.aliases.length > 0) {
+                    room.send({
+                        message: t`🔁 Aliases: ${formattedAliases}`,
+                        color: COLOR.HIGHLIGHT,
+                        to: player.id,
+                        sound: "none",
+                    });
+                }
 
                 return { hideMessage: true };
             }

@@ -27,7 +27,7 @@ import { cn, formatNames } from "@meta/legacy/shared/message";
 import { $global } from "@meta/legacy/hooks/global";
 import { t } from "@lingui/core/macro";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const MAX_PATH_DURATION = ticks({ seconds: 2 });

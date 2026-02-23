@@ -16,7 +16,7 @@ import {
     isBallOutOfBounds,
     isWithinGoalPosts,
 } from "@meta/legacy/shared/stadium";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const EXTRA_POINT_RESULT_DELAY = ticks({ seconds: 2 });

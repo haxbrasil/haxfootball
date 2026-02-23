@@ -1,4 +1,4 @@
-import { CommandHandleResult, type CommandSpec } from "@runtime/commands";
+import { CommandHandleResult, type CommandSpec } from "@core/commands";
 import type { DownState } from "@meta/legacy/shared/down";
 import { $checkpoints, $effect, $restore } from "@runtime/runtime";
 import { $global } from "@meta/legacy/hooks/global";

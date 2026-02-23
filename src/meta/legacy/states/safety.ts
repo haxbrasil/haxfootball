@@ -19,7 +19,7 @@ import {
 import { $next } from "@runtime/runtime";
 import { t } from "@lingui/core/macro";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const KICKING_TEAM_POSITIONS_OFFSET = {

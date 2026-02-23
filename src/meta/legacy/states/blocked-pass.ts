@@ -19,7 +19,7 @@ import {
 import { t } from "@lingui/core/macro";
 import { cn } from "@meta/legacy/shared/message";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 export function BlockedPass({

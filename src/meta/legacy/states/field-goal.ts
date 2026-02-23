@@ -44,7 +44,7 @@ import {
 import { sortBy } from "@common/general/helpers";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import { findEligibleBallCatchers } from "@meta/legacy/shared/reception";
-import type { CommandSpec } from "@runtime/commands";
+import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const FIELD_GOAL_LINE_HEIGHT = 200;

@@ -1,15 +1,14 @@
 import {
     CommandConfig,
-    CommandParseSpec,
     CommandResponse,
     CommandSpec,
-} from "@runtime/commands";
+    NormalizedCommandConfig,
+    buildCommandCatalog,
+    normalizeCommandConfig,
+    normalizeCommandToken,
+    parseCommandMessage,
+} from "@core/commands";
 import { Room } from "@core/room";
-
-type NormalizedCommandConfig = {
-    spec: CommandParseSpec;
-    commands: Set<string>;
-};
 
 export type StadiumChangeHandlerResponse = {
     undo?: boolean;
@@ -20,14 +19,7 @@ export class Module {
     private commandConfig: NormalizedCommandConfig | null = null;
 
     setCommands(config: CommandConfig): this {
-        const normalizedCommands = new Set(
-            config.commands.map((command) => command.toLowerCase()),
-        );
-
-        this.commandConfig = {
-            spec: config.spec,
-            commands: normalizedCommands,
-        };
+        this.commandConfig = normalizeCommandConfig(config);
 
         return this;
     }
@@ -38,7 +30,7 @@ export class Module {
 
     handlesCommand(commandName: string): boolean {
         return this.commandConfig
-            ? this.commandConfig.commands.has(commandName)
+            ? this.commandConfig.entries.has(normalizeCommandToken(commandName))
             : false;
     }
 
@@ -281,34 +273,16 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
         );
     }
 
-    const availableCommands = new Set(
-        commandConfigs.flatMap((config) => Array.from(config.commands)),
-    );
+    const commandCatalog = buildCommandCatalog(commandConfigs);
 
-    const parseCommand = (message: string): CommandSpec | null => {
-        if (!commandSpec || availableCommands.size === 0) return null;
+    room.setCommands(commandCatalog.commands);
 
-        const raw = message.trim();
-
-        if (!raw.startsWith(commandSpec.prefix)) return null;
-
-        const withoutPrefix = raw.slice(commandSpec.prefix.length).trim();
-        if (withoutPrefix.length === 0) return null;
-
-        const parts = withoutPrefix.split(/\s+/);
-        const name = parts[0] ? parts[0].toLowerCase() : "";
-
-        if (!name || !availableCommands.has(name)) return null;
-
-        const args = parts.slice(1);
-
-        return {
-            prefix: commandSpec.prefix,
-            name,
-            args,
-            raw,
-        };
-    };
+    const parseCommand = (message: string): CommandSpec | null =>
+        parseCommandMessage({
+            message,
+            spec: commandSpec,
+            tokens: commandCatalog.tokens,
+        });
 
     const emit =
         (eventName: string) =>

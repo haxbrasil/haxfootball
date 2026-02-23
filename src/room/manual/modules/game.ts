@@ -1,5 +1,5 @@
 import { createModule } from "@core/module";
-import { COMMAND_PREFIX } from "@runtime/commands";
+import { COMMAND_PREFIX } from "@core/commands";
 import { createEngine, type Engine } from "@runtime/engine";
 import { registry, stadium } from "@meta/legacy/meta";
 import {
@@ -21,6 +21,7 @@ import { COLOR } from "@common/general/color";
 import { cn, formatTeamName } from "@meta/legacy/shared/message";
 import { type ScoreState } from "@common/game/game";
 import { type GlobalSchemaState } from "@runtime/global";
+import { CommandCategory } from "../utils/commands";
 
 type LegacyGlobalSnapshot = GlobalSchemaState<typeof legacyGlobalSchema>;
 
@@ -164,18 +165,66 @@ const gameModule = createModule()
     .setCommands({
         spec: { prefix: COMMAND_PREFIX },
         commands: [
-            "punt",
-            "fg",
-            "distance",
-            "down",
-            "los",
-            "version",
-            "undo",
-            "info",
-            "reposition",
-            "score",
-            "flag",
-            "flags",
+            {
+                name: "punt",
+                category: CommandCategory.Game,
+                description: t`Punt the ball`,
+            },
+            {
+                name: "fg",
+                category: CommandCategory.Game,
+                description: t`Attempt a field goal`,
+            },
+            {
+                name: "distance",
+                category: CommandCategory.Game,
+                description: t`Set the distance to first down`,
+            },
+            {
+                name: "down",
+                category: CommandCategory.Game,
+                description: t`Set the current down`,
+            },
+            {
+                name: "los",
+                category: CommandCategory.Game,
+                description: t`Set the line of scrimmage`,
+            },
+            {
+                name: "version",
+                category: CommandCategory.Game,
+                description: t`Show the game version`,
+            },
+            {
+                name: "undo",
+                category: CommandCategory.Game,
+                description: t`Undo the last play`,
+            },
+            {
+                name: "info",
+                category: CommandCategory.Game,
+                description: t`Show game info`,
+            },
+            {
+                name: "reposition",
+                category: CommandCategory.Game,
+                description: t`Reposition players`,
+            },
+            {
+                name: "score",
+                category: CommandCategory.Game,
+                description: t`Show the score`,
+            },
+            {
+                name: "flag",
+                category: CommandCategory.Game,
+                description: t`View or set a config flag`,
+            },
+            {
+                name: "flags",
+                category: CommandCategory.Game,
+                description: t`List all config flags`,
+            },
         ],
     })
     .onGameStart((room) => {
