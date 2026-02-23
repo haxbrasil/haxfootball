@@ -109,7 +109,7 @@ msgstr "{0}-yard penalty."
 msgid "{0}, and {1}"
 msgstr "{0}, and {1}"
 
-#: src/meta/legacy/states/presnap.ts:237
+#: src/meta/legacy/states/presnap.ts:243
 msgid "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 msgstr "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 
@@ -235,12 +235,12 @@ msgstr "•"
 #~ msgstr "• Ball out of bounds • no gain."
 
 #. placeholder {0}: disabledFlags.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:243
+#: src/room/manual/modules/game.ts:246
 msgid "• Disabled: {0}"
 msgstr "• Disabled: {0}"
 
 #. placeholder {0}: enabledFlags.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:237
+#: src/room/manual/modules/game.ts:240
 msgid "• Enabled: {0}"
 msgstr "• Enabled: {0}"
 
@@ -290,14 +290,29 @@ msgstr "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgid "⏱️ PAT window expired."
 msgstr "⏱️ PAT window expired."
 
+#. placeholder {0}: player.name
+#: src/meta/legacy/states/presnap.ts:414
+msgid "⚙️ {0} moved LOS to {sideName} {yards}."
+msgstr "⚙️ {0} moved LOS to {sideName} {yards}."
+
 #: src/room/manual/game.ts:313
 #~ msgid "⚙️ {0} set {requestedFlagName} to {1}."
 #~ msgstr "⚙️ {0} set {requestedFlagName} to {1}."
 
 #. placeholder {0}: player.name
-#: src/room/manual/modules/game.ts:339
+#: src/room/manual/modules/game.ts:342
 msgid "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 msgstr "⚙️ {0} set {requestedFlagName} to {newFlagState}."
+
+#. placeholder {0}: player.name
+#: src/meta/legacy/states/presnap.ts:307
+msgid "⚙️ {0} set distance to {distance}."
+msgstr "⚙️ {0} set distance to {distance}."
+
+#. placeholder {0}: player.name
+#: src/meta/legacy/states/presnap.ts:359
+msgid "⚙️ {0} set down to {down}."
+msgstr "⚙️ {0} set down to {down}."
 
 #: src/room/manual/game.ts:313
 #~ msgid "⚙️ {requestedFlagName} set to {0}."
@@ -307,28 +322,28 @@ msgstr "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 #~ msgid "⚙️ {requestedFlagName}: {0}."
 #~ msgstr "⚙️ {requestedFlagName}: {0}."
 
-#: src/room/manual/modules/game.ts:284
+#: src/room/manual/modules/game.ts:287
 msgid "⚙️ {requestedFlagName}: {flagState}."
 msgstr "⚙️ {requestedFlagName}: {flagState}."
 
-#: src/room/manual/modules/game.ts:231
+#: src/room/manual/modules/game.ts:234
 msgid "⚙️ Available flags:"
 msgstr "⚙️ Available flags:"
 
 #. placeholder {0}: flagNames.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:222
+#: src/room/manual/modules/game.ts:225
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Available flags: {0}."
 
-#: src/meta/legacy/states/presnap.ts:276
+#: src/meta/legacy/states/presnap.ts:441
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal is only available from the defensive side of the field."
 
-#: src/room/manual/modules/game.ts:310
+#: src/room/manual/modules/game.ts:313
 msgid "⚠️ Flags cannot be changed while a game is in progress."
 msgstr "⚠️ Flags cannot be changed while a game is in progress."
 
-#: src/room/manual/modules/game.ts:322
+#: src/room/manual/modules/game.ts:325
 msgid "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 msgstr "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 
@@ -340,27 +355,33 @@ msgstr "⚠️ No checkpoints available to undo."
 msgid "⚠️ Only admins can call for an undo."
 msgstr "⚠️ Only admins can call for an undo."
 
-#: src/meta/legacy/states/presnap.ts:377
+#: src/meta/legacy/states/presnap.ts:542
 msgid "⚠️ Only admins can call for repositioning."
 msgstr "⚠️ Only admins can call for repositioning."
 
-#: src/room/manual/modules/game.ts:300
+#: src/meta/legacy/states/presnap.ts:270
+#: src/meta/legacy/states/presnap.ts:322
+#: src/meta/legacy/states/presnap.ts:374
+msgid "⚠️ Only admins can change game positioning."
+msgstr "⚠️ Only admins can change game positioning."
+
+#: src/room/manual/modules/game.ts:303
 msgid "⚠️ Only admins can modify flags."
 msgstr "⚠️ Only admins can modify flags."
 
-#: src/meta/legacy/states/presnap.ts:264
+#: src/meta/legacy/states/presnap.ts:429
 msgid "⚠️ Only the offense may call for a field goal."
 msgstr "⚠️ Only the offense may call for a field goal."
 
-#: src/meta/legacy/states/presnap.ts:313
+#: src/meta/legacy/states/presnap.ts:478
 msgid "⚠️ Only the offense may punt."
 msgstr "⚠️ Only the offense may punt."
 
-#: src/room/manual/modules/room.ts:86
+#: src/room/manual/modules/room.ts:87
 msgid "⚠️ Please provide a new password."
 msgstr "⚠️ Please provide a new password."
 
-#: src/room/manual/modules/game.ts:362
+#: src/room/manual/modules/game.ts:365
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ The game has not been started yet."
 
@@ -372,13 +393,25 @@ msgstr "⚠️ Two-point try is no longer available"
 #~ msgid "⚠️ Two-point try is no longer available • kick the PAT."
 #~ msgstr "⚠️ Two-point try is no longer available • kick the PAT."
 
-#: src/room/manual/modules/game.ts:265
+#: src/room/manual/modules/game.ts:268
 msgid "⚠️ Unknown flag. Use !flags to list available flags."
 msgstr "⚠️ Unknown flag. Use !flags to list available flags."
 
-#: src/room/manual/modules/game.ts:253
+#: src/meta/legacy/states/presnap.ts:288
+msgid "⚠️ Usage: !distance <1-20>."
+msgstr "⚠️ Usage: !distance <1-20>."
+
+#: src/meta/legacy/states/presnap.ts:340
+msgid "⚠️ Usage: !down <1-4>."
+msgstr "⚠️ Usage: !down <1-4>."
+
+#: src/room/manual/modules/game.ts:256
 msgid "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 msgstr "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
+
+#: src/meta/legacy/states/presnap.ts:393
+msgid "⚠️ Usage: !los <red/blue> <1-50>."
+msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 
 #: src/meta/legacy/states/extra-point-retry.ts:159
 #: src/meta/legacy/states/extra-point.ts:170
@@ -388,29 +421,29 @@ msgstr "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 
 #: src/meta/legacy/states/extra-point-retry.ts:153
 #: src/meta/legacy/states/extra-point.ts:173
-#: src/meta/legacy/states/presnap.ts:189
+#: src/meta/legacy/states/presnap.ts:195
 msgid "⚠️ Wait a moment before snapping."
 msgstr "⚠️ Wait a moment before snapping."
 
-#: src/meta/legacy/states/presnap.ts:288
+#: src/meta/legacy/states/presnap.ts:453
 msgid "⚠️ You are too far from the ball to attempt the field goal."
 msgstr "⚠️ You are too far from the ball to attempt the field goal."
 
-#: src/meta/legacy/states/presnap.ts:325
+#: src/meta/legacy/states/presnap.ts:490
 msgid "⚠️ You are too far from the ball to punt."
 msgstr "⚠️ You are too far from the ball to punt."
 
 #: src/meta/legacy/states/extra-point-retry.ts:165
 #: src/meta/legacy/states/extra-point.ts:200
-#: src/meta/legacy/states/presnap.ts:201
+#: src/meta/legacy/states/presnap.ts:207
 msgid "⚠️ You are too far from the ball to snap it."
 msgstr "⚠️ You are too far from the ball to snap it."
 
-#: src/room/manual/modules/room.ts:214
+#: src/room/manual/modules/room.ts:225
 msgid "⚠️ You cannot ban this player."
 msgstr "⚠️ You cannot ban this player."
 
-#: src/room/manual/modules/room.ts:215
+#: src/room/manual/modules/room.ts:226
 msgid "⚠️ You cannot kick this player."
 msgstr "⚠️ You cannot kick this player."
 
@@ -419,19 +452,19 @@ msgstr "⚠️ You cannot kick this player."
 msgid "⚠️ You cannot kick while a teammate is past the ball line."
 msgstr "⚠️ You cannot kick while a teammate is past the ball line."
 
-#: src/meta/legacy/states/presnap.ts:337
+#: src/meta/legacy/states/presnap.ts:502
 msgid "⚠️ You cannot punt from the opponent red zone."
 msgstr "⚠️ You cannot punt from the opponent red zone."
 
-#: src/meta/legacy/states/presnap.ts:352
+#: src/meta/legacy/states/presnap.ts:517
 msgid "⚠️ You cannot punt while a teammate is past the LOS."
 msgstr "⚠️ You cannot punt while a teammate is past the LOS."
 
-#: src/meta/legacy/states/presnap.ts:216
+#: src/meta/legacy/states/presnap.ts:222
 msgid "⚠️ You cannot snap while a teammate is past the LOS."
 msgstr "⚠️ You cannot snap while a teammate is past the LOS."
 
-#: src/room/manual/modules/game.ts:361
+#: src/room/manual/modules/game.ts:364
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ You cannot use that command right now."
 
@@ -439,7 +472,7 @@ msgstr "⚠️ You cannot use that command right now."
 msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ You must get back behind the ball line to allow the punt!"
 
-#: src/meta/legacy/states/presnap.ts:222
+#: src/meta/legacy/states/presnap.ts:228
 msgid "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 msgstr "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 
@@ -448,7 +481,7 @@ msgstr "⚠️ You must get back behind the line of scrimmage to allow the snap!
 msgid "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 msgstr "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 
-#: src/room/manual/modules/room.ts:150
+#: src/room/manual/modules/room.ts:161
 msgid "✅ All bans cleared successfully."
 msgstr "✅ All bans cleared successfully."
 
@@ -456,11 +489,11 @@ msgstr "✅ All bans cleared successfully."
 #~ msgid "✅ Field goal is good!"
 #~ msgstr "✅ Field goal is good!"
 
-#: src/room/manual/modules/room.ts:114
+#: src/room/manual/modules/room.ts:115
 msgid "✅ Password cleared successfully."
 msgstr "✅ Password cleared successfully."
 
-#: src/room/manual/modules/room.ts:95
+#: src/room/manual/modules/room.ts:96
 msgid "✅ Password updated successfully."
 msgstr "✅ Password updated successfully."
 
@@ -473,7 +506,7 @@ msgstr "✅ Password updated successfully."
 #~ msgid "✅ Two-point try is good!"
 #~ msgstr "✅ Two-point try is good!"
 
-#: src/room/manual/modules/room.ts:56
+#: src/room/manual/modules/room.ts:57
 msgid "✅ You are now an admin."
 msgstr "✅ You are now an admin."
 
@@ -693,7 +726,7 @@ msgstr "❌ Illegal touch by {offenderNames} before the kick"
 #~ msgid "❌ Illegal touch by {offenderNames} before the kick • field goal is dead."
 #~ msgstr "❌ Illegal touch by {offenderNames} before the kick • field goal is dead."
 
-#: src/room/manual/modules/room.ts:64
+#: src/room/manual/modules/room.ts:65
 msgid "❌ Incorrect password."
 msgstr "❌ Incorrect password."
 
@@ -782,8 +815,8 @@ msgstr "❌ Two-point try failed."
 #~ msgstr "➖ No gain"
 
 #. placeholder {0}: env.TUTORIAL_LINK
-#: src/room/manual/modules/room.ts:131
-#: src/room/manual/modules/room.ts:186
+#: src/room/manual/modules/room.ts:132
+#: src/room/manual/modules/room.ts:197
 msgid "🎬 Watch the tutorial: {0}"
 msgstr "🎬 Watch the tutorial: {0}"
 
@@ -841,7 +874,7 @@ msgid "🏈 {0} loses it on contact by {catcherNames}"
 msgstr "🏈 {0} loses it on contact by {catcherNames}"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:235
+#: src/meta/legacy/states/presnap.ts:241
 msgid "🏈 {0} snaps it"
 msgstr "🏈 {0} snaps it"
 
@@ -863,7 +896,7 @@ msgstr "🏈 {0} snaps it"
 msgid "🏈 HaxFootball - American Football 🏈"
 msgstr "🏈 HaxFootball - American Football 🏈"
 
-#: src/room/manual/modules/game.ts:352
+#: src/room/manual/modules/game.ts:355
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
@@ -892,7 +925,7 @@ msgstr "🏈 Safety-kick return by {0}!"
 msgid "🏈 Two-point pass complete to {0}!"
 msgstr "🏈 Two-point pass complete to {0}!"
 
-#: src/room/manual/modules/room.ts:180
+#: src/room/manual/modules/room.ts:191
 msgid "🏈 Welcome to HaxFootball!"
 msgstr "🏈 Welcome to HaxFootball!"
 
@@ -995,8 +1028,8 @@ msgstr "💥 {0} brought down by {catcherNames}!"
 #~ msgstr "💥 QB {0} sacked by {catcherNames} • TURNOVER ON DOWNS!"
 
 #. placeholder {0}: env.DISCORD_LINK
-#: src/room/manual/modules/room.ts:123
-#: src/room/manual/modules/room.ts:192
+#: src/room/manual/modules/room.ts:124
+#: src/room/manual/modules/room.ts:203
 msgid "💬 Join our Discord server: {0}"
 msgstr "💬 Join our Discord server: {0}"
 
@@ -1022,7 +1055,7 @@ msgstr "💬 Join our Discord server: {0}"
 #~ msgstr "📉 {yardsLost}-yard loss"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:388
+#: src/meta/legacy/states/presnap.ts:553
 msgid "📍 {0} repositions the players and ball."
 msgstr "📍 {0} repositions the players and ball."
 
@@ -1050,14 +1083,18 @@ msgstr "📍 {0} repositions the players and ball."
 #~ msgstr "🔥 TOUCHDOWN by {0}!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:299
+#: src/meta/legacy/states/presnap.ts:464
 msgid "🥅 {0} sets up for the field goal!"
 msgstr "🥅 {0} sets up for the field goal!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:363
+#: src/meta/legacy/states/presnap.ts:528
 msgid "🦵 {0} punts it away!"
 msgstr "🦵 {0} punts it away!"
+
+#: src/room/manual/modules/room.ts:140
+msgid "🙂 Stay a little longer with us!"
+msgstr "🙂 Stay a little longer with us!"
 
 #. placeholder {0}: blocker.name
 #: src/meta/legacy/states/extra-point-blocked-pass.ts:57
@@ -1180,13 +1217,13 @@ msgstr "🚪 Punt out of bounds"
 #~ msgid "🚪 QB {0} went out in the end zone • SAFETY!"
 #~ msgstr "🚪 QB {0} went out in the end zone • SAFETY!"
 
-#: src/room/manual/modules/room.ts:226
+#: src/room/manual/modules/room.ts:237
 msgid "🚫 You are not allowed to ban players."
 msgstr "🚫 You are not allowed to ban players."
 
-#: src/room/manual/modules/room.ts:77
-#: src/room/manual/modules/room.ts:105
-#: src/room/manual/modules/room.ts:140
+#: src/room/manual/modules/room.ts:78
+#: src/room/manual/modules/room.ts:106
+#: src/room/manual/modules/room.ts:151
 msgid "🚫 You must be an admin to use this command."
 msgstr "🚫 You must be an admin to use this command."
 
@@ -1221,7 +1258,7 @@ msgid "🛡️ INTERCEPTION by {0}!"
 msgstr "🛡️ INTERCEPTION by {0}!"
 
 #. placeholder {0}: duplicate.name
-#: src/room/manual/modules/room.ts:170
+#: src/room/manual/modules/room.ts:181
 msgid "Already connected ({0})."
 msgstr "Already connected ({0})."
 
@@ -1241,7 +1278,7 @@ msgstr "automatic touchdown."
 #~ msgid "Ball crossed the LOS before the kick"
 #~ msgstr "Ball crossed the LOS before the kick"
 
-#: src/meta/legacy/states/presnap.ts:236
+#: src/meta/legacy/states/presnap.ts:242
 msgid "ball is live"
 msgstr "ball is live"
 
@@ -1284,6 +1321,7 @@ msgid "Blocks player crossings over the LOS during presnap positioning."
 msgstr "Blocks player crossings over the LOS during presnap positioning."
 
 #: src/meta/legacy/shared/message.ts:11
+#: src/meta/legacy/states/presnap.ts:410
 msgid "Blue"
 msgstr "Blue"
 
@@ -1550,9 +1588,9 @@ msgstr "No gain"
 msgid "no gain."
 msgstr "no gain."
 
-#: src/room/manual/modules/game.ts:222
-#: src/room/manual/modules/game.ts:237
-#: src/room/manual/modules/game.ts:243
+#: src/room/manual/modules/game.ts:225
+#: src/room/manual/modules/game.ts:240
+#: src/room/manual/modules/game.ts:246
 msgid "none"
 msgstr "none"
 
@@ -1653,6 +1691,7 @@ msgid "quarterback run is live."
 msgstr "quarterback run is live."
 
 #: src/meta/legacy/shared/message.ts:11
+#: src/meta/legacy/states/presnap.ts:410
 msgid "Red"
 msgstr "Red"
 

@@ -479,17 +479,44 @@ function getCrowdingHashBand() {
     };
 }
 
-function clampCrowdingX(x: number) {
-    const minX = Math.min(
-        MapMeasures.RED_END_ZONE_START_POSITION_X,
-        MapMeasures.BLUE_END_ZONE_START_POSITION_X,
-    );
-    const maxX = Math.max(
-        MapMeasures.RED_END_ZONE_START_POSITION_X,
-        MapMeasures.BLUE_END_ZONE_START_POSITION_X,
-    );
+const CROWDING_MIN_YARD_LINE = 1;
+const CROWDING_INNER_DISABLED_MAX_YARD_LINE = 2;
+const CROWDING_INNER_HEIGHT_RATIO = 0.5;
+const CROWDING_INNER_MIN_GAP_TO_OUTER_TOP_YARDS = 2;
+const CROWDING_INNER_MIN_GAP_TO_OUTER_FRONT_YARDS = 2;
+const CROWDING_INNER_MIN_HEIGHT_YARDS = 2;
+const CROWDING_INNER_MIN_WIDTH_YARDS = 1;
 
-    return Math.min(maxX, Math.max(minX, x));
+const CROWDING_ONE_YARD_MIN_X = Math.min(
+    getPositionFromFieldPosition({
+        side: Team.RED,
+        yards: CROWDING_MIN_YARD_LINE,
+    }),
+    getPositionFromFieldPosition({
+        side: Team.BLUE,
+        yards: CROWDING_MIN_YARD_LINE,
+    }),
+);
+const CROWDING_ONE_YARD_MAX_X = Math.max(
+    getPositionFromFieldPosition({
+        side: Team.RED,
+        yards: CROWDING_MIN_YARD_LINE,
+    }),
+    getPositionFromFieldPosition({
+        side: Team.BLUE,
+        yards: CROWDING_MIN_YARD_LINE,
+    }),
+);
+
+function clampCrowdingX(x: number) {
+    return Math.min(
+        CROWDING_ONE_YARD_MAX_X,
+        Math.max(CROWDING_ONE_YARD_MIN_X, x),
+    );
+}
+
+function isInnerCrowdingDisabledAtLine(fieldPos: FieldPosition): boolean {
+    return fieldPos.yards <= CROWDING_INNER_DISABLED_MAX_YARD_LINE;
 }
 
 function crowdingDashSize(
@@ -506,6 +533,16 @@ function hiddenCrowdingRectangle(): CrowdingRectangle {
         start: SPECIAL_HIDDEN_POSITION,
         direction: 1,
         extension: [MapMeasures.YARD, MapMeasures.YARD],
+    };
+}
+
+function disabledCrowdingRectangle(): CrowdingRectangle {
+    const hidden = hiddenCrowdingRectangle();
+
+    return {
+        start: hidden.start,
+        direction: hidden.direction,
+        extension: [0, 0],
     };
 }
 
@@ -550,7 +587,6 @@ function getCrowdingRectangles(
     const direction = getCrowdingDirection(offensiveTeam);
     const losX = getPositionFromFieldPosition(fieldPos);
     const { yMid, height: outerHeight } = getCrowdingHashBand();
-    const innerHeight = outerHeight * 0.5;
     const yard = MapMeasures.YARD;
 
     const outerStartX = clampCrowdingX(
@@ -560,9 +596,14 @@ function getCrowdingRectangles(
         losX + direction * CROWDING_OUTER_AHEAD_YARDS * yard,
     );
     const innerStartX = clampCrowdingX(losX);
-    const innerEndX = clampCrowdingX(
+    const rawInnerEndX = clampCrowdingX(
         losX + direction * CROWDING_INNER_AHEAD_YARDS * yard,
     );
+    const maxDirectionalInnerEnd =
+        direction * outerEndX -
+        CROWDING_INNER_MIN_GAP_TO_OUTER_FRONT_YARDS * yard;
+    const innerEndX =
+        direction * Math.min(direction * rawInnerEndX, maxDirectionalInnerEnd);
 
     const toExtension = (
         startX: number,
@@ -573,12 +614,36 @@ function getCrowdingRectangles(
         return [Math.max(0, width), height];
     };
 
+    const outer: CrowdingRectangle = {
+        start: [outerStartX, yMid],
+        direction,
+        extension: toExtension(outerStartX, outerEndX, outerHeight),
+    };
+
+    const maxInnerHeightFromGap =
+        outerHeight - 2 * CROWDING_INNER_MIN_GAP_TO_OUTER_TOP_YARDS * yard;
+    const rawInnerHeight = outerHeight * CROWDING_INNER_HEIGHT_RATIO;
+    const innerHeight = Math.min(rawInnerHeight, maxInnerHeightFromGap);
+    const minInnerHeight = CROWDING_INNER_MIN_HEIGHT_YARDS * yard;
+    const innerWidth = (innerEndX - innerStartX) * direction;
+    const minInnerWidth = CROWDING_INNER_MIN_WIDTH_YARDS * yard;
+
+    const shouldDisableInner =
+        isInnerCrowdingDisabledAtLine(fieldPos) ||
+        !Number.isFinite(innerHeight) ||
+        innerHeight < minInnerHeight ||
+        !Number.isFinite(innerWidth) ||
+        innerWidth < minInnerWidth;
+
+    if (shouldDisableInner) {
+        return {
+            outer,
+            inner: disabledCrowdingRectangle(),
+        };
+    }
+
     return {
-        outer: {
-            start: [outerStartX, yMid],
-            direction,
-            extension: toExtension(outerStartX, outerEndX, outerHeight),
-        },
+        outer,
         inner: {
             start: [innerStartX, yMid],
             direction,

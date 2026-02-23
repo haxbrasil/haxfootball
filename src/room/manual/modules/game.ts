@@ -166,6 +166,9 @@ const gameModule = createModule()
         commands: [
             "punt",
             "fg",
+            "distance",
+            "down",
+            "los",
             "version",
             "undo",
             "info",

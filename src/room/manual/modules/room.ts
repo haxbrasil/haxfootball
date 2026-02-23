@@ -30,6 +30,7 @@ const mainModule = createModule()
             "clearpassword",
             "discord",
             "tutorial",
+            "bb",
             "clearbans",
         ],
     })
@@ -133,6 +134,16 @@ const mainModule = createModule()
                 });
 
                 return { hideMessage: false };
+            }
+            case "bb": {
+                room.send({
+                    message: t`🙂 Stay a little longer with us!`,
+                    color: COLOR.HIGHLIGHT,
+                    to: player.id,
+                    sound: "none",
+                });
+
+                return { hideMessage: true };
             }
             case "clearbans": {
                 if (!player.admin) {

@@ -1,7 +1,8 @@
-import { type FieldTeam, isFieldTeam } from "@runtime/models";
+import { type FieldTeam, isFieldTeam, Team } from "@runtime/models";
 import type { GameStatePlayer } from "@runtime/engine";
 import { CommandHandleResult, CommandSpec } from "@runtime/commands";
 import { opposite } from "@common/game/game";
+import { parseIntegerInRange, parseTeamSide } from "@common/game/parsing";
 import {
     BALL_OFFSET_YARDS,
     calculateDirectionalGain,
@@ -58,6 +59,11 @@ const DEFAULT_INITIAL_RELATIVE_POSITIONS: InitialPositioningRelativeLines = {
         end: { x: -100, y: 100 },
     },
 };
+
+const MIN_DISTANCE = 1;
+const MAX_DISTANCE_CMD = 20;
+const MIN_DOWN = 1;
+const MAX_LOS_YARDS = 50;
 
 function $setInitialPlayerPositions(
     offensiveTeam: FieldTeam,
@@ -257,6 +263,165 @@ export function Presnap({ downState }: { downState: DownState }) {
         spec: CommandSpec,
     ): CommandHandleResult {
         switch (spec.name) {
+            case "distance": {
+                if (!player.admin) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Only admins can change game positioning.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return { handled: true };
+                }
+
+                const distance = parseIntegerInRange(
+                    spec.args[0],
+                    MIN_DISTANCE,
+                    MAX_DISTANCE_CMD,
+                );
+
+                if (distance === null) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Usage: !distance <1-20>.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return { handled: true };
+                }
+
+                const nextDownState: DownState = {
+                    ...downState,
+                    downAndDistance: {
+                        ...downState.downAndDistance,
+                        distance,
+                    },
+                };
+
+                $effect(($) => {
+                    $.send({
+                        message: t`⚙️ ${player.name} set distance to ${distance}.`,
+                        color: COLOR.SYSTEM,
+                    });
+                });
+
+                $next({
+                    to: "PRESNAP",
+                    params: { downState: nextDownState },
+                    disposal: "IMMEDIATE",
+                });
+            }
+            case "down": {
+                if (!player.admin) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Only admins can change game positioning.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return { handled: true };
+                }
+
+                const down = parseIntegerInRange(
+                    spec.args[0],
+                    MIN_DOWN,
+                    MAX_DOWNS,
+                );
+
+                if (down === null) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Usage: !down <1-4>.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return { handled: true };
+                }
+
+                const nextDownState: DownState = {
+                    ...downState,
+                    downAndDistance: {
+                        ...downState.downAndDistance,
+                        down,
+                    },
+                };
+
+                $effect(($) => {
+                    $.send({
+                        message: t`⚙️ ${player.name} set down to ${down}.`,
+                        color: COLOR.SYSTEM,
+                    });
+                });
+
+                $next({
+                    to: "PRESNAP",
+                    params: { downState: nextDownState },
+                    disposal: "IMMEDIATE",
+                });
+            }
+            case "los": {
+                if (!player.admin) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Only admins can change game positioning.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return { handled: true };
+                }
+
+                const side = parseTeamSide(spec.args[0]);
+                const yards = parseIntegerInRange(
+                    spec.args[1],
+                    MIN_DISTANCE,
+                    MAX_LOS_YARDS,
+                );
+
+                if (!side || yards === null) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Usage: !los <red/blue> <1-50>.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return { handled: true };
+                }
+
+                const nextDownState: DownState = {
+                    ...downState,
+                    fieldPos: {
+                        side,
+                        yards,
+                    },
+                };
+
+                const sideName = side === Team.RED ? t`Red` : t`Blue`;
+
+                $effect(($) => {
+                    $.send({
+                        message: t`⚙️ ${player.name} moved LOS to ${sideName} ${yards}.`,
+                        color: COLOR.SYSTEM,
+                    });
+                });
+
+                $next({
+                    to: "PRESNAP",
+                    params: { downState: nextDownState },
+                    disposal: "IMMEDIATE",
+                });
+            }
             case "fg": {
                 if (player.team !== offensiveTeam) {
                     $effect(($) => {

@@ -216,7 +216,7 @@ export const evaluateCrowding = ({
         (player) => player.id !== quarterbackId,
     );
     const offensePlayers = nonQuarterbacks.filter(
-        (player) => player.team === offensiveTeam && !isInAnyEndZone(player),
+        (player) => player.team === offensiveTeam,
     );
     const defensePlayers = nonQuarterbacks.filter(
         (player) => player.team !== offensiveTeam && !isInAnyEndZone(player),
