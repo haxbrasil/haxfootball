@@ -19,7 +19,9 @@ import {
 } from "@meta/legacy/shared/penalty";
 import { SCORES } from "@meta/legacy/shared/scoring";
 import {
+    BALL_OFFSET_YARDS,
     calculateDirectionalGain,
+    calculateSnapBallPosition,
     getPositionFromFieldPosition,
     isBallOutOfBounds,
     isInExtraPointZone,
@@ -67,6 +69,7 @@ type Frame = {
     offensivePlayers: GameStatePlayer[];
     defenseCrossedLineOfScrimmage: boolean;
     quarterbackCrossedLineOfScrimmage: boolean;
+    ballBeyondLineOfScrimmage: boolean;
     ballBehindLineOfScrimmage: boolean;
     isQuarterbackEligibleToRun: boolean;
     isBlitzAllowed: boolean;
@@ -89,14 +92,14 @@ export function ExtraPointSnap({
     crowdingData?: Crowding.CrowdingData;
     ballMovedAt?: number;
 }) {
-    const beforeState = $before();
     const { now: currentTickNumber, self: selfStateElapsedTicks } = $tick();
     const snapStartedTick = currentTickNumber - selfStateElapsedTicks;
     const defaultBlitzAllowedTick = snapStartedTick + BLITZ_BASE_DELAY_TICKS;
-    const ballSpawnPosition = {
-        x: beforeState.ball.x,
-        y: beforeState.ball.y,
-    };
+    const ballSpawnPosition = calculateSnapBallPosition(
+        offensiveTeam,
+        fieldPos,
+        BALL_OFFSET_YARDS,
+    );
     const lineOfScrimmageX = getPositionFromFieldPosition(fieldPos);
 
     const isBallBeyondMoveThreshold = (ball: { x: number; y: number }) =>
@@ -157,6 +160,7 @@ export function ExtraPointSnap({
             offensiveTeam,
             state.ball.x - lineOfScrimmageX,
         );
+        const ballBeyondLineOfScrimmage = ballDirectionalGain > 0;
         const ballBehindLineOfScrimmage = ballDirectionalGain < 0;
 
         const shouldRecordBallMoveTick =
@@ -206,6 +210,7 @@ export function ExtraPointSnap({
             offensivePlayers,
             defenseCrossedLineOfScrimmage,
             quarterbackCrossedLineOfScrimmage,
+            ballBeyondLineOfScrimmage,
             ballBehindLineOfScrimmage,
             isQuarterbackEligibleToRun,
             isBlitzAllowed,
@@ -663,8 +668,14 @@ export function ExtraPointSnap({
     }
 
     function $handleQuarterbackRun(frame: Frame) {
+        if (frame.quarterback.isKickingBall) return;
         if (!frame.isQuarterbackEligibleToRun) return;
-        if (!frame.quarterbackCrossedLineOfScrimmage) return;
+        if (
+            !frame.quarterbackCrossedLineOfScrimmage &&
+            !frame.ballBeyondLineOfScrimmage
+        ) {
+            return;
+        }
 
         $effect(($) => {
             $.send({
@@ -687,7 +698,12 @@ export function ExtraPointSnap({
     function $handleIllegalQuarterbackAdvance(frame: Frame) {
         if (frame.quarterback.isKickingBall) return;
         if (frame.isQuarterbackEligibleToRun) return;
-        if (!frame.quarterbackCrossedLineOfScrimmage) return;
+        if (
+            !frame.quarterbackCrossedLineOfScrimmage &&
+            !frame.ballBeyondLineOfScrimmage
+        ) {
+            return;
+        }
 
         $effect(($) => {
             $.send({
