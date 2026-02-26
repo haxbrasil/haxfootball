@@ -68,7 +68,7 @@ export function ExtraPointSnapInFlight({
                 ? null
                 : findOutOfBoundsBallCatcher(
                       state.ball,
-                      state.players.filter(
+                      offensivePlayers.filter(
                           (player) => player.id !== offensiveCatcher?.id,
                       ),
                   ),

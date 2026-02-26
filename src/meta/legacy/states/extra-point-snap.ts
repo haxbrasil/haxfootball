@@ -28,6 +28,7 @@ import {
 } from "@meta/legacy/shared/stadium";
 import {
     $setBallActive,
+    $setBallInactive,
     $setLineOfScrimmage,
     $showCrowdingBoxes,
     $unsetFirstDownLine,
@@ -258,6 +259,8 @@ export function ExtraPointSnap({
     }
 
     function $failTwoPointAttempt() {
+        $setBallInactive();
+
         $next({
             to: "KICKOFF",
             params: {

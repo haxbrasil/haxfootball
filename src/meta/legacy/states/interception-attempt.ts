@@ -16,6 +16,7 @@ import {
     getProjectedInterceptionPoint,
     getTravelInterceptionPoint,
 } from "@meta/legacy/shared/interception";
+import { isOutOfBounds } from "@meta/legacy/shared/stadium";
 import { t } from "@lingui/core/macro";
 import { PointLike } from "@common/math/geometry";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
@@ -23,6 +24,14 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 
 const TIME_TO_CHECK_INTERCEPTION = ticks({ milliseconds: 100 });
+
+type Frame = {
+    state: GameState;
+    blocker: GameStatePlayer;
+    blockerIsOutOfBounds: boolean;
+    intersectionFromTravel: PointLike | null;
+    projectedIntersection: PointLike | null;
+};
 
 export function InterceptionAttempt({
     kickTime,
@@ -52,6 +61,30 @@ export function InterceptionAttempt({
         $unsetFirstDownLine();
     });
 
+    function buildFrame(state: GameState): Frame | null {
+        const blocker = state.players.find((player) => player.id === playerId);
+        if (!blocker) return null;
+
+        const intersectionFromTravel = getTravelInterceptionPoint({
+            previousBall: $before().ball,
+            currentBall: state.ball,
+            goals,
+        });
+
+        const projectedIntersection =
+            state.tickNumber - kickTime >= TIME_TO_CHECK_INTERCEPTION
+                ? getProjectedInterceptionPoint({ ball: state.ball, goals })
+                : null;
+
+        return {
+            state,
+            blocker,
+            blockerIsOutOfBounds: isOutOfBounds(blocker),
+            intersectionFromTravel,
+            projectedIntersection,
+        };
+    }
+
     // TODO: Check if player leaves
 
     function $advanceToInterception(args: {
@@ -76,6 +109,40 @@ export function InterceptionAttempt({
         });
     }
 
+    function $handleTravelInterception(frame: Frame) {
+        if (frame.blockerIsOutOfBounds) return;
+        if (!frame.intersectionFromTravel) return;
+
+        $advanceToInterception({
+            blocker: frame.blocker,
+            intersectionPoint: frame.intersectionFromTravel,
+        });
+    }
+
+    function $handleProjectedInterception(frame: Frame) {
+        if (frame.blockerIsOutOfBounds) return;
+        if (!frame.projectedIntersection) return;
+
+        $advanceToInterception({
+            blocker: frame.blocker,
+            intersectionPoint: frame.projectedIntersection,
+        });
+    }
+
+    function $handleBlockedPass(frame: Frame) {
+        if (frame.state.tickNumber - kickTime < TIME_TO_CHECK_INTERCEPTION) {
+            return;
+        }
+
+        $next({
+            to: "BLOCKED_PASS",
+            params: {
+                blockerId: playerId,
+                downState,
+            },
+        });
+    }
+
     function command(player: PlayerObject, spec: CommandSpec) {
         return $createSharedCommandHandler({
             options: {
@@ -88,45 +155,12 @@ export function InterceptionAttempt({
     }
 
     function run(state: GameState) {
-        const blocker = state.players.find((p) => p.id === playerId);
-        if (!blocker) return;
+        const frame = buildFrame(state);
+        if (!frame) return;
 
-        const intersectionFromTravel = getTravelInterceptionPoint({
-            previousBall: $before().ball,
-            currentBall: state.ball,
-            goals,
-        });
-
-        if (intersectionFromTravel) {
-            $advanceToInterception({
-                blocker,
-                intersectionPoint: intersectionFromTravel,
-            });
-        }
-
-        if (state.tickNumber - kickTime < TIME_TO_CHECK_INTERCEPTION) {
-            return;
-        }
-
-        const projectedIntersection = getProjectedInterceptionPoint({
-            ball: state.ball,
-            goals,
-        });
-
-        if (projectedIntersection) {
-            $advanceToInterception({
-                blocker,
-                intersectionPoint: projectedIntersection,
-            });
-        }
-
-        $next({
-            to: "BLOCKED_PASS",
-            params: {
-                blockerId: playerId,
-                downState,
-            },
-        });
+        $handleTravelInterception(frame);
+        $handleProjectedInterception(frame);
+        $handleBlockedPass(frame);
     }
 
     return { run, command };

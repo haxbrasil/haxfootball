@@ -20,6 +20,7 @@ import {
     getProjectedInterceptionPoint,
     getTravelInterceptionPoint,
 } from "@meta/legacy/shared/interception";
+import { isOutOfBounds } from "@meta/legacy/shared/stadium";
 import { type PointLike } from "@common/math/geometry";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
@@ -30,6 +31,7 @@ const TIME_TO_CHECK_INTERCEPTION = ticks({ milliseconds: 200 });
 type Frame = {
     state: GameState;
     blocker: GameStatePlayer;
+    blockerIsOutOfBounds: boolean;
     intersectionFromTravel: PointLike | null;
     projectedIntersection: PointLike | null;
 };
@@ -79,12 +81,14 @@ export function ExtraPointInterceptionAttempt({
         return {
             state,
             blocker,
+            blockerIsOutOfBounds: isOutOfBounds(blocker),
             intersectionFromTravel,
             projectedIntersection,
         };
     }
 
     function $handleTravelInterception(frame: Frame) {
+        if (frame.blockerIsOutOfBounds) return;
         if (!frame.intersectionFromTravel) return;
 
         $effect(($) => {
@@ -116,6 +120,7 @@ export function ExtraPointInterceptionAttempt({
     }
 
     function $handleProjectedInterception(frame: Frame) {
+        if (frame.blockerIsOutOfBounds) return;
         if (!frame.projectedIntersection) return;
 
         $effect(($) => {
