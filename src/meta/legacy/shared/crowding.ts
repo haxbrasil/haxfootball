@@ -14,7 +14,7 @@ import { FieldTeam, Team } from "@runtime/models";
 import { FieldPosition } from "@common/game/game";
 
 const CROWDING_OUTER_FOUL_TICKS = ticks({ seconds: 3 });
-const CROWDING_INNER_WEIGHT = 5;
+const CROWDING_INNER_WEIGHT = 2.5;
 const CROWDING_GRACE_TICKS = ticks({ seconds: 1 });
 const DEFAULT_CROWDING_BLOCK_DISTANCE = 15;
 export const CROWDING_PENALTY_YARDS = 5;
