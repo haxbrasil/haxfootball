@@ -21,9 +21,11 @@ import {
     processOffensivePenalty,
 } from "@meta/legacy/shared/penalty";
 import { SCORES } from "@meta/legacy/shared/scoring";
-import { $before, $dispose, $effect, $next } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $tick } from "@runtime/runtime";
 import {
+    BALL_OFFSET_YARDS,
     calculateDirectionalGain,
+    calculateSnapBallPosition,
     getPositionFromFieldPosition,
     isBallOutOfBounds,
 } from "@meta/legacy/shared/stadium";
@@ -86,13 +88,14 @@ export function Snap({
 }) {
     const { fieldPos, offensiveTeam, downAndDistance } = downState;
 
-    const beforeState = $before();
-    const downStartTick = beforeState.tickNumber;
-    const defaultBlitzAllowedTick = downStartTick + BLITZ_BASE_DELAY_TICKS;
-    const ballSpawnPosition = {
-        x: beforeState.ball.x,
-        y: beforeState.ball.y,
-    };
+    const { now: snapCurrentTick, self: snapElapsedTicks } = $tick();
+    const snapStartedTick = snapCurrentTick - snapElapsedTicks;
+    const defaultBlitzAllowedTick = snapStartedTick + BLITZ_BASE_DELAY_TICKS;
+    const ballSpawnPosition = calculateSnapBallPosition(
+        offensiveTeam,
+        fieldPos,
+        BALL_OFFSET_YARDS,
+    );
 
     const isBallBeyondMoveThreshold = (ball: { x: number; y: number }) =>
         Math.hypot(ball.x - ballSpawnPosition.x, ball.y - ballSpawnPosition.y) >
