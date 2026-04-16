@@ -1,8 +1,14 @@
 {
-    "name": "haxfootball",
+    "name": "@haxbrasil/haxfootball",
     "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
+    "description": "HaxBall headless room package for room-server",
+    "main": "dist/environments/room-server.js",
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
     "scripts": {
         "start:node": "node ./dist/environments/node.js",
         "dev:node": "babel-node --extensions \".ts,.tsx\" ./src/environments/node.ts",
