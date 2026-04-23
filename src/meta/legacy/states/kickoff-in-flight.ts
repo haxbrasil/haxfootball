@@ -13,6 +13,7 @@ import { getInitialDownState } from "@meta/legacy/shared/down";
 import { $setBallMoveableByPlayer } from "@meta/legacy/hooks/physics";
 import { $setBallActive, $setBallInactive } from "@meta/legacy/hooks/game";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
+import { $syncPossessionQuarterbackSelection } from "@meta/legacy/hooks/global";
 import {
     findEligibleBallCatcher,
     findOutOfBoundsBallCatcher,
@@ -135,6 +136,7 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
             options: {
                 undo: true,
                 info: { stateMessage: t`Kickoff in flight` },
+                qb: { eligibleTeam: receivingTeam },
             },
             player,
             spec,
@@ -142,6 +144,11 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
     }
 
     function run(state: GameState) {
+        $syncPossessionQuarterbackSelection({
+            team: receivingTeam,
+            players: state.players,
+        });
+
         const frame = buildFrame(state);
 
         $handleBallOutOfBounds(frame);

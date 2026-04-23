@@ -216,6 +216,11 @@ const gameModule = createModule()
                 description: t`Show the score`,
             },
             {
+                name: "qb",
+                category: CommandCategory.Game,
+                description: t`Set or clear the current quarterback`,
+            },
+            {
                 name: "flag",
                 category: CommandCategory.Game,
                 description: t`View or set a config flag`,

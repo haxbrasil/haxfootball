@@ -6,11 +6,13 @@ import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
 import { env } from "@env";
 import { CommandCategory } from "../utils/commands";
+import {
+    isOfficialAdmin,
+    markOfficialAdmin,
+    unmarkOfficialAdmin,
+} from "../utils/admin";
 
 const ADMIN_PASSWORD = randomBytes(4).toString("hex");
-
-const admins = new Set<number>();
-const adminIps = new Set<string>();
 
 const manageAdmin = (room: Room) => {
     if (!room.getPlayerList().some((p) => p.admin)) {
@@ -90,8 +92,7 @@ const mainModule = createModule()
                         color: COLOR.SUCCESS,
                         to: player.id,
                     });
-                    admins.add(player.id);
-                    adminIps.add(player.ip);
+                    markOfficialAdmin(player);
                 } else {
                     room.send({
                         message: t`❌ Incorrect password.`,
@@ -326,6 +327,7 @@ const mainModule = createModule()
             manageAdmin(room);
         } else {
             room.setAdmin(player, true);
+            markOfficialAdmin(player);
         }
 
         room.send({
@@ -349,6 +351,7 @@ const mainModule = createModule()
     })
     .onPlayerLeave((room, player) => {
         manageAdmin(room);
+        unmarkOfficialAdmin(player);
 
         console.log(`${player.name} has left`);
     })
@@ -358,8 +361,8 @@ const mainModule = createModule()
     .onBeforeKick((room, kickedPlayer, _reason, ban, byPlayer) => {
         if (
             kickedPlayer &&
-            adminIps.has(kickedPlayer.ip) &&
-            !admins.has(byPlayer.id)
+            isOfficialAdmin(kickedPlayer) &&
+            !isOfficialAdmin(byPlayer)
         ) {
             room.send({
                 message: ban
@@ -373,7 +376,7 @@ const mainModule = createModule()
             return false;
         }
 
-        if (ban && !admins.has(byPlayer.id)) {
+        if (ban && !isOfficialAdmin(byPlayer)) {
             room.send({
                 message: t`🚫 You are not allowed to ban players.`,
                 color: COLOR.ERROR,

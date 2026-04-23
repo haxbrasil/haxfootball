@@ -23,7 +23,7 @@ import {
 } from "@meta/legacy/hooks/physics";
 import {
     buildInitialPlayerPositions,
-    type InitialPositioningRelativeLines,
+    DEFAULT_INITIAL_POSITIONING_RELATIVE_LINES,
 } from "@meta/legacy/shared/initial-positioning";
 import { $global } from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
@@ -36,17 +36,6 @@ import {
 
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
 const EXTRA_POINT_YARD_LINE = 10;
-
-const DEFAULT_INITIAL_RELATIVE_POSITIONS: InitialPositioningRelativeLines = {
-    offensive: {
-        start: { x: 100, y: -100 },
-        end: { x: 100, y: 100 },
-    },
-    defensive: {
-        start: { x: -100, y: -100 },
-        end: { x: -100, y: 100 },
-    },
-};
 
 function $setInitialPlayerPositions(
     offensiveTeam: FieldTeam,
@@ -76,7 +65,7 @@ function $setInitialPlayerPositions(
             players,
             offensiveTeam,
             ballPos,
-            relativeLines: DEFAULT_INITIAL_RELATIVE_POSITIONS,
+            relativeLines: DEFAULT_INITIAL_POSITIONING_RELATIVE_LINES,
             snapProfile,
         }).forEach(({ id, x, y }) => {
             $.setPlayerDiscProperties(id, {

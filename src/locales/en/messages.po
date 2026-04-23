@@ -57,14 +57,14 @@ msgstr "{0} brought down by {catcherNames}"
 
 #. placeholder {0}: frame.player.name
 #: src/meta/legacy/states/interception.ts:281
-#: src/meta/legacy/states/kickoff-return.ts:334
+#: src/meta/legacy/states/kickoff-return.ts:337
 #: src/meta/legacy/states/punt-return.ts:251
 #: src/meta/legacy/states/safety-kick-return.ts:335
 msgid "{0} is down in the end zone"
 msgstr "{0} is down in the end zone"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/kickoff-return.ts:114
+#: src/meta/legacy/states/kickoff-return.ts:117
 #: src/meta/legacy/states/punt-return.ts:379
 #: src/meta/legacy/states/safety-kick-return.ts:114
 msgid "{0} left from the end zone"
@@ -83,7 +83,7 @@ msgstr "{0} stepped out"
 #. placeholder {0}: frame.player.name
 #: src/meta/legacy/states/fake-field-goal.ts:227
 #: src/meta/legacy/states/interception.ts:202
-#: src/meta/legacy/states/kickoff-return.ts:255
+#: src/meta/legacy/states/kickoff-return.ts:258
 #: src/meta/legacy/states/live-ball.ts:301
 #: src/meta/legacy/states/punt-return.ts:172
 #: src/meta/legacy/states/quarterback-run.ts:227
@@ -93,13 +93,13 @@ msgid "{0} went out in the end zone"
 msgstr "{0} went out in the end zone"
 
 #. placeholder {0}: Crowding.CROWDING_PENALTY_YARDS
-#: src/meta/legacy/states/snap.ts:467
-#: src/meta/legacy/states/snap.ts:493
+#: src/meta/legacy/states/snap.ts:470
+#: src/meta/legacy/states/snap.ts:496
 msgid "{0}-yard penalty"
 msgstr "{0}-yard penalty"
 
 #. placeholder {0}: Crowding.CROWDING_PENALTY_YARDS
-#: src/meta/legacy/states/snap.ts:447
+#: src/meta/legacy/states/snap.ts:450
 msgid "{0}-yard penalty."
 msgstr "{0}-yard penalty."
 
@@ -109,38 +109,38 @@ msgstr "{0}-yard penalty."
 msgid "{0}, and {1}"
 msgstr "{0}, and {1}"
 
-#: src/meta/legacy/states/presnap.ts:243
+#: src/meta/legacy/states/presnap.ts:319
 msgid "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 msgstr "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 
-#: src/meta/legacy/states/snap.ts:347
-#: src/meta/legacy/states/snap.ts:376
+#: src/meta/legacy/states/snap.ts:350
+#: src/meta/legacy/states/snap.ts:379
 msgid "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty"
 msgstr "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty"
 
-#: src/meta/legacy/states/snap.ts:326
+#: src/meta/legacy/states/snap.ts:329
 msgid "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty."
 msgstr "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty."
 
-#: src/meta/legacy/states/snap.ts:593
-#: src/meta/legacy/states/snap.ts:622
+#: src/meta/legacy/states/snap.ts:596
+#: src/meta/legacy/states/snap.ts:625
 msgid "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty"
 msgstr "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty"
 
-#: src/meta/legacy/states/snap.ts:572
+#: src/meta/legacy/states/snap.ts:575
 msgid "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty."
 msgstr "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty."
 
 #: src/meta/legacy/states/blitz.ts:141
 #: src/meta/legacy/states/blitz.ts:155
-#: src/meta/legacy/states/snap.ts:248
-#: src/meta/legacy/states/snap.ts:262
-#: src/meta/legacy/states/snap.ts:697
-#: src/meta/legacy/states/snap.ts:711
-#: src/meta/legacy/states/snap.ts:769
-#: src/meta/legacy/states/snap.ts:783
-#: src/meta/legacy/states/snap.ts:830
-#: src/meta/legacy/states/snap.ts:844
+#: src/meta/legacy/states/snap.ts:251
+#: src/meta/legacy/states/snap.ts:265
+#: src/meta/legacy/states/snap.ts:700
+#: src/meta/legacy/states/snap.ts:714
+#: src/meta/legacy/states/snap.ts:772
+#: src/meta/legacy/states/snap.ts:786
+#: src/meta/legacy/states/snap.ts:833
+#: src/meta/legacy/states/snap.ts:847
 msgid "{OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty"
 msgstr "{OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty"
 
@@ -175,12 +175,12 @@ msgstr "{yardsGained} yard gain"
 msgid "{yardsGained}-yard gain"
 msgstr "{yardsGained}-yard gain"
 
-#: src/meta/legacy/states/extra-point-snap.ts:327
-#: src/meta/legacy/states/extra-point-snap.ts:340
-#: src/meta/legacy/states/extra-point-snap.ts:393
-#: src/meta/legacy/states/extra-point-snap.ts:406
-#: src/meta/legacy/states/extra-point-snap.ts:487
-#: src/meta/legacy/states/extra-point-snap.ts:504
+#: src/meta/legacy/states/extra-point-snap.ts:335
+#: src/meta/legacy/states/extra-point-snap.ts:348
+#: src/meta/legacy/states/extra-point-snap.ts:401
+#: src/meta/legacy/states/extra-point-snap.ts:414
+#: src/meta/legacy/states/extra-point-snap.ts:495
+#: src/meta/legacy/states/extra-point-snap.ts:512
 msgid "{yardsGained}-yard penalty"
 msgstr "{yardsGained}-yard penalty"
 
@@ -201,8 +201,8 @@ msgid "{yardsLost}-yard loss"
 msgstr "{yardsLost}-yard loss"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/extra-point-retry.ts:176
-#: src/meta/legacy/states/extra-point.ts:211
+#: src/meta/legacy/states/extra-point-retry.ts:165
+#: src/meta/legacy/states/extra-point.ts:200
 msgid "*️⃣ {0} starts the two-point try!"
 msgstr "*️⃣ {0} starts the two-point try!"
 
@@ -235,12 +235,12 @@ msgstr "•"
 #~ msgstr "• Ball out of bounds • no gain."
 
 #. placeholder {0}: disabledFlags.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:295
+#: src/room/manual/modules/game.ts:300
 msgid "• Disabled: {0}"
 msgstr "• Disabled: {0}"
 
 #. placeholder {0}: enabledFlags.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:289
+#: src/room/manual/modules/game.ts:294
 msgid "• Enabled: {0}"
 msgstr "• Enabled: {0}"
 
@@ -281,36 +281,64 @@ msgstr "• Enabled: {0}"
 #~ msgstr "• TURNOVER ON DOWNS!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/shared/commands.ts:136
+#: src/meta/legacy/shared/commands/handlers/undo.ts:28
 msgid "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgstr "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 
-#: src/meta/legacy/states/extra-point-retry.ts:204
-#: src/meta/legacy/states/extra-point.ts:271
+#: src/meta/legacy/states/extra-point-retry.ts:193
+#: src/meta/legacy/states/extra-point.ts:260
 msgid "⏱️ PAT window expired."
 msgstr "⏱️ PAT window expired."
 
+#: src/meta/legacy/shared/commands/handlers/qb.ts:71
+#~ msgid "⚙️ {0} is no longer the QB."
+#~ msgstr "⚙️ {0} is no longer the QB."
+
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:414
+#: src/meta/legacy/shared/commands/handlers/qb.ts:71
+msgid "⚙️ {0} is no longer the quarterback."
+msgstr "⚙️ {0} is no longer the quarterback."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:97
+#~ msgid "⚙️ {0} is now the QB."
+#~ msgstr "⚙️ {0} is now the QB."
+
+#. placeholder {0}: player.name
+#: src/meta/legacy/shared/commands/handlers/qb.ts:97
+msgid "⚙️ {0} is now the quarterback."
+msgstr "⚙️ {0} is now the quarterback."
+
+#. placeholder {0}: player.name
+#: src/meta/legacy/states/presnap.ts:490
 msgid "⚙️ {0} moved LOS to {sideName} {yards}."
 msgstr "⚙️ {0} moved LOS to {sideName} {yards}."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:166
+#~ msgid "⚙️ {0} set {1} as QB."
+#~ msgstr "⚙️ {0} set {1} as QB."
+
+#. placeholder {0}: player.name
+#. placeholder {1}: targetResolution.player.name
+#: src/meta/legacy/shared/commands/handlers/qb.ts:166
+msgid "⚙️ {0} set {1} as quarterback."
+msgstr "⚙️ {0} set {1} as quarterback."
 
 #: src/room/manual/game.ts:313
 #~ msgid "⚙️ {0} set {requestedFlagName} to {1}."
 #~ msgstr "⚙️ {0} set {requestedFlagName} to {1}."
 
 #. placeholder {0}: player.name
-#: src/room/manual/modules/game.ts:391
+#: src/room/manual/modules/game.ts:396
 msgid "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 msgstr "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:307
+#: src/meta/legacy/states/presnap.ts:383
 msgid "⚙️ {0} set distance to {distance}."
 msgstr "⚙️ {0} set distance to {distance}."
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:359
+#: src/meta/legacy/states/presnap.ts:435
 msgid "⚙️ {0} set down to {down}."
 msgstr "⚙️ {0} set down to {down}."
 
@@ -322,70 +350,132 @@ msgstr "⚙️ {0} set down to {down}."
 #~ msgid "⚙️ {requestedFlagName}: {0}."
 #~ msgstr "⚙️ {requestedFlagName}: {0}."
 
-#: src/room/manual/modules/game.ts:336
+#: src/room/manual/modules/game.ts:341
 msgid "⚙️ {requestedFlagName}: {flagState}."
 msgstr "⚙️ {requestedFlagName}: {flagState}."
 
-#: src/room/manual/modules/game.ts:283
+#: src/room/manual/modules/game.ts:288
 msgid "⚙️ Available flags:"
 msgstr "⚙️ Available flags:"
 
 #. placeholder {0}: flagNames.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:274
+#: src/room/manual/modules/game.ts:279
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Available flags: {0}."
 
-#: src/meta/legacy/states/presnap.ts:441
+#: src/meta/legacy/states/presnap.ts:517
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal is only available from the defensive side of the field."
 
-#: src/room/manual/modules/game.ts:362
+#: src/room/manual/modules/game.ts:367
 msgid "⚠️ Flags cannot be changed while a game is in progress."
 msgstr "⚠️ Flags cannot be changed while a game is in progress."
 
-#: src/room/manual/modules/game.ts:374
+#: src/room/manual/modules/game.ts:379
 msgid "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 msgstr "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 
-#: src/meta/legacy/shared/commands.ts:126
+#: src/meta/legacy/shared/commands/handlers/qb.ts:151
+msgid "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
+msgstr "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
+
+#: src/meta/legacy/shared/commands/handlers/undo.ts:20
 msgid "⚠️ No checkpoints available to undo."
 msgstr "⚠️ No checkpoints available to undo."
 
-#: src/meta/legacy/shared/commands.ts:113
+#: src/meta/legacy/shared/commands/handlers/qb.ts:140
+#~ msgid "⚠️ No eligible player matched that QB target."
+#~ msgstr "⚠️ No eligible player matched that QB target."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:140
+msgid "⚠️ No eligible player matched that quarterback target."
+msgstr "⚠️ No eligible player matched that quarterback target."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:108
+#~ msgid "⚠️ Only admins can assign QB targets."
+#~ msgstr "⚠️ Only admins can assign QB targets."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:108
+msgid "⚠️ Only admins can assign quarterback targets."
+msgstr "⚠️ Only admins can assign quarterback targets."
+
+#: src/meta/legacy/shared/commands/handlers/undo.ts:10
 msgid "⚠️ Only admins can call for an undo."
 msgstr "⚠️ Only admins can call for an undo."
 
-#: src/meta/legacy/states/presnap.ts:542
+#: src/meta/legacy/states/presnap.ts:618
 msgid "⚠️ Only admins can call for repositioning."
 msgstr "⚠️ Only admins can call for repositioning."
 
-#: src/meta/legacy/states/presnap.ts:270
-#: src/meta/legacy/states/presnap.ts:322
-#: src/meta/legacy/states/presnap.ts:374
+#: src/meta/legacy/states/presnap.ts:346
+#: src/meta/legacy/states/presnap.ts:398
+#: src/meta/legacy/states/presnap.ts:450
 msgid "⚠️ Only admins can change game positioning."
 msgstr "⚠️ Only admins can change game positioning."
 
-#: src/room/manual/modules/game.ts:352
+#: src/room/manual/modules/game.ts:357
 msgid "⚠️ Only admins can modify flags."
 msgstr "⚠️ Only admins can modify flags."
 
-#: src/meta/legacy/states/presnap.ts:429
+#: src/meta/legacy/shared/commands/handlers/qb.ts:43
+#~ msgid "⚠️ Only the eligible team can pick the QB right now."
+#~ msgstr "⚠️ Only the eligible team can pick the QB right now."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:43
+msgid "⚠️ Only the eligible team can pick the quarterback right now."
+msgstr "⚠️ Only the eligible team can pick the quarterback right now."
+
+#: src/meta/legacy/states/presnap.ts:505
 msgid "⚠️ Only the offense may call for a field goal."
 msgstr "⚠️ Only the offense may call for a field goal."
 
-#: src/meta/legacy/states/presnap.ts:478
+#: src/meta/legacy/states/presnap.ts:554
 msgid "⚠️ Only the offense may punt."
 msgstr "⚠️ Only the offense may punt."
 
-#: src/room/manual/modules/room.ts:119
+#: src/meta/legacy/states/presnap.ts:258
+#~ msgid "⚠️ Only the selected QB can snap."
+#~ msgstr "⚠️ Only the selected QB can snap."
+
+#: src/meta/legacy/states/presnap.ts:258
+msgid "⚠️ Only the selected quarterback can snap."
+msgstr "⚠️ Only the selected quarterback can snap."
+
+#: src/room/manual/modules/room.ts:120
 msgid "⚠️ Please provide a new password."
 msgstr "⚠️ Please provide a new password."
 
-#: src/room/manual/modules/game.ts:414
+#: src/meta/legacy/shared/commands/handlers/qb.ts:76
+#: src/meta/legacy/states/presnap.ts:157
+#~ msgid "⚠️ QB position is vacant. Use !qb to become the QB."
+#~ msgstr "⚠️ QB position is vacant. Use !qb to become the QB."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:28
+#~ msgid "⚠️ QB selection is disabled."
+#~ msgstr "⚠️ QB selection is disabled."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:76
+#: src/meta/legacy/states/presnap.ts:157
+msgid "⚠️ Quarterback position is vacant. Use !qb to become the quarterback."
+msgstr "⚠️ Quarterback position is vacant. Use !qb to become the quarterback."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:28
+msgid "⚠️ Quarterback selection is disabled."
+msgstr "⚠️ Quarterback selection is disabled."
+
+#: src/meta/legacy/states/presnap.ts:246
+#~ msgid "⚠️ Select a QB with !qb before snapping."
+#~ msgstr "⚠️ Select a QB with !qb before snapping."
+
+#: src/meta/legacy/states/presnap.ts:246
+msgid "⚠️ Select a quarterback with !qb before snapping."
+msgstr "⚠️ Select a quarterback with !qb before snapping."
+
+#: src/room/manual/modules/game.ts:419
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ The game has not been started yet."
 
-#: src/meta/legacy/states/extra-point.ts:186
+#: src/meta/legacy/states/extra-point.ts:175
 msgid "⚠️ Two-point try is no longer available"
 msgstr "⚠️ Two-point try is no longer available"
 
@@ -393,29 +483,33 @@ msgstr "⚠️ Two-point try is no longer available"
 #~ msgid "⚠️ Two-point try is no longer available • kick the PAT."
 #~ msgstr "⚠️ Two-point try is no longer available • kick the PAT."
 
-#: src/room/manual/modules/room.ts:276
+#: src/room/manual/modules/room.ts:277
 msgid "⚠️ Unknown command. Use !help to see available commands."
 msgstr "⚠️ Unknown command. Use !help to see available commands."
 
-#: src/room/manual/modules/game.ts:317
+#: src/room/manual/modules/game.ts:322
 msgid "⚠️ Unknown flag. Use !flags to list available flags."
 msgstr "⚠️ Unknown flag. Use !flags to list available flags."
 
-#: src/meta/legacy/states/presnap.ts:288
+#: src/meta/legacy/states/presnap.ts:364
 msgid "⚠️ Usage: !distance <1-20>."
 msgstr "⚠️ Usage: !distance <1-20>."
 
-#: src/meta/legacy/states/presnap.ts:340
+#: src/meta/legacy/states/presnap.ts:416
 msgid "⚠️ Usage: !down <1-4>."
 msgstr "⚠️ Usage: !down <1-4>."
 
-#: src/room/manual/modules/game.ts:305
+#: src/room/manual/modules/game.ts:310
 msgid "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 msgstr "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 
-#: src/meta/legacy/states/presnap.ts:393
+#: src/meta/legacy/states/presnap.ts:469
 msgid "⚠️ Usage: !los <red/blue> <1-50>."
 msgstr "⚠️ Usage: !los <red/blue> <1-50>."
+
+#: src/meta/legacy/shared/commands/handlers/qb.ts:133
+msgid "⚠️ Usage: !qb [#id|name]."
+msgstr "⚠️ Usage: !qb [#id|name]."
 
 #: src/meta/legacy/states/extra-point-retry.ts:159
 #: src/meta/legacy/states/extra-point.ts:170
@@ -423,31 +517,31 @@ msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 #~ msgid "⚠️ Wait 1 second before snapping."
 #~ msgstr "⚠️ Wait 1 second before snapping."
 
-#: src/meta/legacy/states/extra-point-retry.ts:153
-#: src/meta/legacy/states/extra-point.ts:173
-#: src/meta/legacy/states/presnap.ts:195
+#: src/meta/legacy/states/extra-point-retry.ts:142
+#: src/meta/legacy/states/extra-point.ts:162
+#: src/meta/legacy/states/presnap.ts:271
 msgid "⚠️ Wait a moment before snapping."
 msgstr "⚠️ Wait a moment before snapping."
 
-#: src/meta/legacy/states/presnap.ts:453
+#: src/meta/legacy/states/presnap.ts:529
 msgid "⚠️ You are too far from the ball to attempt the field goal."
 msgstr "⚠️ You are too far from the ball to attempt the field goal."
 
-#: src/meta/legacy/states/presnap.ts:490
+#: src/meta/legacy/states/presnap.ts:566
 msgid "⚠️ You are too far from the ball to punt."
 msgstr "⚠️ You are too far from the ball to punt."
 
-#: src/meta/legacy/states/extra-point-retry.ts:165
-#: src/meta/legacy/states/extra-point.ts:200
-#: src/meta/legacy/states/presnap.ts:207
+#: src/meta/legacy/states/extra-point-retry.ts:154
+#: src/meta/legacy/states/extra-point.ts:189
+#: src/meta/legacy/states/presnap.ts:283
 msgid "⚠️ You are too far from the ball to snap it."
 msgstr "⚠️ You are too far from the ball to snap it."
 
-#: src/room/manual/modules/room.ts:366
+#: src/room/manual/modules/room.ts:369
 msgid "⚠️ You cannot ban this player."
 msgstr "⚠️ You cannot ban this player."
 
-#: src/room/manual/modules/room.ts:367
+#: src/room/manual/modules/room.ts:370
 msgid "⚠️ You cannot kick this player."
 msgstr "⚠️ You cannot kick this player."
 
@@ -456,19 +550,19 @@ msgstr "⚠️ You cannot kick this player."
 msgid "⚠️ You cannot kick while a teammate is past the ball line."
 msgstr "⚠️ You cannot kick while a teammate is past the ball line."
 
-#: src/meta/legacy/states/presnap.ts:502
+#: src/meta/legacy/states/presnap.ts:578
 msgid "⚠️ You cannot punt from the opponent red zone."
 msgstr "⚠️ You cannot punt from the opponent red zone."
 
-#: src/meta/legacy/states/presnap.ts:517
+#: src/meta/legacy/states/presnap.ts:593
 msgid "⚠️ You cannot punt while a teammate is past the LOS."
 msgstr "⚠️ You cannot punt while a teammate is past the LOS."
 
-#: src/meta/legacy/states/presnap.ts:222
+#: src/meta/legacy/states/presnap.ts:298
 msgid "⚠️ You cannot snap while a teammate is past the LOS."
 msgstr "⚠️ You cannot snap while a teammate is past the LOS."
 
-#: src/room/manual/modules/game.ts:413
+#: src/room/manual/modules/game.ts:418
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ You cannot use that command right now."
 
@@ -476,16 +570,16 @@ msgstr "⚠️ You cannot use that command right now."
 msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ You must get back behind the ball line to allow the punt!"
 
-#: src/meta/legacy/states/presnap.ts:228
+#: src/meta/legacy/states/presnap.ts:304
 msgid "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 msgstr "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 
-#: src/meta/legacy/states/extra-point-snap.ts:658
-#: src/meta/legacy/states/snap.ts:927
+#: src/meta/legacy/states/extra-point-snap.ts:666
+#: src/meta/legacy/states/snap.ts:933
 msgid "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 msgstr "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 
-#: src/room/manual/modules/room.ts:193
+#: src/room/manual/modules/room.ts:194
 msgid "✅ All bans cleared successfully."
 msgstr "✅ All bans cleared successfully."
 
@@ -493,11 +587,11 @@ msgstr "✅ All bans cleared successfully."
 #~ msgid "✅ Field goal is good!"
 #~ msgstr "✅ Field goal is good!"
 
-#: src/room/manual/modules/room.ts:147
+#: src/room/manual/modules/room.ts:148
 msgid "✅ Password cleared successfully."
 msgstr "✅ Password cleared successfully."
 
-#: src/room/manual/modules/room.ts:128
+#: src/room/manual/modules/room.ts:129
 msgid "✅ Password updated successfully."
 msgstr "✅ Password updated successfully."
 
@@ -510,7 +604,7 @@ msgstr "✅ Password updated successfully."
 #~ msgid "✅ Two-point try is good!"
 #~ msgstr "✅ Two-point try is good!"
 
-#: src/room/manual/modules/room.ts:89
+#: src/room/manual/modules/room.ts:91
 msgid "✅ You are now an admin."
 msgstr "✅ You are now an admin."
 
@@ -544,11 +638,11 @@ msgstr "❌ Ball crossed the LOS before the kick"
 #~ msgid "❌ Ball out of bounds • {OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty • turnover on downs."
 #~ msgstr "❌ Ball out of bounds • {OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty • turnover on downs."
 
-#: src/meta/legacy/states/extra-point-snap.ts:503
+#: src/meta/legacy/states/extra-point-snap.ts:511
 msgid "❌ Crowd abuse ({crowdingOffenderNames})"
 msgstr "❌ Crowd abuse ({crowdingOffenderNames})"
 
-#: src/meta/legacy/states/extra-point-snap.ts:486
+#: src/meta/legacy/states/extra-point-snap.ts:494
 msgid "❌ Crowd abuse by {crowdingOffenderNames}"
 msgstr "❌ Crowd abuse by {crowdingOffenderNames}"
 
@@ -603,8 +697,8 @@ msgstr "❌ Defensive contact by {offenderNames} on {0} before the kick"
 #~ msgid "❌ Defensive crowding by {crowdingOffenderNames} • {yardsGained}-yard penalty • replay the try."
 #~ msgstr "❌ Defensive crowding by {crowdingOffenderNames} • {yardsGained}-yard penalty • replay the try."
 
-#: src/meta/legacy/states/extra-point-snap.ts:392
-#: src/meta/legacy/states/extra-point-snap.ts:405
+#: src/meta/legacy/states/extra-point-snap.ts:400
+#: src/meta/legacy/states/extra-point-snap.ts:413
 msgid "❌ Defensive illegal touch"
 msgstr "❌ Defensive illegal touch"
 
@@ -635,8 +729,8 @@ msgstr "❌ Defensive illegal touch"
 #~ msgid "❌ Defensive illegal touch by {offenderNames} • {DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty."
 #~ msgstr "❌ Defensive illegal touch by {offenderNames} • {DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty."
 
-#: src/meta/legacy/states/extra-point-snap.ts:326
-#: src/meta/legacy/states/extra-point-snap.ts:339
+#: src/meta/legacy/states/extra-point-snap.ts:334
+#: src/meta/legacy/states/extra-point-snap.ts:347
 msgid "❌ Defensive offside"
 msgstr "❌ Defensive offside"
 
@@ -730,11 +824,11 @@ msgstr "❌ Illegal touch by {offenderNames} before the kick"
 #~ msgid "❌ Illegal touch by {offenderNames} before the kick • field goal is dead."
 #~ msgstr "❌ Illegal touch by {offenderNames} before the kick • field goal is dead."
 
-#: src/room/manual/modules/room.ts:97
+#: src/room/manual/modules/room.ts:98
 msgid "❌ Incorrect password."
 msgstr "❌ Incorrect password."
 
-#: src/meta/legacy/states/kickoff-in-flight.ts:90
+#: src/meta/legacy/states/kickoff-in-flight.ts:91
 msgid "❌ Kickoff out of bounds"
 msgstr "❌ Kickoff out of bounds"
 
@@ -742,7 +836,7 @@ msgstr "❌ Kickoff out of bounds"
 #~ msgid "❌ Kickoff out of bounds • ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 #~ msgstr "❌ Kickoff out of bounds • ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 
-#: src/meta/legacy/states/extra-point.ts:361
+#: src/meta/legacy/states/extra-point.ts:350
 msgid "❌ Offense crossed the LOS"
 msgstr "❌ Offense crossed the LOS"
 
@@ -752,8 +846,8 @@ msgstr "❌ Offense crossed the LOS"
 #~ msgstr "❌ Offense crossed the LOS • two-point try is no longer available."
 
 #: src/meta/legacy/states/extra-point-blitz.ts:118
-#: src/meta/legacy/states/extra-point-snap.ts:620
-#: src/meta/legacy/states/extra-point-snap.ts:695
+#: src/meta/legacy/states/extra-point-snap.ts:628
+#: src/meta/legacy/states/extra-point-snap.ts:714
 msgid "❌ Offensive foul"
 msgstr "❌ Offensive foul"
 
@@ -764,7 +858,7 @@ msgstr "❌ Offensive foul"
 
 #. placeholder {0}: frame.outOfBoundsCatcher!.name
 #: src/meta/legacy/states/extra-point-snap-in-flight.ts:90
-#: src/meta/legacy/states/kickoff-in-flight.ts:59
+#: src/meta/legacy/states/kickoff-in-flight.ts:60
 #: src/meta/legacy/states/safety-kick-in-flight.ts:69
 msgid "❌ Out-of-bounds reception by {0}"
 msgstr "❌ Out-of-bounds reception by {0}"
@@ -778,7 +872,7 @@ msgstr "❌ PAT is no good."
 msgid "❌ PAT went out of bounds."
 msgstr "❌ PAT went out of bounds."
 
-#: src/meta/legacy/states/extra-point-snap.ts:237
+#: src/meta/legacy/states/extra-point-snap.ts:243
 msgid "❌ Pushing foul by {pusherNames}"
 msgstr "❌ Pushing foul by {pusherNames}"
 
@@ -805,8 +899,8 @@ msgstr "❌ Safety kick out of bounds"
 #: src/meta/legacy/states/extra-point-run.ts:199
 #: src/meta/legacy/states/extra-point-snap-in-flight.ts:109
 #: src/meta/legacy/states/extra-point-snap-in-flight.ts:163
-#: src/meta/legacy/states/extra-point-snap.ts:300
-#: src/meta/legacy/states/extra-point-snap.ts:633
+#: src/meta/legacy/states/extra-point-snap.ts:308
+#: src/meta/legacy/states/extra-point-snap.ts:641
 msgid "❌ Two-point try failed."
 msgstr "❌ Two-point try failed."
 
@@ -819,8 +913,8 @@ msgstr "❌ Two-point try failed."
 #~ msgstr "➖ No gain"
 
 #. placeholder {0}: env.TUTORIAL_LINK
-#: src/room/manual/modules/room.ts:164
-#: src/room/manual/modules/room.ts:338
+#: src/room/manual/modules/room.ts:165
+#: src/room/manual/modules/room.ts:340
 msgid "🎬 Watch the tutorial: {0}"
 msgstr "🎬 Watch the tutorial: {0}"
 
@@ -839,16 +933,16 @@ msgstr "🎭 {0} sells the fake field goal!"
 #~ msgstr "🏃 {0} takes the handoff and hits the hole!"
 
 #. placeholder {0}: runner.name
-#: src/meta/legacy/states/snap.ts:657
+#: src/meta/legacy/states/snap.ts:660
 msgid "🏃 {0} takes the handoff and starts a run!"
 msgstr "🏃 {0} takes the handoff and starts a run!"
 
 #. placeholder {0}: runner.name
-#: src/meta/legacy/states/extra-point-snap.ts:591
+#: src/meta/legacy/states/extra-point-snap.ts:599
 msgid "🏃 {0} takes the handoff!"
 msgstr "🏃 {0} takes the handoff!"
 
-#: src/meta/legacy/states/snap.ts:872
+#: src/meta/legacy/states/snap.ts:876
 msgid "🏃 Ball crossed the LOS"
 msgstr "🏃 Ball crossed the LOS"
 
@@ -856,21 +950,31 @@ msgstr "🏃 Ball crossed the LOS"
 #~ msgid "🏃 Ball crossed the LOS • QB run is live."
 #~ msgstr "🏃 Ball crossed the LOS • QB run is live."
 
-#. placeholder {0}: frame.quarterback.name
 #: src/meta/legacy/states/extra-point-blitz.ts:157
-#: src/meta/legacy/states/extra-point-snap.ts:671
-msgid "🏃 QB {0} keeps it and runs!"
-msgstr "🏃 QB {0} keeps it and runs!"
+#: src/meta/legacy/states/extra-point-snap.ts:685
+#~ msgid "🏃 QB {0} keeps it and runs!"
+#~ msgstr "🏃 QB {0} keeps it and runs!"
 
 #: src/meta/legacy/states/blitz.ts:199
-#: src/meta/legacy/states/snap.ts:897
-msgid "🏃 QB crossed the LOS"
-msgstr "🏃 QB crossed the LOS"
+#: src/meta/legacy/states/snap.ts:900
+#~ msgid "🏃 QB crossed the LOS"
+#~ msgstr "🏃 QB crossed the LOS"
 
 #: src/meta/legacy/states/blitz.ts:185
 #: src/meta/legacy/states/snap.ts:646
 #~ msgid "🏃 QB crossed the LOS • quarterback run is live."
 #~ msgstr "🏃 QB crossed the LOS • quarterback run is live."
+
+#. placeholder {0}: frame.quarterback.name
+#: src/meta/legacy/states/extra-point-blitz.ts:157
+#: src/meta/legacy/states/extra-point-snap.ts:685
+msgid "🏃 Quarterback {0} keeps it and runs!"
+msgstr "🏃 Quarterback {0} keeps it and runs!"
+
+#: src/meta/legacy/states/blitz.ts:199
+#: src/meta/legacy/states/snap.ts:903
+msgid "🏃 Quarterback crossed the LOS"
+msgstr "🏃 Quarterback crossed the LOS"
 
 #. placeholder {0}: player.name
 #: src/meta/legacy/states/live-ball.ts:108
@@ -878,7 +982,7 @@ msgid "🏈 {0} loses it on contact by {catcherNames}"
 msgstr "🏈 {0} loses it on contact by {catcherNames}"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:241
+#: src/meta/legacy/states/presnap.ts:317
 msgid "🏈 {0} snaps it"
 msgstr "🏈 {0} snaps it"
 
@@ -897,7 +1001,7 @@ msgstr "🏈 {0} snaps it"
 #~ msgstr "🏈 Defense takes it back • TWO POINTS!"
 
 #. placeholder {0}: formatCommands(gameCommands)
-#: src/room/manual/modules/room.ts:227
+#: src/room/manual/modules/room.ts:228
 msgid "🏈 Game: {0}"
 msgstr "🏈 Game: {0}"
 
@@ -905,12 +1009,12 @@ msgstr "🏈 Game: {0}"
 msgid "🏈 HaxFootball - American Football 🏈"
 msgstr "🏈 HaxFootball - American Football 🏈"
 
-#: src/room/manual/modules/game.ts:404
+#: src/room/manual/modules/game.ts:409
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
 #. placeholder {0}: catcher.name
-#: src/meta/legacy/states/kickoff-in-flight.ts:115
+#: src/meta/legacy/states/kickoff-in-flight.ts:116
 msgid "🏈 Kickoff return by {0}!"
 msgstr "🏈 Kickoff return by {0}!"
 
@@ -934,7 +1038,7 @@ msgstr "🏈 Safety-kick return by {0}!"
 msgid "🏈 Two-point pass complete to {0}!"
 msgstr "🏈 Two-point pass complete to {0}!"
 
-#: src/room/manual/modules/room.ts:332
+#: src/room/manual/modules/room.ts:334
 msgid "🏈 Welcome to HaxFootball!"
 msgstr "🏈 Welcome to HaxFootball!"
 
@@ -1002,7 +1106,7 @@ msgstr "🏈 Welcome to HaxFootball!"
 
 #. placeholder {0}: frame.player.name
 #: src/meta/legacy/states/interception.ts:313
-#: src/meta/legacy/states/kickoff-return.ts:366
+#: src/meta/legacy/states/kickoff-return.ts:369
 #: src/meta/legacy/states/punt-return.ts:283
 #: src/meta/legacy/states/safety-kick-return.ts:368
 msgid "💥 {0} brought down by {catcherNames}!"
@@ -1037,8 +1141,8 @@ msgstr "💥 {0} brought down by {catcherNames}!"
 #~ msgstr "💥 QB {0} sacked by {catcherNames} • TURNOVER ON DOWNS!"
 
 #. placeholder {0}: env.DISCORD_LINK
-#: src/room/manual/modules/room.ts:156
-#: src/room/manual/modules/room.ts:344
+#: src/room/manual/modules/room.ts:157
+#: src/room/manual/modules/room.ts:346
 msgid "💬 Join our Discord server: {0}"
 msgstr "💬 Join our Discord server: {0}"
 
@@ -1048,7 +1152,7 @@ msgstr "💬 Join our Discord server: {0}"
 #~ msgstr "💬 Join our Discord server: {DISCORD_LINK}"
 
 #. placeholder {0}: formatCommands(roomCommands)
-#: src/room/manual/modules/room.ts:233
+#: src/room/manual/modules/room.ts:234
 msgid "💬 Room: {0}"
 msgstr "💬 Room: {0}"
 
@@ -1068,32 +1172,32 @@ msgstr "💬 Room: {0}"
 #~ msgid "📉 {yardsLost}-yard loss"
 #~ msgstr "📉 {yardsLost}-yard loss"
 
-#: src/room/manual/modules/room.ts:221
+#: src/room/manual/modules/room.ts:222
 msgid "📋 Available commands:"
 msgstr "📋 Available commands:"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:553
+#: src/meta/legacy/states/presnap.ts:629
 msgid "📍 {0} repositions the players and ball."
 msgstr "📍 {0} repositions the players and ball."
 
 #. placeholder {0}: matchedCommand.name
 #. placeholder {1}: matchedCommand.description
-#: src/room/manual/modules/room.ts:287
+#: src/room/manual/modules/room.ts:288
 msgid "📘 {COMMAND_PREFIX}{0}: {1}"
 msgstr "📘 {COMMAND_PREFIX}{0}: {1}"
 
 #. placeholder {0}: matchedCommand.name
-#: src/room/manual/modules/room.ts:288
+#: src/room/manual/modules/room.ts:289
 msgid "📘 {COMMAND_PREFIX}{0}: No description available."
 msgstr "📘 {COMMAND_PREFIX}{0}: No description available."
 
-#: src/room/manual/modules/room.ts:300
+#: src/room/manual/modules/room.ts:301
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Aliases: {formattedAliases}"
 
 #. placeholder {0}: formatCommands(adminCommands)
-#: src/room/manual/modules/room.ts:241
+#: src/room/manual/modules/room.ts:242
 msgid "🔒 Admin: {0}"
 msgstr "🔒 Admin: {0}"
 
@@ -1121,16 +1225,16 @@ msgstr "🔒 Admin: {0}"
 #~ msgstr "🔥 TOUCHDOWN by {0}!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:464
+#: src/meta/legacy/states/presnap.ts:540
 msgid "🥅 {0} sets up for the field goal!"
 msgstr "🥅 {0} sets up for the field goal!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/presnap.ts:528
+#: src/meta/legacy/states/presnap.ts:604
 msgid "🦵 {0} punts it away!"
 msgstr "🦵 {0} punts it away!"
 
-#: src/room/manual/modules/room.ts:172
+#: src/room/manual/modules/room.ts:173
 msgid "🙂 Stay a little longer with us!"
 msgstr "🙂 Stay a little longer with us!"
 
@@ -1151,13 +1255,13 @@ msgstr "🚧 Pass batted by {0}"
 #~ msgid "🚧 Pass batted by {0} • two-point try failed."
 #~ msgstr "🚧 Pass batted by {0} • two-point try failed."
 
-#: src/meta/legacy/states/extra-point-snap.ts:713
-#: src/meta/legacy/states/snap.ts:941
+#: src/meta/legacy/states/extra-point-snap.ts:732
+#: src/meta/legacy/states/snap.ts:947
 msgid "🚨 Defense is bringing the blitz!"
 msgstr "🚨 Defense is bringing the blitz!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/kickoff-return.ts:60
+#: src/meta/legacy/states/kickoff-return.ts:63
 msgid "🚪 {0} left during the kickoff return!"
 msgstr "🚪 {0} left during the kickoff return!"
 
@@ -1172,7 +1276,7 @@ msgid "🚪 {0} left during the safety-kick return!"
 msgstr "🚪 {0} left during the safety-kick return!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/states/kickoff-return.ts:82
+#: src/meta/legacy/states/kickoff-return.ts:85
 #: src/meta/legacy/states/punt-return.ts:347
 #: src/meta/legacy/states/safety-kick-return.ts:82
 msgid "🚪 {0} left from the end zone"
@@ -1196,7 +1300,7 @@ msgid "🚪 {0} stepped out on the interception return."
 msgstr "🚪 {0} stepped out on the interception return."
 
 #. placeholder {0}: frame.player.name
-#: src/meta/legacy/states/kickoff-return.ts:219
+#: src/meta/legacy/states/kickoff-return.ts:222
 msgid "🚪 {0} stepped out on the kickoff return."
 msgstr "🚪 {0} stepped out on the kickoff return."
 
@@ -1255,19 +1359,19 @@ msgstr "🚪 Punt out of bounds"
 #~ msgid "🚪 QB {0} went out in the end zone • SAFETY!"
 #~ msgstr "🚪 QB {0} went out in the end zone • SAFETY!"
 
-#: src/room/manual/modules/room.ts:378
+#: src/room/manual/modules/room.ts:381
 msgid "🚫 You are not allowed to ban players."
 msgstr "🚫 You are not allowed to ban players."
 
-#: src/room/manual/modules/room.ts:110
-#: src/room/manual/modules/room.ts:138
-#: src/room/manual/modules/room.ts:183
+#: src/room/manual/modules/room.ts:111
+#: src/room/manual/modules/room.ts:139
+#: src/room/manual/modules/room.ts:184
 msgid "🚫 You must be an admin to use this command."
 msgstr "🚫 You must be an admin to use this command."
 
 #. placeholder {0}: frame.player.name
 #: src/meta/legacy/states/interception.ts:241
-#: src/meta/legacy/states/kickoff-return.ts:294
+#: src/meta/legacy/states/kickoff-return.ts:297
 #: src/meta/legacy/states/punt-return.ts:211
 #: src/meta/legacy/states/safety-kick-return.ts:294
 msgid "🛑 {0} is down in the end zone"
@@ -1289,14 +1393,14 @@ msgstr "🛑 {0} is down in the end zone"
 
 #. placeholder {0}: args.blocker.name
 #. placeholder {0}: frame.blocker.name
-#: src/meta/legacy/states/extra-point-interception-attempt.ts:92
-#: src/meta/legacy/states/extra-point-interception-attempt.ts:123
-#: src/meta/legacy/states/interception-attempt.ts:63
+#: src/meta/legacy/states/extra-point-interception-attempt.ts:96
+#: src/meta/legacy/states/extra-point-interception-attempt.ts:128
+#: src/meta/legacy/states/interception-attempt.ts:96
 msgid "🛡️ INTERCEPTION by {0}!"
 msgstr "🛡️ INTERCEPTION by {0}!"
 
 #. placeholder {0}: duplicate.name
-#: src/room/manual/modules/room.ts:322
+#: src/room/manual/modules/room.ts:323
 msgid "Already connected ({0})."
 msgstr "Already connected ({0})."
 
@@ -1304,15 +1408,15 @@ msgstr "Already connected ({0})."
 msgid "Attempt a field goal"
 msgstr "Attempt a field goal"
 
-#: src/meta/legacy/states/snap.ts:348
-#: src/meta/legacy/states/snap.ts:468
-#: src/meta/legacy/states/snap.ts:594
+#: src/meta/legacy/states/snap.ts:351
+#: src/meta/legacy/states/snap.ts:471
+#: src/meta/legacy/states/snap.ts:597
 msgid "automatic first down."
 msgstr "automatic first down."
 
-#: src/meta/legacy/states/snap.ts:377
-#: src/meta/legacy/states/snap.ts:494
-#: src/meta/legacy/states/snap.ts:623
+#: src/meta/legacy/states/snap.ts:380
+#: src/meta/legacy/states/snap.ts:497
+#: src/meta/legacy/states/snap.ts:626
 msgid "automatic touchdown."
 msgstr "automatic touchdown."
 
@@ -1320,7 +1424,7 @@ msgstr "automatic touchdown."
 #~ msgid "Ball crossed the LOS before the kick"
 #~ msgstr "Ball crossed the LOS before the kick"
 
-#: src/meta/legacy/states/presnap.ts:242
+#: src/meta/legacy/states/presnap.ts:318
 msgid "ball is live"
 msgstr "ball is live"
 
@@ -1331,8 +1435,8 @@ msgstr "ball is live"
 #: src/meta/legacy/states/snap-in-flight.ts:159
 #: src/meta/legacy/states/snap-in-flight.ts:170
 #: src/meta/legacy/states/snap-in-flight.ts:181
-#: src/meta/legacy/states/snap.ts:768
-#: src/meta/legacy/states/snap.ts:782
+#: src/meta/legacy/states/snap.ts:771
+#: src/meta/legacy/states/snap.ts:785
 msgid "ball out of bounds"
 msgstr "ball out of bounds"
 
@@ -1351,23 +1455,23 @@ msgstr "ball out of bounds"
 msgid "ball spotted at the {0}-yard line."
 msgstr "ball spotted at the {0}-yard line."
 
-#: src/meta/legacy/states/kickoff-in-flight.ts:60
-#: src/meta/legacy/states/kickoff-in-flight.ts:91
+#: src/meta/legacy/states/kickoff-in-flight.ts:61
+#: src/meta/legacy/states/kickoff-in-flight.ts:92
 #: src/meta/legacy/states/safety-kick-in-flight.ts:70
 #: src/meta/legacy/states/safety-kick-in-flight.ts:101
 msgid "ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 msgstr "ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 
-#: src/meta/legacy/config.ts:20
+#: src/meta/legacy/config.ts:21
 msgid "Blocks player crossings over the LOS during presnap positioning."
 msgstr "Blocks player crossings over the LOS during presnap positioning."
 
 #: src/meta/legacy/shared/message.ts:11
-#: src/meta/legacy/states/presnap.ts:410
+#: src/meta/legacy/states/presnap.ts:486
 msgid "Blue"
 msgstr "Blue"
 
-#: src/room/manual/modules/room.ts:60
+#: src/room/manual/modules/room.ts:62
 msgid "Clear all bans"
 msgstr "Clear all bans"
 
@@ -1376,13 +1480,13 @@ msgstr "Clear all bans"
 #~ msgid "Crowd abuse ({crowdingOffenderNames})"
 #~ msgstr "Crowd abuse ({crowdingOffenderNames})"
 
-#: src/meta/legacy/states/extra-point-snap.ts:524
-#: src/meta/legacy/states/snap.ts:466
-#: src/meta/legacy/states/snap.ts:492
+#: src/meta/legacy/states/extra-point-snap.ts:532
+#: src/meta/legacy/states/snap.ts:469
+#: src/meta/legacy/states/snap.ts:495
 msgid "crowd abuse by {crowdingOffenderNames}"
 msgstr "crowd abuse by {crowdingOffenderNames}"
 
-#: src/meta/legacy/states/snap.ts:446
+#: src/meta/legacy/states/snap.ts:449
 msgid "Crowd abuse by {crowdingOffenderNames}"
 msgstr "Crowd abuse by {crowdingOffenderNames}"
 
@@ -1413,13 +1517,13 @@ msgstr "defense takes it back"
 #~ msgid "Defensive crowding by {crowdingOffenderNames}"
 #~ msgstr "Defensive crowding by {crowdingOffenderNames}"
 
-#: src/meta/legacy/states/extra-point-snap.ts:424
+#: src/meta/legacy/states/extra-point-snap.ts:432
 msgid "defensive illegal touch"
 msgstr "defensive illegal touch"
 
-#: src/meta/legacy/states/snap.ts:571
-#: src/meta/legacy/states/snap.ts:592
-#: src/meta/legacy/states/snap.ts:621
+#: src/meta/legacy/states/snap.ts:574
+#: src/meta/legacy/states/snap.ts:595
+#: src/meta/legacy/states/snap.ts:624
 msgid "defensive illegal touch by {offenderNames}"
 msgstr "defensive illegal touch by {offenderNames}"
 
@@ -1427,14 +1531,14 @@ msgstr "defensive illegal touch by {offenderNames}"
 #~ msgid "Defensive illegal touch by {offenderNames}"
 #~ msgstr "Defensive illegal touch by {offenderNames}"
 
-#: src/meta/legacy/states/extra-point.ts:299
+#: src/meta/legacy/states/extra-point.ts:288
 msgid "Defensive kick foul"
 msgstr "Defensive kick foul"
 
-#: src/meta/legacy/states/extra-point-snap.ts:358
-#: src/meta/legacy/states/snap.ts:325
-#: src/meta/legacy/states/snap.ts:346
-#: src/meta/legacy/states/snap.ts:375
+#: src/meta/legacy/states/extra-point-snap.ts:366
+#: src/meta/legacy/states/snap.ts:328
+#: src/meta/legacy/states/snap.ts:349
+#: src/meta/legacy/states/snap.ts:378
 msgid "defensive offside"
 msgstr "defensive offside"
 
@@ -1450,15 +1554,15 @@ msgstr "defensive offside"
 
 #: src/meta/legacy/states/extra-point-blitz.ts:258
 #: src/meta/legacy/states/extra-point-blocked-pass.ts:42
-#: src/meta/legacy/states/extra-point-interception-attempt.ts:167
+#: src/meta/legacy/states/extra-point-interception-attempt.ts:172
 #: src/meta/legacy/states/extra-point-kick.ts:48
 #: src/meta/legacy/states/extra-point-pass-deflection.ts:46
 #: src/meta/legacy/states/extra-point-quarterback-run.ts:212
-#: src/meta/legacy/states/extra-point-retry.ts:220
+#: src/meta/legacy/states/extra-point-retry.ts:209
 #: src/meta/legacy/states/extra-point-run.ts:226
 #: src/meta/legacy/states/extra-point-snap-in-flight.ts:179
-#: src/meta/legacy/states/extra-point-snap.ts:732
-#: src/meta/legacy/states/extra-point.ts:375
+#: src/meta/legacy/states/extra-point-snap.ts:751
+#: src/meta/legacy/states/extra-point.ts:364
 msgid "Extra point"
 msgstr "Extra point"
 
@@ -1507,9 +1611,9 @@ msgstr "Game ended in a tie!"
 #~ msgid "HaxFootball 2026"
 #~ msgstr "HaxFootball 2026"
 
-#: src/meta/legacy/states/extra-point-snap.ts:696
-#: src/meta/legacy/states/snap.ts:829
-#: src/meta/legacy/states/snap.ts:843
+#: src/meta/legacy/states/extra-point-snap.ts:715
+#: src/meta/legacy/states/snap.ts:832
+#: src/meta/legacy/states/snap.ts:846
 msgid "illegal advance beyond the LOS"
 msgstr "illegal advance beyond the LOS"
 
@@ -1523,8 +1627,8 @@ msgstr "illegal advance beyond the LOS"
 #~ msgid "Illegal touch"
 #~ msgstr "Illegal touch"
 
-#: src/meta/legacy/states/snap.ts:696
-#: src/meta/legacy/states/snap.ts:710
+#: src/meta/legacy/states/snap.ts:699
+#: src/meta/legacy/states/snap.ts:713
 msgid "illegal touch by {offenderNames}"
 msgstr "illegal touch by {offenderNames}"
 
@@ -1550,36 +1654,36 @@ msgstr "Interception"
 #~ msgid "Join our Discord server: {DISCORD_LINK}"
 #~ msgstr "Join our Discord server: {DISCORD_LINK}"
 
-#: src/meta/legacy/states/extra-point.ts:187
+#: src/meta/legacy/states/extra-point.ts:176
 msgid "kick the PAT."
 msgstr "kick the PAT."
 
-#: src/meta/legacy/states/kickoff.ts:92
+#: src/meta/legacy/states/kickoff.ts:100
 msgid "Kickoff"
 msgstr "Kickoff"
 
-#: src/meta/legacy/states/kickoff-in-flight.ts:137
+#: src/meta/legacy/states/kickoff-in-flight.ts:138
 msgid "Kickoff in flight"
 msgstr "Kickoff in flight"
 
-#: src/meta/legacy/states/kickoff-return.ts:405
+#: src/meta/legacy/states/kickoff-return.ts:408
 msgid "Kickoff return"
 msgstr "Kickoff return"
 
 #. placeholder {0}: frame.player.name
-#: src/meta/legacy/states/kickoff-return.ts:186
+#: src/meta/legacy/states/kickoff-return.ts:189
 msgid "kickoff return touchdown by {0}!"
 msgstr "kickoff return touchdown by {0}!"
 
-#: src/room/manual/modules/game.ts:226
+#: src/room/manual/modules/game.ts:231
 msgid "List all config flags"
 msgstr "List all config flags"
 
 #: src/meta/legacy/states/blitz.ts:142
-#: src/meta/legacy/states/snap.ts:249
-#: src/meta/legacy/states/snap.ts:698
-#: src/meta/legacy/states/snap.ts:770
-#: src/meta/legacy/states/snap.ts:831
+#: src/meta/legacy/states/snap.ts:252
+#: src/meta/legacy/states/snap.ts:701
+#: src/meta/legacy/states/snap.ts:773
+#: src/meta/legacy/states/snap.ts:834
 msgid "loss of down."
 msgstr "loss of down."
 
@@ -1638,9 +1742,9 @@ msgstr "No gain"
 msgid "no gain."
 msgstr "no gain."
 
-#: src/room/manual/modules/game.ts:274
-#: src/room/manual/modules/game.ts:289
-#: src/room/manual/modules/game.ts:295
+#: src/room/manual/modules/game.ts:279
+#: src/room/manual/modules/game.ts:294
+#: src/room/manual/modules/game.ts:300
 msgid "none"
 msgstr "none"
 
@@ -1713,13 +1817,29 @@ msgstr "punt return touchdown by {0}!"
 msgid "Punt the ball"
 msgstr "Punt the ball"
 
-#: src/meta/legacy/states/snap.ts:261
+#: src/meta/legacy/states/snap.ts:264
 msgid "pushing foul by {offenderNames}"
 msgstr "pushing foul by {offenderNames}"
 
-#: src/meta/legacy/states/snap.ts:247
+#: src/meta/legacy/states/snap.ts:250
 msgid "Pushing foul by {offenderNames}"
 msgstr "Pushing foul by {offenderNames}"
+
+#: src/meta/legacy/states/blitz.ts:374
+#: src/meta/legacy/states/blitz.ts:388
+#: src/meta/legacy/states/blitz.ts:402
+#: src/meta/legacy/states/blitz.ts:416
+#: src/meta/legacy/states/blitz.ts:431
+#~ msgid "QB {0} sacked by {catcherNames}"
+#~ msgstr "QB {0} sacked by {catcherNames}"
+
+#: src/meta/legacy/states/blitz.ts:325
+#~ msgid "QB {0} went out in the end zone"
+#~ msgstr "QB {0} went out in the end zone"
+
+#: src/meta/legacy/states/snap.ts:875
+#~ msgid "QB run is live."
+#~ msgstr "QB run is live."
 
 #. placeholder {0}: frame.quarterback.name
 #: src/meta/legacy/states/blitz.ts:374
@@ -1727,44 +1847,49 @@ msgstr "Pushing foul by {offenderNames}"
 #: src/meta/legacy/states/blitz.ts:402
 #: src/meta/legacy/states/blitz.ts:416
 #: src/meta/legacy/states/blitz.ts:431
-msgid "QB {0} sacked by {catcherNames}"
-msgstr "QB {0} sacked by {catcherNames}"
+msgid "Quarterback {0} sacked by {catcherNames}"
+msgstr "Quarterback {0} sacked by {catcherNames}"
 
 #. placeholder {0}: frame.quarterback.name
 #: src/meta/legacy/states/blitz.ts:325
-msgid "QB {0} went out in the end zone"
-msgstr "QB {0} went out in the end zone"
-
-#: src/meta/legacy/states/snap.ts:872
-msgid "QB run is live."
-msgstr "QB run is live."
+msgid "Quarterback {0} went out in the end zone"
+msgstr "Quarterback {0} went out in the end zone"
 
 #: src/meta/legacy/states/blitz.ts:200
-#: src/meta/legacy/states/snap.ts:898
+#: src/meta/legacy/states/snap.ts:877
+#: src/meta/legacy/states/snap.ts:904
 msgid "quarterback run is live."
 msgstr "quarterback run is live."
 
 #: src/meta/legacy/shared/message.ts:11
-#: src/meta/legacy/states/presnap.ts:410
+#: src/meta/legacy/states/presnap.ts:486
 msgid "Red"
 msgstr "Red"
 
-#: src/room/manual/modules/room.ts:41
+#: src/room/manual/modules/room.ts:43
 msgid "Remove the room password"
 msgstr "Remove the room password"
 
-#: src/meta/legacy/states/extra-point-snap.ts:328
-#: src/meta/legacy/states/extra-point-snap.ts:341
-#: src/meta/legacy/states/extra-point-snap.ts:394
-#: src/meta/legacy/states/extra-point-snap.ts:407
-#: src/meta/legacy/states/extra-point-snap.ts:488
-#: src/meta/legacy/states/extra-point-snap.ts:505
+#: src/meta/legacy/states/extra-point-snap.ts:336
+#: src/meta/legacy/states/extra-point-snap.ts:349
+#: src/meta/legacy/states/extra-point-snap.ts:402
+#: src/meta/legacy/states/extra-point-snap.ts:415
+#: src/meta/legacy/states/extra-point-snap.ts:496
+#: src/meta/legacy/states/extra-point-snap.ts:513
 msgid "replay the try."
 msgstr "replay the try."
 
 #: src/room/manual/modules/game.ts:211
 msgid "Reposition players"
 msgstr "Reposition players"
+
+#: src/meta/legacy/config.ts:31
+#~ msgid "Requires a selected QB before the offense can snap."
+#~ msgstr "Requires a selected QB before the offense can snap."
+
+#: src/meta/legacy/config.ts:31
+msgid "Requires a selected quarterback before the offense can snap."
+msgstr "Requires a selected quarterback before the offense can snap."
 
 #: src/meta/legacy/states/safety.ts:96
 msgid "Safety"
@@ -1796,9 +1921,9 @@ msgstr "safety-kick return touchdown by {0}!"
 #: src/meta/legacy/states/fake-field-goal.ts:228
 #: src/meta/legacy/states/interception.ts:203
 #: src/meta/legacy/states/interception.ts:282
-#: src/meta/legacy/states/kickoff-return.ts:115
-#: src/meta/legacy/states/kickoff-return.ts:256
-#: src/meta/legacy/states/kickoff-return.ts:335
+#: src/meta/legacy/states/kickoff-return.ts:118
+#: src/meta/legacy/states/kickoff-return.ts:259
+#: src/meta/legacy/states/kickoff-return.ts:338
 #: src/meta/legacy/states/live-ball.ts:302
 #: src/meta/legacy/states/punt-return.ts:173
 #: src/meta/legacy/states/punt-return.ts:252
@@ -1810,6 +1935,14 @@ msgstr "safety-kick return touchdown by {0}!"
 #: src/meta/legacy/states/safety-kick-return.ts:336
 msgid "SAFETY!"
 msgstr "SAFETY!"
+
+#: src/room/manual/modules/game.ts:221
+#~ msgid "Set or clear the current QB"
+#~ msgstr "Set or clear the current QB"
+
+#: src/room/manual/modules/game.ts:221
+msgid "Set or clear the current quarterback"
+msgstr "Set or clear the current quarterback"
 
 #: src/room/manual/modules/game.ts:186
 msgid "Set the current down"
@@ -1823,11 +1956,11 @@ msgstr "Set the distance to first down"
 msgid "Set the line of scrimmage"
 msgstr "Set the line of scrimmage"
 
-#: src/room/manual/modules/room.ts:36
+#: src/room/manual/modules/room.ts:38
 msgid "Set the room password"
 msgstr "Set the room password"
 
-#: src/room/manual/modules/room.ts:65
+#: src/room/manual/modules/room.ts:67
 msgid "Show available commands or details for one command"
 msgstr "Show available commands or details for one command"
 
@@ -1835,7 +1968,7 @@ msgstr "Show available commands or details for one command"
 msgid "Show game info"
 msgstr "Show game info"
 
-#: src/room/manual/modules/room.ts:46
+#: src/room/manual/modules/room.ts:48
 msgid "Show the Discord invite link"
 msgstr "Show the Discord invite link"
 
@@ -1847,7 +1980,7 @@ msgstr "Show the game version"
 msgid "Show the score"
 msgstr "Show the score"
 
-#: src/room/manual/modules/room.ts:51
+#: src/room/manual/modules/room.ts:53
 msgid "Show the tutorial link"
 msgstr "Show the tutorial link"
 
@@ -1856,8 +1989,8 @@ msgstr "Show the tutorial link"
 #~ msgstr "The game has not been started yet."
 
 #: src/meta/legacy/states/interception.ts:242
-#: src/meta/legacy/states/kickoff-return.ts:83
-#: src/meta/legacy/states/kickoff-return.ts:295
+#: src/meta/legacy/states/kickoff-return.ts:86
+#: src/meta/legacy/states/kickoff-return.ts:298
 #: src/meta/legacy/states/punt-in-flight.ts:68
 #: src/meta/legacy/states/punt-in-flight.ts:119
 #: src/meta/legacy/states/punt-return.ts:212
@@ -1901,31 +2034,31 @@ msgid "TURNOVER ON DOWNS!"
 msgstr "TURNOVER ON DOWNS!"
 
 #: src/meta/legacy/states/blitz.ts:156
-#: src/meta/legacy/states/snap.ts:263
-#: src/meta/legacy/states/snap.ts:712
-#: src/meta/legacy/states/snap.ts:784
-#: src/meta/legacy/states/snap.ts:845
+#: src/meta/legacy/states/snap.ts:266
+#: src/meta/legacy/states/snap.ts:715
+#: src/meta/legacy/states/snap.ts:787
+#: src/meta/legacy/states/snap.ts:848
 msgid "turnover on downs."
 msgstr "turnover on downs."
 
 #: src/meta/legacy/states/extra-point-quarterback-run.ts:111
 #: src/meta/legacy/states/extra-point-run.ts:125
-#: src/meta/legacy/states/extra-point.ts:300
+#: src/meta/legacy/states/extra-point.ts:289
 msgid "TWO POINTS!"
 msgstr "TWO POINTS!"
 
-#: src/meta/legacy/states/extra-point-snap.ts:359
-#: src/meta/legacy/states/extra-point-snap.ts:425
-#: src/meta/legacy/states/extra-point-snap.ts:525
+#: src/meta/legacy/states/extra-point-snap.ts:367
+#: src/meta/legacy/states/extra-point-snap.ts:433
+#: src/meta/legacy/states/extra-point-snap.ts:533
 msgid "two-point try awarded."
 msgstr "two-point try awarded."
 
 #: src/meta/legacy/states/extra-point-blitz.ts:118
 #: src/meta/legacy/states/extra-point-blocked-pass.ts:58
 #: src/meta/legacy/states/extra-point-snap-in-flight.ts:91
-#: src/meta/legacy/states/extra-point-snap.ts:238
-#: src/meta/legacy/states/extra-point-snap.ts:620
-#: src/meta/legacy/states/extra-point-snap.ts:697
+#: src/meta/legacy/states/extra-point-snap.ts:244
+#: src/meta/legacy/states/extra-point-snap.ts:628
+#: src/meta/legacy/states/extra-point-snap.ts:716
 msgid "two-point try failed."
 msgstr "two-point try failed."
 
@@ -1934,7 +2067,7 @@ msgstr "two-point try failed."
 msgid "two-point try is good!"
 msgstr "two-point try is good!"
 
-#: src/meta/legacy/states/extra-point.ts:362
+#: src/meta/legacy/states/extra-point.ts:351
 msgid "two-point try is no longer available."
 msgstr "two-point try is no longer available."
 
@@ -1947,7 +2080,7 @@ msgstr "Undo the last play"
 msgid "Victory for the {0} team!"
 msgstr "Victory for the {0} team!"
 
-#: src/room/manual/modules/game.ts:221
+#: src/room/manual/modules/game.ts:226
 msgid "View or set a config flag"
 msgstr "View or set a config flag"
 

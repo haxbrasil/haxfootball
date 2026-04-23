@@ -13,6 +13,7 @@ export const {
     defaultConfig: {
         flags: {
             losBlocking: false,
+            requireQb: true,
         },
     },
     flags: {
@@ -23,6 +24,16 @@ export const {
                 config.flags = {
                     ...config.flags,
                     losBlocking: value,
+                };
+            },
+        },
+        REQUIRE_QB: {
+            description: t`Requires a selected quarterback before the offense can snap.`,
+            getValue: (config) => config.flags.requireQb,
+            setValue: (config, value) => {
+                config.flags = {
+                    ...config.flags,
+                    requireQb: value,
                 };
             },
         },

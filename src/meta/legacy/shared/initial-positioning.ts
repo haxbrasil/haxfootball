@@ -1,4 +1,5 @@
 import { distributeOnLine } from "@common/math/geometry";
+import { clamp } from "@common/general/helpers";
 import { Team, type FieldTeam } from "@runtime/models";
 
 export type InitialPositioningRelativeLine = {
@@ -10,6 +11,18 @@ export type InitialPositioningRelativeLines = {
     offensive: InitialPositioningRelativeLine;
     defensive: InitialPositioningRelativeLine;
 };
+
+export const DEFAULT_INITIAL_POSITIONING_RELATIVE_LINES: InitialPositioningRelativeLines =
+    {
+        offensive: {
+            start: { x: 100, y: -250 },
+            end: { x: 100, y: 250 },
+        },
+        defensive: {
+            start: { x: -100, y: -250 },
+            end: { x: -100, y: 250 },
+        },
+    };
 
 export type InitialPositioningPlayer = {
     id: number;
@@ -143,6 +156,38 @@ function getPlacementLine({
     };
 }
 
+function getClosestPointOnLineSegment({
+    point,
+    line,
+}: {
+    point: Position;
+    line: {
+        start: Position;
+        end: Position;
+    };
+}): Position {
+    const dx = line.end.x - line.start.x;
+    const dy = line.end.y - line.start.y;
+    const lengthSq = dx * dx + dy * dy;
+
+    if (lengthSq === 0) {
+        return {
+            x: line.start.x,
+            y: line.start.y,
+        };
+    }
+
+    const projection =
+        ((point.x - line.start.x) * dx + (point.y - line.start.y) * dy) /
+        lengthSq;
+    const factor = clamp(projection, 0, 1);
+
+    return {
+        x: line.start.x + dx * factor,
+        y: line.start.y + dy * factor,
+    };
+}
+
 function getTeamInitialPositions({
     players,
     team,
@@ -150,6 +195,7 @@ function getTeamInitialPositions({
     ballPos,
     relativeLine,
     snapProfileMap,
+    offensiveAnchorPlayerId,
 }: {
     players: InitialPositioningPlayer[];
     team: FieldTeam;
@@ -157,6 +203,7 @@ function getTeamInitialPositions({
     ballPos: Position;
     relativeLine: InitialPositioningRelativeLine;
     snapProfileMap: Map<number, InitialPositioningSnapProfile>;
+    offensiveAnchorPlayerId?: number;
 }): InitialPositioningPlayerPosition[] {
     const teamPlayers = players.filter((player) => player.team === team);
     const orderedPlayers = getPlacementOrder(teamPlayers, snapProfileMap);
@@ -166,14 +213,81 @@ function getTeamInitialPositions({
         relativeLine,
     });
 
-    return distributeOnLine(
-        orderedPlayers.map((player) => ({
+    if (
+        team !== offensiveTeam ||
+        offensiveAnchorPlayerId === undefined ||
+        orderedPlayers.length === 0
+    ) {
+        return distributeOnLine(
+            orderedPlayers.map((player) => ({
+                id: player.id,
+                x: player.position.x,
+                y: player.position.y,
+            })),
+            placementLine,
+        ).map(({ id, x, y }) => ({ id, x, y }));
+    }
+
+    const anchorPlayer = orderedPlayers.find(
+        (player) => player.id === offensiveAnchorPlayerId,
+    );
+
+    if (!anchorPlayer) {
+        return distributeOnLine(
+            orderedPlayers.map((player) => ({
+                id: player.id,
+                x: player.position.x,
+                y: player.position.y,
+            })),
+            placementLine,
+        ).map(({ id, x, y }) => ({ id, x, y }));
+    }
+
+    const anchorLinePoint = getClosestPointOnLineSegment({
+        point: ballPos,
+        line: placementLine,
+    });
+
+    const anchorPosition = {
+        id: anchorPlayer.id,
+        x: (anchorLinePoint.x + ballPos.x) / 2,
+        y: (anchorLinePoint.y + ballPos.y) / 2,
+    };
+
+    const teammates = orderedPlayers.filter(
+        (player) => player.id !== offensiveAnchorPlayerId,
+    );
+    const playersBeforeAnchor = teammates.slice(
+        0,
+        Math.floor(teammates.length / 2),
+    );
+    const playersAfterAnchor = teammates.slice(playersBeforeAnchor.length);
+
+    const beforeAnchorPositions = distributeOnLine(
+        playersBeforeAnchor.map((player) => ({
             id: player.id,
             x: player.position.x,
             y: player.position.y,
         })),
-        placementLine,
+        {
+            start: placementLine.start,
+            end: anchorLinePoint,
+        },
     ).map(({ id, x, y }) => ({ id, x, y }));
+
+    const afterAnchorPositions = distributeOnLine(
+        playersAfterAnchor.map((player) => ({
+            id: player.id,
+            x: player.position.x,
+            y: player.position.y,
+        })),
+        {
+            start: anchorLinePoint,
+            end: placementLine.end,
+        },
+    ).map(({ id, x, y }) => ({ id, x, y }));
+
+    return [...beforeAnchorPositions, anchorPosition, ...afterAnchorPositions];
 }
 
 export function buildInitialPlayerPositions({
@@ -183,6 +297,7 @@ export function buildInitialPlayerPositions({
     relativeLines,
     snapProfile,
     minSnapProfileCount = 1,
+    offensiveAnchorPlayerId,
 }: {
     players: InitialPositioningPlayer[];
     offensiveTeam: FieldTeam;
@@ -190,6 +305,7 @@ export function buildInitialPlayerPositions({
     relativeLines: InitialPositioningRelativeLines;
     snapProfile: InitialPositioningSnapProfile[];
     minSnapProfileCount?: number;
+    offensiveAnchorPlayerId?: number;
 }): InitialPositioningPlayerPosition[] {
     const snapProfileMap = buildSnapProfileMap(
         snapProfile,
@@ -205,6 +321,9 @@ export function buildInitialPlayerPositions({
             ballPos,
             relativeLine: relativeLines.offensive,
             snapProfileMap,
+            ...(offensiveAnchorPlayerId !== undefined
+                ? { offensiveAnchorPlayerId }
+                : {}),
         }),
         ...getTeamInitialPositions({
             players,

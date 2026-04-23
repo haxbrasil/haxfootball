@@ -1,5 +1,5 @@
 import { type FieldTeam, isFieldTeam, Team } from "@runtime/models";
-import type { GameStatePlayer } from "@runtime/engine";
+import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { CommandHandleResult, CommandSpec } from "@core/commands";
 import { opposite } from "@common/game/game";
 import { parseIntegerInRange, parseTeamSide } from "@common/game/parsing";
@@ -34,10 +34,13 @@ import {
 } from "@meta/legacy/hooks/game";
 import { DownState, MAX_DOWNS } from "@meta/legacy/shared/down";
 import assert from "node:assert";
-import { $global } from "@meta/legacy/hooks/global";
+import {
+    $global,
+    $syncPossessionQuarterbackSelection,
+} from "@meta/legacy/hooks/global";
 import {
     buildInitialPlayerPositions,
-    type InitialPositioningRelativeLines,
+    DEFAULT_INITIAL_POSITIONING_RELATIVE_LINES,
 } from "@meta/legacy/shared/initial-positioning";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import { COLOR } from "@common/general/color";
@@ -49,17 +52,6 @@ import {
     MIN_SNAP_DELAY_TICKS,
 } from "@meta/legacy/shared/snap";
 
-const DEFAULT_INITIAL_RELATIVE_POSITIONS: InitialPositioningRelativeLines = {
-    offensive: {
-        start: { x: 100, y: -100 },
-        end: { x: 100, y: 100 },
-    },
-    defensive: {
-        start: { x: -100, y: -100 },
-        end: { x: -100, y: 100 },
-    },
-};
-
 const MIN_DISTANCE = 1;
 const MAX_DISTANCE_CMD = 20;
 const MIN_DOWN = 1;
@@ -69,6 +61,7 @@ function $setInitialPlayerPositions(
     offensiveTeam: FieldTeam,
     ballPos: Position,
     targetPlayerId?: number,
+    quarterbackId?: number,
 ) {
     const snapProfile = $global().snapProfile;
 
@@ -94,8 +87,11 @@ function $setInitialPlayerPositions(
             players,
             offensiveTeam,
             ballPos,
-            relativeLines: DEFAULT_INITIAL_RELATIVE_POSITIONS,
+            relativeLines: DEFAULT_INITIAL_POSITIONING_RELATIVE_LINES,
             snapProfile,
+            ...(quarterbackId !== undefined
+                ? { offensiveAnchorPlayerId: quarterbackId }
+                : {}),
         });
 
         const playerPositions =
@@ -118,6 +114,11 @@ function $setInitialPlayerPositions(
 
 export function Presnap({ downState }: { downState: DownState }) {
     const { offensiveTeam, downAndDistance, fieldPos } = downState;
+
+    const initialState = $before();
+    const initialPlayersSnapshot = initialState.players;
+    const config = $config<Config>();
+    const requireQb = config.flags.requireQb;
 
     assert(
         downAndDistance.down >= 1 &&
@@ -143,15 +144,37 @@ export function Presnap({ downState }: { downState: DownState }) {
         $.setBall({ ...ballPosWithOffset, xspeed: 0, yspeed: 0 });
     });
 
-    $setInitialPlayerPositions(offensiveTeam, ballPos);
+    const initialQuarterbackId = requireQb
+        ? $syncPossessionQuarterbackSelection({
+              team: offensiveTeam,
+              players: initialPlayersSnapshot,
+          })
+        : null;
+
+    if (requireQb && initialQuarterbackId === null) {
+        $effect(($) => {
+            $.send({
+                message: t`⚠️ Quarterback position is vacant. Use !qb to become the quarterback.`,
+                to: initialPlayersSnapshot.filter(
+                    (player) => player.team === offensiveTeam,
+                ),
+                color: COLOR.WARNING,
+            });
+        });
+    }
+
+    $setInitialPlayerPositions(
+        offensiveTeam,
+        ballPos,
+        undefined,
+        initialQuarterbackId ?? undefined,
+    );
 
     $dispose(() => {
         $setBallMoveable();
         $unlockBall();
         $unsetLineOfScrimmage();
         $unsetFirstDownLine();
-
-        const config = $config<Config>();
 
         if (config.flags.losBlocking) {
             $syncLineOfScrimmageBlocking({ enabled: false });
@@ -177,7 +200,20 @@ export function Presnap({ downState }: { downState: DownState }) {
     }
 
     function join(player: GameStatePlayer) {
-        $setInitialPlayerPositions(offensiveTeam, ballPos, player.id);
+        const state = $before();
+        const selectedQuarterbackId = requireQb
+            ? $syncPossessionQuarterbackSelection({
+                  team: offensiveTeam,
+                  players: state.players,
+              })
+            : null;
+
+        $setInitialPlayerPositions(
+            offensiveTeam,
+            ballPos,
+            player.id,
+            selectedQuarterbackId ?? undefined,
+        );
     }
 
     function chat(player: PlayerObject, message: string): false | void {
@@ -187,6 +223,46 @@ export function Presnap({ downState }: { downState: DownState }) {
         if (isHikeCommand) {
             if (player.team !== offensiveTeam) {
                 return;
+            }
+
+            if (requireQb) {
+                const { possessionQuarterback } = $global();
+
+                if (
+                    possessionQuarterback &&
+                    possessionQuarterback.team !== offensiveTeam
+                ) {
+                    $global((state) => state.clearPossessionQuarterback());
+                }
+
+                const selectedQuarterbackId =
+                    possessionQuarterback?.team === offensiveTeam
+                        ? possessionQuarterback.playerId
+                        : null;
+
+                if (selectedQuarterbackId === null) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Select a quarterback with !qb before snapping.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return false;
+                }
+
+                if (selectedQuarterbackId !== player.id) {
+                    $effect(($) => {
+                        $.send({
+                            message: t`⚠️ Only the selected quarterback can snap.`,
+                            to: player.id,
+                            color: COLOR.CRITICAL,
+                        });
+                    });
+
+                    return false;
+                }
             }
 
             if ($tick().current < MIN_SNAP_DELAY_TICKS) {
@@ -556,7 +632,26 @@ export function Presnap({ downState }: { downState: DownState }) {
                     });
                 });
 
-                $setInitialPlayerPositions(offensiveTeam, ballPos);
+                const { possessionQuarterback } = $global();
+
+                if (
+                    possessionQuarterback &&
+                    possessionQuarterback.team !== offensiveTeam
+                ) {
+                    $global((state) => state.clearPossessionQuarterback());
+                }
+
+                const selectedQuarterbackId =
+                    requireQb && possessionQuarterback?.team === offensiveTeam
+                        ? possessionQuarterback.playerId
+                        : null;
+
+                $setInitialPlayerPositions(
+                    offensiveTeam,
+                    ballPos,
+                    undefined,
+                    selectedQuarterbackId ?? undefined,
+                );
 
                 return { handled: true };
             }
@@ -565,6 +660,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                     options: {
                         undo: true,
                         info: { downState },
+                        qb: { eligibleTeam: offensiveTeam },
                     },
                     player,
                     spec,
@@ -572,8 +668,13 @@ export function Presnap({ downState }: { downState: DownState }) {
         }
     }
 
-    function run() {
-        const config = $config<Config>();
+    function run(state: GameState) {
+        if (requireQb) {
+            $syncPossessionQuarterbackSelection({
+                team: offensiveTeam,
+                players: state.players,
+            });
+        }
 
         if (config.flags.losBlocking) {
             $syncLineOfScrimmageBlocking();

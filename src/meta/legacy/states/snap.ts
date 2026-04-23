@@ -872,7 +872,10 @@ export function Snap({
 
         $effect(($) => {
             $.send({
-                message: cn(t`🏃 Ball crossed the LOS`, t`QB run is live.`),
+                message: cn(
+                    t`🏃 Ball crossed the LOS`,
+                    t`quarterback run is live.`,
+                ),
                 color: COLOR.ACTION,
             });
         });
@@ -897,7 +900,7 @@ export function Snap({
         $effect(($) => {
             $.send({
                 message: cn(
-                    t`🏃 QB crossed the LOS`,
+                    t`🏃 Quarterback crossed the LOS`,
                     t`quarterback run is live.`,
                 ),
                 color: COLOR.ACTION,

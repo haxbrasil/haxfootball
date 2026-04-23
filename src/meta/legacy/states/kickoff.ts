@@ -18,6 +18,10 @@ import {
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
+import {
+    $global,
+    $syncPossessionQuarterbackSelection,
+} from "@meta/legacy/hooks/global";
 
 const KICKOFF_START_LINE = {
     [Team.RED]: {
@@ -31,6 +35,10 @@ const KICKOFF_START_LINE = {
 };
 
 export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
+    const receivingTeam = opposite(forTeam);
+
+    $global((state) => state.clearPossessionQuarterback());
+
     $setBallInMiddleOfField();
     $trapTeamInMidField(forTeam);
     $trapTeamInEndZone(opposite(forTeam));
@@ -90,6 +98,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
             options: {
                 undo: true,
                 info: { stateMessage: t`Kickoff` },
+                qb: { eligibleTeam: receivingTeam },
             },
             player,
             spec,
@@ -97,6 +106,11 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     }
 
     function run(state: GameState) {
+        $syncPossessionQuarterbackSelection({
+            team: receivingTeam,
+            players: state.players,
+        });
+
         const kicker = state.players.find((p) => p.isKickingBall);
 
         if (kicker) {

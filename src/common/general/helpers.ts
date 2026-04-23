@@ -86,3 +86,10 @@ export function sortBy<T>(items: T[], selector: Selector<T, number>): T[] {
 export function unique<T>(items: T[]): T[] {
     return items.filter((item, index, list) => list.indexOf(item) === index);
 }
+
+export function clamp(value: number, min: number, max: number): number {
+    if (value < min) return min;
+    if (value > max) return max;
+
+    return value;
+}

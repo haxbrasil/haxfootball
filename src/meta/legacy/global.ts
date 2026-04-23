@@ -9,12 +9,18 @@ type PlayerSnapProfile = {
     count: number;
 };
 
+type PossessionQuarterback = {
+    playerId: number;
+    team: FieldTeam;
+};
+
 const initialState = {
     scores: {
         [Team.RED]: 0,
         [Team.BLUE]: 0,
     } as ScoreState,
     snapProfile: [] as PlayerSnapProfile[],
+    possessionQuarterback: null as PossessionQuarterback | null,
 };
 
 export const legacyGlobalSchema = defineGlobalSchema({
@@ -70,6 +76,21 @@ export const legacyGlobalSchema = defineGlobalSchema({
         clearSnapProfile: (state) => ({
             ...state,
             snapProfile: [],
+        }),
+        setPossessionQuarterback: (
+            state,
+            playerId: number,
+            team: FieldTeam,
+        ) => ({
+            ...state,
+            possessionQuarterback: {
+                playerId,
+                team,
+            },
+        }),
+        clearPossessionQuarterback: (state) => ({
+            ...state,
+            possessionQuarterback: null,
         }),
     },
 });

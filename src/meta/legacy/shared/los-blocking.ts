@@ -1,3 +1,5 @@
+import { clamp } from "@common/general/helpers";
+
 export type BlockingVec2 = {
     x: number;
     y: number;
@@ -49,13 +51,6 @@ function distanceSq(a: BlockingVec2, b: BlockingVec2): number {
     const dy = a.y - b.y;
 
     return dx * dx + dy * dy;
-}
-
-function clamp(value: number, min: number, max: number): number {
-    if (value < min) return min;
-    if (value > max) return max;
-
-    return value;
 }
 
 function computeRestPosition(

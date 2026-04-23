@@ -154,7 +154,7 @@ export function ExtraPointBlitz({
 
         $effect(($) => {
             $.send({
-                message: t`🏃 QB ${frame.quarterback.name} keeps it and runs!`,
+                message: t`🏃 Quarterback ${frame.quarterback.name} keeps it and runs!`,
                 color: COLOR.ACTION,
             });
         });

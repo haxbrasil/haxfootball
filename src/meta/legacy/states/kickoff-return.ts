@@ -16,7 +16,10 @@ import { getInitialDownState } from "@meta/legacy/shared/down";
 import { isTouchdown, SCORES } from "@meta/legacy/shared/scoring";
 import { cn, formatNames } from "@meta/legacy/shared/message";
 import { $setBallActive, $setBallInactive } from "@meta/legacy/hooks/game";
-import { $global } from "@meta/legacy/hooks/global";
+import {
+    $global,
+    $syncPossessionQuarterbackSelection,
+} from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
@@ -403,6 +406,7 @@ export function KickoffReturn({
             options: {
                 undo: true,
                 info: { stateMessage: t`Kickoff return` },
+                qb: { eligibleTeam: receivingTeam },
             },
             player,
             spec,
@@ -410,6 +414,11 @@ export function KickoffReturn({
     }
 
     function run(state: GameState) {
+        $syncPossessionQuarterbackSelection({
+            team: receivingTeam,
+            players: state.players,
+        });
+
         const frame = buildFrame(state);
         if (!frame) return;
 
