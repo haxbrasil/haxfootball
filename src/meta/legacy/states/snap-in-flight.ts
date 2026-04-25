@@ -32,6 +32,7 @@ type Frame = {
     outOfBoundsCatcher: GameStatePlayer | null;
     offensiveCatcher: GameStatePlayer | null;
     defensiveCatcher: GameStatePlayer | null;
+    defensiveOutOfBoundsCatcher: GameStatePlayer | null;
 };
 
 export function SnapInFlight({ downState }: { downState: DownState }) {
@@ -73,6 +74,10 @@ export function SnapInFlight({ downState }: { downState: DownState }) {
                   ),
             offensiveCatcher,
             defensiveCatcher: findEligibleBallCatcher(
+                state.ball,
+                defensivePlayers,
+            ),
+            defensiveOutOfBoundsCatcher: findOutOfBoundsBallCatcher(
                 state.ball,
                 defensivePlayers,
             ),
@@ -225,6 +230,20 @@ export function SnapInFlight({ downState }: { downState: DownState }) {
         });
     }
 
+    function $handleDefensiveOutOfBoundsCatch(frame: Frame) {
+        if (!frame.defensiveOutOfBoundsCatcher) return;
+
+        $next({
+            to: "PASS_DEFLECTION",
+            params: {
+                blockTime: frame.state.tickNumber,
+                blockerId: frame.defensiveOutOfBoundsCatcher.id,
+                isKickingBall: frame.defensiveOutOfBoundsCatcher.isKickingBall,
+                downState,
+            },
+        });
+    }
+
     function command(player: PlayerObject, spec: CommandSpec) {
         return $createSharedCommandHandler({
             options: {
@@ -239,6 +258,7 @@ export function SnapInFlight({ downState }: { downState: DownState }) {
     function run(state: GameState) {
         const frame = buildFrame(state);
 
+        $handleDefensiveOutOfBoundsCatch(frame);
         $handleBallOutOfBounds(frame);
         $handleOutOfBoundsReception(frame);
         $handleOffensiveReception(frame);

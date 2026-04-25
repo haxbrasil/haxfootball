@@ -29,6 +29,7 @@ type Frame = {
     outOfBoundsCatcher: GameStatePlayer | null;
     offensiveCatcher: GameStatePlayer | null;
     defensiveCatcher: GameStatePlayer | null;
+    defensiveOutOfBoundsCatcher: GameStatePlayer | null;
 };
 
 export function ExtraPointSnapInFlight({
@@ -74,6 +75,10 @@ export function ExtraPointSnapInFlight({
                   ),
             offensiveCatcher,
             defensiveCatcher: findEligibleBallCatcher(
+                state.ball,
+                defensivePlayers,
+            ),
+            defensiveOutOfBoundsCatcher: findOutOfBoundsBallCatcher(
                 state.ball,
                 defensivePlayers,
             ),
@@ -155,6 +160,21 @@ export function ExtraPointSnapInFlight({
         });
     }
 
+    function $handleDefensiveOutOfBoundsCatch(frame: Frame) {
+        if (!frame.defensiveOutOfBoundsCatcher) return;
+
+        $next({
+            to: "EXTRA_POINT_PASS_DEFLECTION",
+            params: {
+                blockTime: frame.state.tickNumber,
+                blockerId: frame.defensiveOutOfBoundsCatcher.id,
+                isKickingBall: frame.defensiveOutOfBoundsCatcher.isKickingBall,
+                offensiveTeam,
+                fieldPos,
+            },
+        });
+    }
+
     function $handleBallLeftTwoPointZone(frame: Frame) {
         if (isInExtraPointZone(frame.state.ball, offensiveTeam)) return;
 
@@ -186,6 +206,7 @@ export function ExtraPointSnapInFlight({
     function run(state: GameState) {
         const frame = buildFrame(state);
 
+        $handleDefensiveOutOfBoundsCatch(frame);
         $handleBallOutOfBounds(frame);
         $handleOutOfBoundsReception(frame);
         $handleOffensiveReception(frame);
