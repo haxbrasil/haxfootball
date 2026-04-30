@@ -85,6 +85,18 @@ export const qbCommandHandler: SharedCommandImplementation = ({
             return { handled: true };
         }
 
+        if (selectedQuarterbackId !== null) {
+            $effect(($) => {
+                $.send({
+                    message: t`⚠️ Quarterback position is already occupied.`,
+                    to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+            });
+
+            return { handled: true };
+        }
+
         $global((state) =>
             state.setPossessionQuarterback(
                 player.id,
@@ -125,7 +137,10 @@ export const qbCommandHandler: SharedCommandImplementation = ({
                   ]
                 : [],
         );
-        const targetResolution = resolvePlayerTarget(eligiblePlayers, rawTarget);
+        const targetResolution = resolvePlayerTarget(
+            eligiblePlayers,
+            rawTarget,
+        );
 
         switch (targetResolution.type) {
             case "INVALID_TARGET":

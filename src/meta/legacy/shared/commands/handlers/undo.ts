@@ -2,9 +2,7 @@ import { $checkpoints, $effect, $restore } from "@runtime/runtime";
 import { t } from "@lingui/core/macro";
 import type { SharedCommandImplementation } from "@meta/legacy/shared/commands/types";
 
-export const undoCommandHandler: SharedCommandImplementation = ({
-    player,
-}) => {
+export const undoCommandHandler: SharedCommandImplementation = ({ player }) => {
     if (!player.admin) {
         $effect(($) => {
             $.send(t`⚠️ Only admins can call for an undo.`, player.id);
