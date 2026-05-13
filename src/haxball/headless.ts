@@ -1029,66 +1029,6 @@ declare global {
         updateLibrary(libraryIndex: number, library: NodeHaxballLibrary): void;
         removeLibrary(library: NodeHaxballLibrary): void;
         takeSnapshot(): object;
-        exportStadium(): object;
-        createVertex(data: NodeHaxballVertexParams): NodeHaxballVertex;
-        createSegment(data: NodeHaxballSegmentParams): NodeHaxballSegment;
-        createSegmentFromObj(
-            data: NodeHaxballSegmentFromObjParams,
-        ): NodeHaxballSegment;
-        createGoal(data: NodeHaxballGoalParams): NodeHaxballGoal;
-        createPlane(data: NodeHaxballPlaneParams): NodeHaxballPlane;
-        createDisc(data: NodeHaxballDiscParams): NodeHaxballDisc;
-        createJoint(data: NodeHaxballJointParams): NodeHaxballJoint;
-        createJointFromObj(
-            data: NodeHaxballJointFromObjParams,
-        ): NodeHaxballJoint;
-        addVertex(data: NodeHaxballVertexParams): void;
-        addSegment(data: NodeHaxballSegmentParams): void;
-        addGoal(data: NodeHaxballGoalParams): void;
-        addPlane(data: NodeHaxballPlaneParams): void;
-        addDisc(data: NodeHaxballDiscParams): void;
-        addJoint(data: NodeHaxballJointParams): void;
-        addSpawnPoint(data: NodeHaxballSpawnPointParams): void;
-        addPlayer(data: NodeHaxballAddPlayerParams): void;
-        findVertexIndicesOfSegmentObj(segment: NodeHaxballSegment): number[];
-        findVertexIndicesOfSegment(segmentIndex: number): number[] | null;
-        updateVertex(index: number, data: NodeHaxballUpdateVertexParams): void;
-        updateSegment(
-            index: number,
-            data: NodeHaxballUpdateSegmentParams,
-        ): void;
-        updateGoal(index: number, data: NodeHaxballUpdateGoalParams): void;
-        updatePlane(index: number, data: NodeHaxballUpdatePlaneParams): void;
-        updateDisc(index: number, data: NodeHaxballUpdateDiscParams): void;
-        updateDiscObj(
-            disc: NodeHaxballDisc,
-            data: NodeHaxballUpdateDiscParams,
-        ): void;
-        updateJoint(index: number, data: NodeHaxballUpdateJointParams): void;
-        updateSpawnPoint(
-            index: number,
-            team: NodeHaxballTeamName,
-            data: NodeHaxballUpdateSpawnPointParams,
-        ): void;
-        updatePlayer(
-            playerId: number,
-            data: NodeHaxballUpdatePlayerParams,
-        ): void;
-        removeVertex(index: number): void;
-        removeSegment(index: number): void;
-        removeGoal(index: number): void;
-        removePlane(index: number): void;
-        removeDisc(index: number): void;
-        removeJoint(index: number): void;
-        removeSpawnPoint(index: number, team: NodeHaxballTeamName): void;
-        removePlayer(playerId: number): void;
-        updateStadiumPlayerPhysics(
-            data: NodeHaxballUpdateStadiumPlayerPhysicsParams,
-        ): void;
-        updateStadiumBg(data: NodeHaxballUpdateStadiumBgParams): void;
-        updateStadiumGeneral(
-            data: NodeHaxballUpdateStadiumGeneralParams,
-        ): void;
         fakePlayerJoin(
             id: number,
             name: string,

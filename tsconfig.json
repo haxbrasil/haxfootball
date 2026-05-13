@@ -14,11 +14,10 @@
         "isolatedModules": true,
         "esModuleInterop": true,
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "skipLibCheck": true,
         "allowJs": true,
         "noEmit": true,
-        "baseUrl": ".",
         "paths": {
             "@runtime/*": ["./src/runtime/*"],
             "@core/*": ["./src/core/*"],
