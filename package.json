@@ -12,7 +12,7 @@
     },
     "scripts": {
         "start:node": "node ./dist/environments/node.js",
-        "dev:node": "babel-node --extensions \".ts,.tsx\" ./src/environments/node.ts",
+        "dev:node": "DEBUG=true babel-node --extensions \".ts,.tsx\" ./src/environments/node.ts",
         "build": "babel ./src --extensions \".ts,.tsx\" --out-dir ./dist --copy-files",
         "i18n:extract": "lingui extract",
         "i18n:compile": "lingui compile",

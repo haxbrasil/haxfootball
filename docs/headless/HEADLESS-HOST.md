@@ -1,659 +1,774 @@
-# HaxBall Headless Host
+# HaxBall Headless Host API
 
-The headless room host is useful if you want to run an unmanned haxball host on a vps.
-It doesn't draw or play any sounds which makes it a lot more lightweight.
-It is only controllable through a javascript API.
+The headless host lets server code create and control a HaxBall room without a browser UI. The main entrypoint is `HBInit(config)`, which returns a `RoomObject` used to change room settings, move players, inspect game state, send messages, and subscribe to room events.
 
-You can load the headless host [here](https://html5.haxball.com/headless)
+Most methods that change room state are applied asynchronously by the room. If code changes state and immediately reads it back, the read may still show the previous state. Use callbacks or a later game tick when you need the confirmed state.
 
-# Connectivity warning
+## Creating a Room
 
-If you are hosting on a VPS using Chrome version 78 or greater it is required to disable the Local IP WebRTC Anonymization feature for the host to work.
-
-Run chrome with the command flag `--disable-features=WebRtcHideLocalIpsWithMdns` to disable the feature.
-
-# API
-
-When haxball headless host is done loading it will set `window.HBInit` and call the function `window.onHBLoaded`
-
-**Note:** All of the API functions that modify the game's state will execute asynchronously. This means that if you move a player using the roomObject.setPlayerTeam method and immediately after you call roomObject.getPlayerList, the player list obtained will show the player's original team and not the modified one.
-
-### `HBInit(roomConfig : RoomConfigObject) : RoomObject`
-
-Use this function to initialize the room, it returns the room object used to control the room.
-
-After calling this function a recaptcha challenge will appear, after passing the recaptcha the room link will appear on the page.
-
-Example:
-
-```js
-var room = HBInit({
-    roomName: "My room",
-    maxPlayers: 16,
-    noPlayer: true, // Remove host player (recommended!)
+```ts
+const room = HBInit({
+  roomName: "HaxFootball",
+  maxPlayers: 30,
+  public: true,
+  noPlayer: true,
+  token: process.env.TOKEN,
 });
-room.setDefaultStadium("Big");
-room.setScoreLimit(5);
-room.setTimeLimit(0);
 
-// If there are no admins left in the room give admin to one of the remaining players.
-function updateAdmins() {
-    // Get all players
-    var players = room.getPlayerList();
-    if (players.length == 0) return; // No players left, do nothing.
-    if (players.find((player) => player.admin) != null) return; // There's an admin left so do nothing.
-    room.setPlayerAdmin(players[0].id, true); // Give admin to the first non admin player in the list
+room.onRoomLink = (link) => {
+  console.log(link);
+};
+```
+
+`HBInit(config)` starts opening the room and returns the room controller immediately. `onRoomLink` is called when the playable room link is available.
+
+### RoomConfigObject
+
+```ts
+interface RoomConfigObject {
+  roomName: string;
+  playerName?: string;
+  password?: string;
+  maxPlayers: number;
+  public?: boolean;
+  geo?: { code: string; lat: number; lon: number };
+  token?: string;
+  noPlayer?: boolean;
+  proxy?: string;
 }
-
-room.onPlayerJoin = function (player) {
-    updateAdmins();
-};
-
-room.onPlayerLeave = function (player) {
-    updateAdmins();
-};
 ```
 
----
+`roomName` is the room name shown to players. `playerName` is the host player's name when `noPlayer` is not enabled.
 
-## RoomConfigObject
+`password` sets the join password. Omit it or set it to `null` later with `setPassword(null)` to run without a password.
 
-RoomConfig is passed to HBInit to configure the room, all values are optional.
+`maxPlayers` is the normal room player limit. `public` controls whether the room appears in the public room list.
 
-### `roomName : string`
+`geo` overrides the room location shown in the room list. Use a country code and latitude/longitude values.
 
-The name for the room.
+`token` is the headless token used to create the room. `noPlayer` creates the room without a host player in the player list. `proxy` routes the room connection through an HTTPS proxy.
 
-### `playerName : string`
+The returned room may also expose these creation helpers:
 
-The name for the host player.
+```ts
+room.cancel?.();
+room.useRecaptchaToken?.("token");
+```
 
-### `password : string`
+`cancel()` cancels room creation while the room is opening, or leaves the room after it has opened. `useRecaptchaToken(token)` supplies a recaptcha token to an opening room.
 
-The password for the room (no password if ommited).
+## Chat and Announcements
 
-### `maxPlayers : int`
+```ts
+room.sendChat(message, targetId?);
+```
 
-Max number of players the room accepts.
+Sends a normal chat message from the host. If `targetId` is omitted, the message is sent to everyone. If `targetId` is provided, only that player receives it.
 
-### `public : bool`
+```ts
+room.sendAnnouncement(message, targetId?, color?, style?, sound?);
+```
 
-If true the room will appear in the room list.
+Sends a room announcement. Announcements work even when the room has no host player and support longer text than normal chat. `color` is either a numeric RGB value such as `0xff0000` or a supported color string. `style` may be `"normal"`, `"bold"`, `"italic"`, `"small"`, `"small-bold"`, or `"small-italic"`. `sound` may be `0` for no sound, `1` for chat sound, or `2` for notification sound.
 
-### `geo : {"code": string, "lat" : float, "lon" : float}`
+## Player Management
 
-GeoLocation override for the room.
+```ts
+room.setPlayerAdmin(playerId, admin);
+```
 
-### `token : String`
+Grants or removes admin rights for a player.
 
-Can be used to skip the recaptcha by setting it to a token that can be obtained [here](https://www.haxball.com/headlesstoken)
+```ts
+room.setPlayerTeam(playerId, team);
+```
 
-These tokens will expire after a few minutes.
+Moves a player to spectators, red, or blue. Team values are `0` for spectators, `1` for red, and `2` for blue.
 
-### `noPlayer : Bool`
+```ts
+room.kickPlayer(playerId, reason, ban);
+```
 
-If set to true the room player list will be empty, the playerName setting will be ignored.
+Kicks a player from the room. If `ban` is `true`, the player is also banned. `reason` is shown to the kicked player.
 
-Default value is false for backwards compatibility reasons but it's recommended to set this to true.
+```ts
+room.reorderPlayers(playerIdList, moveToTop);
+```
 
-**Warning! events will have null as the byPlayer argument when the event is caused by the host, so make sure to check for null values!**
+Reorders players in the room list. The players in `playerIdList` are removed from their current positions and inserted in that order. If `moveToTop` is `true`, they are inserted at the top; otherwise they are inserted at the bottom.
 
----
+```ts
+room.setPlayerAvatar(playerId, avatar);
+```
 
-## RoomObject
+Overrides a player's avatar. Passing `null` clears the room override and lets the player's own avatar show again.
 
-RoomObject is the main interface which lets you control the room and listen to it's events
+```ts
+room.setPlayerIdentity(playerId, data, targetId?);
+```
 
-### `sendChat`
+Sends identity data for a player. If `targetId` is provided, only that recipient gets the update.
 
-`sendChat(message : string, targetId? : Int) : void`
+## Bans
 
-Sends a chat message using the host player
+```ts
+room.clearBan(playerId);
+```
 
-If targetId is null or undefined the message is sent to all players. If targetId is defined the message is sent only to the player with a matching id.
+Clears the ban associated with a player id.
 
-### `setPlayerAdmin`
+```ts
+room.clearBans();
+```
 
-`setPlayerAdmin(playerID : int, admin : bool) : void`
+Clears all room bans.
 
-Changes the admin status of the specified player
+```ts
+room.addPlayerBan(playerId);
+```
 
-### `setPlayerTeam`
+Adds a ban for the current connection/auth information of a player and returns the ban entry id, or `null` if the ban could not be created.
 
-`setPlayerTeam(playerID : int, team : int) : void`
+```ts
+room.addIpBan(...ips);
+```
 
-Moves the specified player to a team
+Adds one or more IP bans. Each argument can be an IP string or an IP range object. Returns one ban entry id per argument.
 
-### `kickPlayer`
+```ts
+room.addAuthBan(...auths);
+```
 
-`kickPlayer(playerID : int, reason : string, ban : bool) : void`
+Adds one or more auth bans. Returns one ban entry id per auth.
 
-Kicks the specified player from the room
+```ts
+room.removeBan(id);
+```
 
-### `clearBan`
+Removes a ban by ban entry id. Returns whether a ban was removed.
 
-`clearBan(playerId : int) : void`
+## Room Settings
 
-Clears the ban for a playerId that belonged to a player that was previously banned.
+```ts
+room.setScoreLimit(limit);
+```
 
-### `clearBans`
+Sets the score limit. If a game is already running, the change may not apply until the game is stopped.
 
-`clearBans() : void`
+```ts
+room.setTimeLimit(limit);
+```
 
-Clears the list of banned players.
+Sets the time limit in minutes. If a game is already running, the change may not apply until the game is stopped.
 
-### `setScoreLimit`
+```ts
+room.setTeamsLock(locked);
+```
 
-`setScoreLimit(limit : int) : void`
+Enables or disables team lock. When teams are locked, players cannot move themselves between teams unless an admin moves them.
 
-Sets the score limit of the room
+```ts
+room.setTeamColors(team, angle, textColor, colors);
+```
 
-If a game is in progress this method does nothing.
+Sets a team's shirt colors. `team` must be red or blue. `angle` controls stripe angle, `textColor` controls number/name color, and `colors` is the list of shirt colors as numeric RGB values.
 
-### `setTimeLimit`
+```ts
+room.setPassword(password);
+```
 
-`setTimeLimit(limitInMinutes : int) : void`
+Changes the room password. Pass `null` to remove the password.
 
-Sets the time limit of the room. The limit must be specified in number of minutes.
+```ts
+room.setRequireRecaptcha(required);
+```
 
-If a game is in progress this method does nothing.
+Controls whether joining players must pass recaptcha.
 
-### `setCustomStadium`
+```ts
+room.setKickRateLimit(min, rate, burst);
+```
 
-`setCustomStadium(stadiumFileContents : string) : void`
+Sets the kick rate limiter. `min` is the minimum number of game ticks between kicks. `rate` controls how quickly saved kicks recover. `burst` controls how many extra kicks can be saved.
 
-Parses the stadiumFileContents as a .hbs stadium file and sets it as the selected stadium.
+```ts
+room.setProperties(properties);
+```
 
-There must not be a game in progress, If a game is in progress this method does nothing
+Updates multiple room properties at once. Supported fields include room name, password, geo, current player count, maximum player count, fake password state, unlimited player count state, and public room-list visibility.
 
-See example [here](https://github.com/haxball/haxball-issues/blob/master/headless/examples/setCustomStadium.js).
+```ts
+room.setHandicap(handicap);
+```
 
-### `setDefaultStadium`
+Sets the room handicap value. Handicap affects network delay compensation for players.
 
-`setDefaultStadium(stadiumName : string) : void`
+```ts
+room.setUnlimitedPlayerCount(on);
+```
 
-Sets the selected stadium to one of the default stadiums. The name must match exactly (case sensitive)
+Allows or disallows player counts above the configured room maximum.
 
-There must not be a game in progress, If a game is in progress this method does nothing
+```ts
+room.setFakePassword(fakePassword);
+```
 
-### `setTeamsLock`
+Controls the password indicator shown for the room without changing the real password. Pass `true`, `false`, or `null` to restore the normal indicator.
 
-`setTeamsLock(locked : bool) : void`
+## Stadium and Game Control
 
-Sets the teams lock. When teams are locked players are not able to change team unless they are moved by an admin.
+```ts
+room.setCustomStadium(stadiumFileContents);
+```
 
-### `setTeamColors`
+Loads a custom stadium from `.hbs` file contents. The game must be stopped for the change to apply.
 
-`setTeamColors(team : TeamID, angle : float, textColor : int, colors : []int) : void`
+```ts
+room.setDefaultStadium(stadiumName);
+```
 
-Sets the colors of a team.
+Selects one of HaxBall's built-in stadiums by exact name. The game must be stopped for the change to apply.
 
-Colors are represented as an integer, for example a pure red color is `0xFF0000`.
+```ts
+room.setCurrentStadium(stadium);
+```
 
-### `startGame`
+Sets the current stadium from a parsed stadium object. Use this when code already has a stadium object instead of raw `.hbs` text.
 
-`startGame() : void`
+```ts
+room.startGame();
+room.stopGame();
+```
 
-Starts the game, if a game is already in progress this method does nothing
+Starts or stops the current game. Calling `startGame()` while a game is running, or `stopGame()` while no game is running, has no effect.
 
-### `stopGame`
+```ts
+room.pauseGame(pauseState);
+```
 
-`stopGame() : void`
+Pauses or unpauses the game.
 
-Stops the game, if no game is in progress this method does nothing
+```ts
+room.isGamePaused();
+```
 
-### `pauseGame`
+Returns whether the current game is paused.
 
-`pauseGame(pauseState : bool)`
+```ts
+room.autoTeams();
+room.randTeams();
+```
 
-Sets the pause state of the game. true = paused and false = unpaused
+`autoTeams()` assigns players to teams using the room's automatic team balancer. `randTeams()` randomly distributes players between teams.
 
-### `getPlayer`
+```ts
+room.resetTeam(teamId);
+room.resetTeams();
+```
 
-`getPlayer(playerId : Int) : PlayerObject`
+Moves players from a team, or from all teams, back to spectators.
 
-Returns the player with the specified id. Returns null if the player doesn't exist.
+## Room Lifecycle
 
-### `getPlayerList`
+```ts
+room.leave();
+```
 
-`getPlayerList() : PlayerObject[]`
+Leaves and closes the room.
 
-Returns the current list of players
+```ts
+room.setConfig(config);
+room.mixConfig(config);
+```
 
-### `getScores`
+Replaces or merges room configuration used by the host runtime. `setConfig` replaces the active configuration object. `mixConfig` applies partial changes over the current configuration.
 
-`getScores() : ScoresObject`
+```ts
+room.takeSnapshot();
+```
 
-If a game is in progress it returns the current score information. Otherwise it returns null
+Returns an object representing the current room state. Use it for diagnostics, state transfer, or debugging tools.
 
-### `getBallPosition`
+## Reading Game State
 
-`getBallPosition() : {"x": float, "y": float}`
+```ts
+room.getPlayer(playerId);
+```
 
-Returns the ball's position in the field or null if no game is in progress.
+Returns the player with the given id, or `null` if that player is not in the room.
 
-### `startRecording`
+```ts
+room.getPlayerList();
+```
 
-`startRecording() : void`
+Returns the current list of players.
 
-Starts recording of a haxball replay.
+```ts
+room.getScores();
+```
 
-Don't forget to call stop recording or it will cause a memory leak.
+Returns current score information when a game is running, or `null` when there is no active game.
 
-### `stopRecording`
+```ts
+room.getBallPosition();
+```
 
-`stopRecording() : Uint8Array`
+Returns the ball position as `{ x, y }`, or `null` when there is no active game.
 
-Stops the recording previously started with startRecording and returns the replay file contents as a Uint8Array.
+```ts
+room.getBall(extrapolated?);
+room.getDiscs(extrapolated?);
+room.getDisc(discId, extrapolated?);
+room.getPlayerDisc(playerId, extrapolated?);
+room.getPlayerDisc_exp(playerId);
+```
 
-Returns null if recording was not started or had already been stopped.
+Reads live disc objects. `getBall()` returns the ball disc. `getDiscs()` returns all discs. `getDisc(discId)` returns one disc. `getPlayerDisc(playerId)` returns the disc controlled by a player. When `extrapolated` is `true`, the returned object uses extrapolated positions. `getPlayerDisc_exp(playerId)` returns the extrapolated player disc directly.
 
-### `setPassword`
+```ts
+room.extrapolate(milliseconds, ignoreMultipleCalls?);
+```
 
-`setPassword(pass : string) : void`
+Advances a predicted copy of the room state by the requested number of milliseconds and returns the extrapolated state object.
 
-Changes the password of the room, if pass is null the password will be cleared.
+## Disc Properties
 
-### `setRequireRecaptcha`
+```ts
+room.setDiscProperties(discIndex, properties);
+```
 
-`setRequireRecaptcha(required : bool) : void`
+Changes properties of a disc. Omitted or `null` properties are left unchanged. This can move discs, change speed, gravity, radius, damping, color, collision mask, or collision group.
 
-Activates or deactivates the recaptcha requirement to join the room.
+```ts
+room.getDiscProperties(discIndex);
+```
 
-### `reorderPlayers`
+Returns the properties of a disc, or `null` if the disc index does not exist.
 
-`reorderPlayers( playerIdList : Array<Int>, moveToTop : Bool) : void`
+```ts
+room.setPlayerDiscProperties(playerId, properties);
+```
 
-First all players listed are removed, then they are reinserted in the same order they appear in the playerIdList.
+Changes properties of the disc controlled by a player.
 
-If moveToTop is true players are inserted at the top of the list, otherwise they are inserted at the bottom of the list.
+```ts
+room.getPlayerDiscProperties(playerId);
+```
 
-### `sendAnnouncement`
+Returns the disc properties for the disc controlled by a player, or `null` if the player does not have a disc.
 
-`sendAnnouncement(msg:String, targetId?:Int, color?:Int, style?:String, sound?:Int)`
+```ts
+room.getDiscCount();
+```
 
-Sends a host announcement with msg as contents. Unlike sendChat, announcements will work without a host player and has a larger limit on the number of characters.
+Returns the total number of discs in the current stadium, including the ball and player discs.
 
-If targetId is null or undefined the message is sent to all players, otherwise it's sent only to the player with matching targetId.
+## Host Player Controls
 
-color will set the color of the announcement text, it's encoded as an integer (0xFF0000 is red, 0x00FF00 is green, 0x0000FF is blue).
+These methods control the host player when the room has one.
 
-If color is null or undefined the text will use the default chat color.
+```ts
+room.setAvatar(avatar);
+```
 
-style will set the style of the announcement text, it must be one of the following strings: `"normal","bold","italic", "small", "small-bold", "small-italic"`
+Changes the host player's avatar.
 
-If style is null or undefined `"normal"` style will be used.
+```ts
+room.setChatIndicatorActive(active);
+```
 
-If sound is set to 0 the announcement will produce no sound. If sound is set to 1 the announcement will produce a normal chat sound. If set to 2 it will produce a notification sound.
+Shows or hides the host player's typing indicator.
 
-### `setKickRateLimit`
+```ts
+room.getKeyState();
+```
 
-`setKickRateLimit(min : Int = 2, rate : Int = 0, burst : Int = 0)`
+Returns the current host player input bitmask.
 
-Sets the room's kick rate limits.
+```ts
+room.setKeyState(state, instant?);
+```
 
-`min` is the minimum number of logic-frames between two kicks. It is impossible to kick faster than this.
+Sets the host player input bitmask. If `instant` is true, the state is applied immediately.
 
-`rate` works like `min` but lets players save up extra kicks to use them later depending on the value of burst.
+```ts
+room.setSync(value);
+```
 
-`burst` determines how many extra kicks the player is able to save up.
+Enables or disables sync for the host player.
 
-### `setPlayerAvatar`
+```ts
+room.changeTeam(teamId);
+```
 
-`setPlayerAvatar( playerId : Int, avatar : String )`
+Moves the host player to spectators, red, or blue.
 
-Overrides the avatar of the target player.
+## Custom Events and Operations
 
-If avatar is set to null the override is cleared and the player will be able to use his own avatar again.
+```ts
+room.sendCustomEvent(type, data, targetId?);
+```
 
-### `setDiscProperties`
+Sends a custom JSON data event to players. If `targetId` is omitted, the event is sent to everyone.
 
-`setDiscProperties( discIndex : Int, properties : DiscPropertiesObject )`
+```ts
+room.sendBinaryCustomEvent(type, data, targetId?);
+```
 
-Sets properties of the target disc.
+Sends a custom binary event. `data` must be a `Uint8Array`.
 
-Properties that are null or undefined will not be set and therefor will preserve whatever value the disc already had.
+```ts
+room.executeEvent(event, byId);
+```
 
-For example `room.setDiscProperties(0, {x: 0, y: 0});` will set the position of disc 0 to <0,0> while leaving any other value intact.
+Executes a room operation object as if it was sent by the player id in `byId`.
 
-### `getDiscProperties`
+```ts
+room.executeEventWithTarget(event, targetId);
+```
 
-`getDiscProperties( discIndex : Int ) : DiscPropertiesObject`
+Executes a room operation object for a specific target player.
 
-Gets the properties of the disc at discIndex. Returns null if discIndex is out of bounds.
+```ts
+room.clearEvents();
+```
 
-### `setPlayerDiscProperties`
+Clears queued room operations that have not been processed yet.
 
-`setPlayerDiscProperties( playerId : Int, properties : DiscPropertiesObject )`
+## Recording, Streaming, Plugins, and Rendering
 
-Same as setDiscProperties but targets the disc belonging to a player with the given Id.
+```ts
+room.startRecording();
+room.stopRecording();
+```
 
-### `getPlayerDiscProperties`
+Starts and stops replay recording. `stopRecording()` returns replay bytes as a `Uint8Array`, or `null` if recording was not active.
 
-`getPlayerDiscProperties( playerId : Int ) : DiscPropertiesObject`
+```ts
+room.startStreaming(params);
+room.stopStreaming();
+```
 
-Same as getDiscProperties but targets the disc belonging to a player with the given Id.
+Starts or stops room-state streaming. `params` supplies callbacks for client count updates and emitted binary data.
 
-### `getDiscCount`
+```ts
+room.isRecording();
+```
 
-`getDiscCount()`
+Returns whether recording is currently active.
 
-Gets the number of discs in the game including the ball and player discs.
+```ts
+room.setPluginActive(pluginName, active);
+```
 
-### `CollisionFlags`
+Enables or disables a registered plugin by name.
 
-`CollisionFlags : CollisionFlagsObject`
+```ts
+room.addPlugin(plugin);
+room.movePlugin(pluginIndex, newIndex);
+room.updatePlugin(pluginIndex, plugin);
+room.removePlugin(plugin);
+```
 
-Object filled with the collision flags constants that compose the cMask and cGroup disc properties.
+Adds, reorders, replaces, or removes plugins used by the room runtime.
 
-[Read more about collision flags here](https://github.com/haxball/haxball-issues/wiki/Collision-Flags).
+```ts
+room.setRenderer(renderer);
+```
 
-Example usage:
+Sets the renderer object used by the room runtime.
 
-```js
-// Check if disc 4 belongs to collision group "ball":
-var discProps = room.getDiscProperties(4);
-var hasBallFlag = (discProps.cGroup & room.CollisionFlags.ball) != 0;
+```ts
+room.addLibrary(library);
+room.moveLibrary(libraryIndex, newIndex);
+room.updateLibrary(libraryIndex, library);
+room.removeLibrary(library);
+```
 
-// Add "wall" to the collision mask of disc 5 without changing any other of it's flags:
-var discProps = room.getDiscProperties(5);
+Adds, reorders, replaces, or removes support libraries used by the room runtime.
+
+## Synthetic Player Operations
+
+These methods create room operations programmatically. They can trigger the same callbacks as player actions, so pass the correct `byId` for authorization and auditing logic.
+
+```ts
+room.fakePlayerJoin(id, name, flag, avatar, conn, auth);
+```
+
+Creates a synthetic player join operation.
+
+```ts
+room.fakePlayerLeave(id);
+```
+
+Creates a synthetic player leave operation and returns the removed player identity data.
+
+```ts
+room.fakeSendPlayerInput(input, byId);
+```
+
+Submits an input bitmask for a player.
+
+```ts
+room.fakeSendPlayerChat(message, byId);
+```
+
+Submits a chat message as a player.
+
+```ts
+room.fakeSetPlayerChatIndicator(value, byId);
+```
+
+Sets a player's typing indicator.
+
+```ts
+room.fakeSetPlayerAvatar(value, byId);
+```
+
+Sets a player's avatar.
+
+```ts
+room.fakeSetPlayerAdmin(playerId, value, byId);
+```
+
+Changes a player's admin state as if requested by `byId`.
+
+```ts
+room.fakeSetPlayerSync(value, byId);
+```
+
+Changes a player's sync state.
+
+```ts
+room.fakeSetStadium(stadium, byId);
+```
+
+Sets the current stadium as if requested by `byId`.
+
+```ts
+room.fakeStartGame(byId);
+room.fakeStopGame(byId);
+room.fakeSetGamePaused(value, byId);
+```
+
+Starts, stops, pauses, or unpauses the game as if requested by `byId`.
+
+```ts
+room.fakeSetScoreLimit(value, byId);
+room.fakeSetTimeLimit(value, byId);
+room.fakeSetTeamsLock(value, byId);
+```
+
+Changes score limit, time limit, or team lock as if requested by `byId`.
+
+```ts
+room.fakeAutoTeams(byId);
+room.fakeSetPlayerTeam(playerId, teamId, byId);
+```
+
+Runs auto-teams or moves a player to a team as if requested by `byId`.
+
+```ts
+room.fakeSetKickRateLimit(min, rate, burst, byId);
+```
+
+Changes the kick rate limit as if requested by `byId`.
+
+```ts
+room.fakeSetTeamColors(teamId, angle, colors, byId);
+```
+
+Changes a team's colors as if requested by `byId`.
+
+```ts
+room.fakeKickPlayer(playerId, reason, ban, byId);
+```
+
+Kicks or bans a player as if requested by `byId`.
+
+## Events
+
+Assign callbacks on the room object to observe room activity.
+
+```ts
+room.onPlayerJoin = (player) => {};
+```
+
+Called when a player joins.
+
+```ts
+room.onPlayerLeave = (player) => {};
+```
+
+Called when a player leaves.
+
+```ts
+room.onTeamVictory = (scores) => {};
+```
+
+Called when a team wins because the score or time limit was reached.
+
+```ts
+room.onPlayerChat = (player, message) => {};
+```
+
+Called when a player sends a chat message. Return `false` to block the message.
+
+```ts
+room.onPlayerBallKick = (player) => {};
+```
+
+Called when a player kicks the ball.
+
+```ts
+room.onTeamGoal = (team) => {};
+```
+
+Called when a team scores.
+
+```ts
+room.onGameStart = (byPlayer) => {};
+room.onGameStop = (byPlayer) => {};
+```
+
+Called when a game starts or stops. `byPlayer` is the player who caused the event, or `null` for host-originated changes.
+
+```ts
+room.onPlayerAdminChange = (changedPlayer, byPlayer) => {};
+room.onPlayerTeamChange = (changedPlayer, byPlayer) => {};
+```
+
+Called when a player's admin status or team changes.
+
+```ts
+room.onBeforeKick = (player, reason, ban, byPlayer) => {};
+```
+
+Called before a kick or ban is applied. Return `false` to block the operation.
+
+```ts
+room.onPlayerKicked = (kickedPlayer, reason, ban, byPlayer) => {};
+```
+
+Called after a player is kicked or banned.
+
+```ts
+room.onGameTick = () => {};
+```
+
+Called once per game tick while the game is running and not paused.
+
+```ts
+room.onGamePause = (byPlayer) => {};
+room.onGameUnpause = (byPlayer) => {};
+```
+
+Called when the game is paused or unpaused.
+
+```ts
+room.onPositionsReset = () => {};
+```
+
+Called when player and ball positions reset after a goal.
+
+```ts
+room.onPlayerActivity = (player) => {};
+```
+
+Called when a player provides input or otherwise shows activity.
+
+```ts
+room.onStadiumChange = (newStadiumName, byPlayer) => {};
+```
+
+Called when the current stadium changes.
+
+```ts
+room.onRoomLink = (link) => {};
+```
+
+Called when the room link is available.
+
+```ts
+room.onKickRateLimitSet = (min, rate, burst, byPlayer) => {};
+```
+
+Called when the kick rate limit changes.
+
+```ts
+room.onTeamsLockChange = (locked, byPlayer) => {};
+```
+
+Called when team lock is enabled or disabled.
+
+## Data Shapes
+
+```ts
+interface PlayerObject {
+  id: number;
+  name: string;
+  team: 0 | 1 | 2;
+  admin: boolean;
+  position: { x: number; y: number } | null;
+  conn: string;
+  auth?: string;
+  ip: string;
+}
+```
+
+`id` is stable for the player's stay in the room. `conn` identifies the connection. `auth` is the player's public auth id when available. `ip` is the player IP address when available to the host. `position` is `null` when the player does not currently have an active disc.
+
+```ts
+interface ScoresObject {
+  red: number;
+  blue: number;
+  time: number;
+  scoreLimit: number;
+  timeLimit: number;
+}
+```
+
+`time` is elapsed game time in seconds. It does not advance while the game is paused.
+
+```ts
+interface DiscPropertiesObject {
+  x?: number | null;
+  y?: number | null;
+  xspeed?: number | null;
+  yspeed?: number | null;
+  xgravity?: number | null;
+  ygravity?: number | null;
+  radius?: number | null;
+  bCoeff?: number | null;
+  invMass?: number | null;
+  damping?: number | null;
+  color?: number | null;
+  cMask?: number | null;
+  cGroup?: number | null;
+}
+```
+
+Disc properties use stadium physics names. `cMask` and `cGroup` are collision bit fields. Use `room.CollisionFlags` to read or compose collision values.
+
+```ts
+type TeamID = 0 | 1 | 2;
+```
+
+`0` is spectators, `1` is red, and `2` is blue.
+
+## CollisionFlags
+
+```ts
+const cf = room.CollisionFlags;
+```
+
+`CollisionFlags` contains helper constants for disc collision groups and masks: `all`, `ball`, `red`, `blue`, `redKO`, `blueKO`, `wall`, `kick`, `score`, `c0`, `c1`, `c2`, and `c3`.
+
+```ts
+const disc = room.getDiscProperties(4);
+const hasBallFlag = (disc.cGroup & room.CollisionFlags.ball) !== 0;
+
 room.setDiscProperties(5, {
-    cMask: discProps.cMask | room.CollisionFlags.wall,
+  cMask: disc.cMask | room.CollisionFlags.wall,
 });
-```
-
-### `onPlayerJoin`
-
-`onPlayerJoin(player : PlayerObject) : void`
-
-Event called when a new player joins the room.
-
-### `onPlayerLeave`
-
-`onPlayerLeave(player : PlayerObject) : void`
-
-Event called when a player leaves the room.
-
-### `onTeamVictory`
-
-`onTeamVictory(scores : ScoresObject) : void`
-
-Event called when a team wins.
-
-### `onPlayerChat`
-
-`onPlayerChat(player : PlayerObject, message : String) : bool`
-
-Event called when a player sends a chat message.
-
-The event function can return `false` in order to filter the chat message. This prevents the chat message from reaching other players in the room.
-
-### `onPlayerBallKick`
-
-`onPlayerBallKick(player : PlayerObject) : void`
-
-Event called when a player kicks the ball.
-
-### `onTeamGoal`
-
-`onTeamGoal(team : TeamID) : void`
-
-Event called when a team scores a goal.
-
-### `onGameStart`
-
-`onGameStart(byPlayer : PlayerObject) : void`
-
-Event called when a game starts.
-
-`byPlayer` is the player which caused the event (can be null if the event wasn't caused by a player).
-
-### `onGameStop`
-
-`onGameStop(byPlayer : PlayerObject) : void`
-
-Event called when a game stops.
-
-`byPlayer` is the player which caused the event (can be null if the event wasn't caused by a player).
-
-### `onPlayerAdminChange`
-
-`onPlayerAdminChange(changedPlayer : PlayerObject, byPlayer : PlayerObject) : void`
-
-Event called when a player's admin rights are changed.
-
-`byPlayer` is the player which caused the event (can be null if the event wasn't caused by a player).
-
-### `onPlayerTeamChange`
-
-`onPlayerTeamChange(changedPlayer : PlayerObject, byPlayer : PlayerObject) : void`
-
-Event called when a player team is changed.
-
-`byPlayer` is the player which caused the event (can be null if the event wasn't caused by a player).
-
-### `onPlayerKicked`
-
-`onPlayerKicked(kickedPlayer : PlayerObject, reason : string, ban : bool, byPlayer : PlayerObject) : void`
-
-Event called when a player has been kicked from the room. This is always called after the onPlayerLeave event.
-
-`byPlayer` is the player which caused the event (can be null if the event wasn't caused by a player).
-
-### `onGameTick`
-
-`onGameTick() : void`
-
-Event called once for every game tick (happens 60 times per second). This is useful if you want to monitor the player and ball positions without missing any ticks.
-
-This event is not called if the game is paused or stopped.
-
-### `onGamePause`
-
-`onGamePause(byPlayer : PlayerObject) : void`
-
-Event called when the game is paused.
-
-### `onGameUnpause`
-
-`onGameUnpause(byPlayer : PlayerObject) : void`
-
-Event called when the game is unpaused.
-
-After this event there's a timer before the game is fully unpaused, to detect when the game has really resumed you can listen for the first onGameTick event after this event is called.
-
-### `onPositionsReset`
-
-`onPositionsReset() : void`
-
-Event called when the players and ball positions are reset after a goal happens.
-
-### `onPlayerActivity`
-
-`onPlayerActivity(player : PlayerObject) : void`
-
-Event called when a player gives signs of activity, such as pressing a key. This is useful for detecting inactive players.
-
-### `onStadiumChange`
-
-`(newStadiumName : string, byPlayer : PlayerObject ) : void`
-
-Event called when the stadium is changed.
-
-### `onRoomLink`
-
-`onRoomLink(url : string) : void`
-
-Event called when the room link is obtained.
-
-### `onKickRateLimitSet`
-
-`onKickRateLimitSet(min : Int, rate : Int, burst : Int, byPlayer : PlayerObject)`
-
-Event called when the kick rate is set.
-
-### `onTeamsLockChange`
-
-`onTeamsLockChange(locked: bool, byPlayer : PlayerObject)`
-
-Event called when the teams lock setting is changed.
-
----
-
-## PlayerObject
-
-PlayerObject holds information about a player
-
-### `id : int`
-
-The id of the player, each player that joins the room gets a unique id that will never change.
-
-### `name : string`
-
-The name of the player.
-
-### `team : TeamID`
-
-The team of the player.
-
-### `admin : bool`
-
-Whether the player has admin rights.
-
-### `position : {"x": float, "y": float}`
-
-The player's position in the field, if the player is not in the field the value will be null.
-
-### `auth : String | null`
-
-The player's public ID. Players can view their own ID's here: [https://www.haxball.com/playerauth](https://www.haxball.com/playerauth)
-
-The public ID is useful to validate that a player is who he claims to be, but can't be used to verify that a player isn't someone else. Which means it's useful for implementing user accounts, but not useful for implementing a banning system.
-
-Can be null if the ID validation fails.
-
-This property is only set in the RoomObject.onPlayerJoin event.
-
-### `conn : String`
-
-A string that uniquely identifies the player's connection, if two players join using the same network this string will be equal.
-
-This property is only set in the RoomObject.onPlayerJoin event.
-
----
-
-## ScoresObject
-
-ScoresObject holds information relevant to the current game scores
-
-### `red : int`
-
-The number of goals scored by the red team
-
-### `blue : int`
-
-The number of goals scored by the blue team
-
-### `time : float`
-
-The number of seconds elapsed (seconds don't advance while the game is paused)
-
-### `scoreLimit : int`
-
-The score limit for the game.
-
-### `timeLimit : float`
-
-The time limit for the game.
-
----
-
-## TeamID
-
-TeamID are int values:
-
-```
-Spectators: 0
-Red Team: 1
-Blue Team: 2
-```
-
----
-
-## DiscPropertiesObject
-
-DiscPropertiesObject holds information about a game physics disc.
-
-### `x : Float`
-
-The x coordinate of the disc's position
-
-### `y : Float`
-
-The y coordinate of the disc's position
-
-### `xspeed : Float`
-
-The x coordinate of the disc's speed vector
-
-### `yspeed : Float`
-
-The y coordinate of the disc's speed vector
-
-### `xgravity : Float`
-
-The x coordinate of the disc's gravity vector
-
-### `ygravity : Float`
-
-The y coordinate of the disc's gravity vector
-
-### `radius : Float`
-
-The disc's radius
-
-### `bCoeff : Float`
-
-The disc's bouncing coefficient
-
-### `invMass : Float`
-
-The inverse of the disc's mass
-
-### `damping : Float`
-
-The disc's damping factor.
-
-### `color : Int`
-
-The disc's color expressed as an integer (0xFF0000 is red, 0x00FF00 is green, 0x0000FF is blue, -1 is transparent)
-
-### `cMask : Int`
-
-The disc's collision mask (Represents what groups the disc can collide with)
-
-### `cGroup : Int`
-
-The disc's collision groups
-
----
-
-## CollisionFlagsObject
-
-CollisionFlagsObjects contains flag constants that are used as helpers for reading and writing collision flags.
-
-The flags are `ball`, `red`, `blue`, `redKO`, `blueKO`, `wall`, `all`, `kick`, `score`, `c0`, `c1`, `c2` and `c3`
-
-Example usage:
-
-```js
-var cf = room.CollisionFlags;
-
-// Check if disc 4 belongs to collision group "ball":
-var discProps = room.getDiscProperties(4);
-var hasBallFlag = (discProps.cGroup & cf.ball) != 0;
-
-// Add "wall" to the collision mask of disc 5 without changing any other of it's flags:
-var discProps = room.getDiscProperties(5);
-room.setDiscProperties(5, { cMask: discProps.cMask | cf.wall });
 ```
