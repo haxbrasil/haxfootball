@@ -179,6 +179,10 @@ declare global {
          */
         position: Position;
         /**
+         * Raw connection string reported by the HaxBall backend.
+         */
+        conn: string;
+        /**
          * The player's public ID. Players can view their own ID's here: https://www.haxball.com/playerauth
          *
          * The public ID is useful to validate that a player is who he claims to be, but can't be used to verify that a player isn't someone else. Which means it's useful for implementing user accounts, but not useful for implementing a banning system.
@@ -191,6 +195,316 @@ declare global {
          */
         ip: string;
     }
+
+    type NodeHaxballBanEntryId = number;
+
+    type NodeHaxballIPv4Range = { ip: number; mask: number };
+
+    type NodeHaxballIPv6Range = { ip: BigInt; mask: BigInt };
+
+    type NodeHaxballIpBanTarget =
+        | string
+        | NodeHaxballIPv4Range
+        | NodeHaxballIPv6Range;
+
+    type NodeHaxballSetRoomProperties = {
+        name?: string | null;
+        password?: string | null;
+        geo?: { lat?: number; lon?: number; flag?: string } | null;
+        playerCount?: number | null;
+        maxPlayerCount?: number | null;
+        fakePassword?: boolean | null;
+        unlimitedPlayerCount?: boolean;
+        showInRoomList?: boolean;
+    };
+
+    type NodeHaxballPoint = { x: number; y: number };
+
+    type NodeHaxballStadium = object;
+
+    type NodeHaxballVertex = {
+        id: number;
+        cGroup: number;
+        cMask: number;
+        bCoef: number;
+        pos: NodeHaxballPoint;
+    };
+
+    type NodeHaxballSegment = object;
+
+    type NodeHaxballGoal = object;
+
+    type NodeHaxballPlane = object;
+
+    type NodeHaxballDisc = {
+        pos: NodeHaxballPoint;
+        speed: NodeHaxballPoint;
+        gravity: NodeHaxballPoint;
+        radius: number;
+        bCoef: number;
+        invMass: number;
+        damping: number;
+        color: number;
+        cMask: number;
+        cGroup: number;
+    };
+
+    type NodeHaxballJoint = object;
+
+    type NodeHaxballHaxballEvent = object;
+
+    type NodeHaxballRoomConfig = object;
+
+    type NodeHaxballPlugin = object;
+
+    type NodeHaxballRenderer = object;
+
+    type NodeHaxballLibrary = object;
+
+    type NodeHaxballStartStreamingParams = {
+        immediate?: boolean;
+        onClientCount: (count: number) => void;
+        emitData: (data: Uint8Array) => void;
+    };
+
+    type NodeHaxballStartStreamingReturnValue = {
+        onOpen: () => void;
+        onDataReceived: (data: Uint8Array) => void;
+        interval: () => void;
+    };
+
+    type NodeHaxballCollisionFlagName =
+        | "ball"
+        | "red"
+        | "blue"
+        | "redKO"
+        | "blueKO"
+        | "wall"
+        | "kick"
+        | "score"
+        | "c0"
+        | "c1"
+        | "c2"
+        | "c3";
+
+    type NodeHaxballColor = string | [number, number, number];
+
+    type NodeHaxballTeamName = "red" | "blue";
+
+    type NodeHaxballPlayerTeamName = "spec" | "red" | "blue";
+
+    type NodeHaxballVertexParams = {
+        x: number;
+        y: number;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballSegmentParams = {
+        v0: number;
+        v1: number;
+        color?: NodeHaxballColor;
+        bias?: number;
+        curve?: number;
+        curveF?: number;
+        vis?: boolean;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballSegmentFromObjParams = {
+        v0: NodeHaxballVertex;
+        v1: NodeHaxballVertex;
+        color?: NodeHaxballColor;
+        bias?: number;
+        curve?: number;
+        curveF?: number;
+        vis?: boolean;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballGoalParams = {
+        p0: [number, number];
+        p1: [number, number];
+        team: NodeHaxballTeamName;
+    };
+
+    type NodeHaxballPlaneParams = {
+        normal: [number, number];
+        dist: number;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballDiscParams = {
+        pos: [number, number];
+        radius: number;
+        speed?: [number, number];
+        gravity?: [number, number];
+        invMass?: number;
+        damping?: number;
+        color?: NodeHaxballColor;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballJointParams = {
+        d0: number;
+        d1: number;
+        color?: NodeHaxballColor;
+        strength?: "rigid" | number;
+        length?: number | [number, number];
+    };
+
+    type NodeHaxballJointFromObjParams = {
+        d0: NodeHaxballDisc;
+        d1: NodeHaxballDisc;
+        color?: NodeHaxballColor;
+        strength?: "rigid" | number;
+        length?: number | [number, number];
+    };
+
+    type NodeHaxballSpawnPointParams = {
+        x: number;
+        y: number;
+        team: NodeHaxballTeamName;
+    };
+
+    type NodeHaxballAddPlayerParams = {
+        id: number;
+        name: string;
+        avatar: string;
+        flag: string;
+        team: NodeHaxballPlayerTeamName;
+        pos?: [number, number];
+        speed?: [number, number];
+        gravity?: [number, number];
+        radius?: number;
+        invMass?: number;
+        damping?: number;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballUpdateVertexParams = {
+        x?: number;
+        y?: number;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballUpdateSegmentParams = {
+        v0?: number;
+        v1?: number;
+        color?: NodeHaxballColor;
+        bias?: number;
+        curve?: number;
+        curveF?: number;
+        vis?: boolean;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballUpdateGoalParams = {
+        p0?: [number, number];
+        p1?: [number, number];
+        team?: NodeHaxballTeamName;
+    };
+
+    type NodeHaxballUpdatePlaneParams = {
+        normal?: [number, number];
+        dist?: number;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballUpdateDiscParams = {
+        pos?: [number, number];
+        radius?: number;
+        speed?: [number, number];
+        gravity?: [number, number];
+        invMass?: number;
+        damping?: number;
+        color?: NodeHaxballColor;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballUpdateJointParams = {
+        d0?: number;
+        d1?: number;
+        color?: NodeHaxballColor;
+        strength?: "rigid" | number;
+        length?: number | [number, number];
+    };
+
+    type NodeHaxballUpdateSpawnPointParams = {
+        x?: number;
+        y?: number;
+        team?: NodeHaxballTeamName;
+    };
+
+    type NodeHaxballUpdatePlayerParams = {
+        name?: string;
+        avatar?: string;
+        flag?: string;
+        team?: NodeHaxballPlayerTeamName;
+        pos?: [number, number];
+        speed?: [number, number];
+        gravity?: [number, number];
+        radius?: number;
+        invMass?: number;
+        damping?: number;
+        bCoef?: number;
+        cMask?: NodeHaxballCollisionFlagName[];
+        cGroup?: NodeHaxballCollisionFlagName[];
+    };
+
+    type NodeHaxballUpdateStadiumPlayerPhysicsParams = {
+        radius?: number;
+        gravity?: [number, number];
+        invMass?: number;
+        bCoef?: number;
+        cGroup?: NodeHaxballCollisionFlagName[];
+        damping?: number;
+        kickingDamping?: number;
+        acceleration?: number;
+        kickingAcceleration?: number;
+        kickStrength?: number;
+        kickback?: number;
+    };
+
+    type NodeHaxballUpdateStadiumBgParams = {
+        type?: 0 | 1 | 2;
+        width?: number;
+        height?: number;
+        kickOffRadius?: number;
+        cornerRadius?: number;
+        color?: NodeHaxballColor;
+        goalLine?: number;
+    };
+
+    type NodeHaxballUpdateStadiumGeneralParams = {
+        name?: string;
+        width?: number;
+        height?: number;
+        maxViewWidth?: number;
+        cameraFollow?: 0 | 1;
+        spawnDistance?: number;
+        kickOffReset?: boolean;
+        canBeStored?: boolean;
+    };
 
     /**
      * ScoresObject holds information relevant to the current game scores
@@ -308,7 +622,7 @@ declare global {
         wall: 32;
     };
 
-    type RoomObject = {
+    type LegacyHeadlessRoomObject = {
         /**
          * Object filled with the collision flags constants that compose the cMask and cGroup disc properties.
          *
@@ -403,7 +717,7 @@ declare global {
         /**
          * Sets the pause state of the game. true = paused and false = unpaused
          */
-        pauseGame(pauseState: boolean): void;
+        pauseGame(pauseState?: boolean): void;
         /**
          * Returns the player with the specified id. Returns null if the player doesn't exist.
          */
@@ -483,7 +797,11 @@ declare global {
          *
          * If avatar is set to null the override is cleared and the player will be able to use his own avatar again.
          */
-        setPlayerAvatar(playerId: number, avatar: string | null): void;
+        setPlayerAvatar(
+            playerId: number,
+            avatar: string | null,
+            headless?: boolean,
+        ): void;
         /**
          * Sets properties of the target disc.
          *
@@ -642,4 +960,199 @@ declare global {
          */
         onTeamsLockChange(locked: boolean, byPlayer: PlayerObject | null): void;
     };
+
+    type NodeHaxballRoomObject = {
+        leave(): void;
+        setProperties(properties: NodeHaxballSetRoomProperties): void;
+        setHandicap(handicap: number): void;
+        addPlayerBan(playerId: number): NodeHaxballBanEntryId | null;
+        addIpBan(
+            ...ips: NodeHaxballIpBanTarget[]
+        ): Array<NodeHaxballBanEntryId | null>;
+        addAuthBan(...auths: string[]): Array<NodeHaxballBanEntryId | null>;
+        removeBan(id: NodeHaxballBanEntryId): boolean;
+        executeEvent(event: NodeHaxballHaxballEvent, byId: number): void;
+        executeEventWithTarget(
+            event: NodeHaxballHaxballEvent,
+            targetId: number,
+        ): void;
+        clearEvents(): void;
+        setAvatar(avatar: string): void;
+        setChatIndicatorActive(active: boolean): void;
+        setUnlimitedPlayerCount(on: boolean): void;
+        setFakePassword(fakePassword: boolean | null): void;
+        sendCustomEvent(type: number, data: object, targetId?: number): void;
+        sendBinaryCustomEvent(
+            type: number,
+            data: Uint8Array,
+            targetId?: number,
+        ): void;
+        setPlayerIdentity(
+            playerId: number,
+            data: object,
+            targetId?: number,
+        ): void;
+        getKeyState(): number;
+        setKeyState(state: number, instant?: boolean): void;
+        isGamePaused(): boolean;
+        autoTeams(): void;
+        changeTeam(teamId: TeamID): void;
+        resetTeam(teamId: TeamID): void;
+        resetTeams(): void;
+        randTeams(): void;
+        setSync(value: boolean): void;
+        setCurrentStadium(stadium: NodeHaxballStadium): void;
+        getBall(extrapolated?: boolean): NodeHaxballDisc;
+        getDiscs(extrapolated?: boolean): NodeHaxballDisc[];
+        getDisc(discId: number, extrapolated?: boolean): NodeHaxballDisc;
+        getPlayerDisc(
+            playerId: number,
+            extrapolated?: boolean,
+        ): NodeHaxballDisc;
+        getPlayerDisc_exp(playerId: number): NodeHaxballDisc;
+        setPluginActive(name: string, active: boolean): void;
+        startStreaming(
+            params: NodeHaxballStartStreamingParams,
+        ): NodeHaxballStartStreamingReturnValue | null;
+        stopStreaming(): void;
+        isRecording(): boolean;
+        extrapolate(milliseconds: number, ignoreMultipleCalls?: boolean): object;
+        setConfig(roomConfig: NodeHaxballRoomConfig): void;
+        mixConfig(roomConfig: NodeHaxballRoomConfig): void;
+        addPlugin(plugin: NodeHaxballPlugin): void;
+        movePlugin(pluginIndex: number, newIndex: number): void;
+        updatePlugin(pluginIndex: number, plugin: NodeHaxballPlugin): void;
+        removePlugin(plugin: NodeHaxballPlugin): void;
+        setRenderer(renderer: NodeHaxballRenderer): void;
+        addLibrary(library: NodeHaxballLibrary): void;
+        moveLibrary(libraryIndex: number, newIndex: number): void;
+        updateLibrary(libraryIndex: number, library: NodeHaxballLibrary): void;
+        removeLibrary(library: NodeHaxballLibrary): void;
+        takeSnapshot(): object;
+        exportStadium(): object;
+        createVertex(data: NodeHaxballVertexParams): NodeHaxballVertex;
+        createSegment(data: NodeHaxballSegmentParams): NodeHaxballSegment;
+        createSegmentFromObj(
+            data: NodeHaxballSegmentFromObjParams,
+        ): NodeHaxballSegment;
+        createGoal(data: NodeHaxballGoalParams): NodeHaxballGoal;
+        createPlane(data: NodeHaxballPlaneParams): NodeHaxballPlane;
+        createDisc(data: NodeHaxballDiscParams): NodeHaxballDisc;
+        createJoint(data: NodeHaxballJointParams): NodeHaxballJoint;
+        createJointFromObj(
+            data: NodeHaxballJointFromObjParams,
+        ): NodeHaxballJoint;
+        addVertex(data: NodeHaxballVertexParams): void;
+        addSegment(data: NodeHaxballSegmentParams): void;
+        addGoal(data: NodeHaxballGoalParams): void;
+        addPlane(data: NodeHaxballPlaneParams): void;
+        addDisc(data: NodeHaxballDiscParams): void;
+        addJoint(data: NodeHaxballJointParams): void;
+        addSpawnPoint(data: NodeHaxballSpawnPointParams): void;
+        addPlayer(data: NodeHaxballAddPlayerParams): void;
+        findVertexIndicesOfSegmentObj(segment: NodeHaxballSegment): number[];
+        findVertexIndicesOfSegment(segmentIndex: number): number[] | null;
+        updateVertex(index: number, data: NodeHaxballUpdateVertexParams): void;
+        updateSegment(
+            index: number,
+            data: NodeHaxballUpdateSegmentParams,
+        ): void;
+        updateGoal(index: number, data: NodeHaxballUpdateGoalParams): void;
+        updatePlane(index: number, data: NodeHaxballUpdatePlaneParams): void;
+        updateDisc(index: number, data: NodeHaxballUpdateDiscParams): void;
+        updateDiscObj(
+            disc: NodeHaxballDisc,
+            data: NodeHaxballUpdateDiscParams,
+        ): void;
+        updateJoint(index: number, data: NodeHaxballUpdateJointParams): void;
+        updateSpawnPoint(
+            index: number,
+            team: NodeHaxballTeamName,
+            data: NodeHaxballUpdateSpawnPointParams,
+        ): void;
+        updatePlayer(
+            playerId: number,
+            data: NodeHaxballUpdatePlayerParams,
+        ): void;
+        removeVertex(index: number): void;
+        removeSegment(index: number): void;
+        removeGoal(index: number): void;
+        removePlane(index: number): void;
+        removeDisc(index: number): void;
+        removeJoint(index: number): void;
+        removeSpawnPoint(index: number, team: NodeHaxballTeamName): void;
+        removePlayer(playerId: number): void;
+        updateStadiumPlayerPhysics(
+            data: NodeHaxballUpdateStadiumPlayerPhysicsParams,
+        ): void;
+        updateStadiumBg(data: NodeHaxballUpdateStadiumBgParams): void;
+        updateStadiumGeneral(
+            data: NodeHaxballUpdateStadiumGeneralParams,
+        ): void;
+        fakePlayerJoin(
+            id: number,
+            name: string,
+            flag: string,
+            avatar: string,
+            conn: string,
+            auth: string,
+        ): void;
+        fakePlayerLeave(id: number): {
+            id: number;
+            name: string;
+            flag: string;
+            avatar: string;
+            conn: string;
+            auth: string;
+        };
+        fakeSendPlayerInput(input: number, byId: number): void;
+        fakeSendPlayerChat(message: string, byId: number): void;
+        fakeSetPlayerChatIndicator(value: boolean, byId: number): void;
+        fakeSetPlayerAvatar(value: string, byId: number): void;
+        fakeSetPlayerAdmin(
+            playerId: number,
+            value: boolean,
+            byId: number,
+        ): void;
+        fakeSetPlayerSync(value: boolean, byId: number): void;
+        fakeSetStadium(stadium: NodeHaxballStadium, byId: number): void;
+        fakeStartGame(byId: number): void;
+        fakeStopGame(byId: number): void;
+        fakeSetGamePaused(value: boolean, byId: number): void;
+        fakeSetScoreLimit(value: number, byId: number): void;
+        fakeSetTimeLimit(value: number, byId: number): void;
+        fakeSetTeamsLock(value: boolean, byId: number): void;
+        fakeAutoTeams(byId: number): void;
+        fakeSetPlayerTeam(playerId: number, teamId: TeamID, byId: number): void;
+        fakeSetKickRateLimit(
+            min: number,
+            rate: number,
+            burst: number,
+            byId: number,
+        ): void;
+        fakeSetTeamColors(
+            teamId: TeamID,
+            angle: number,
+            colors: number[],
+            byId: number,
+        ): void;
+        fakeKickPlayer(
+            playerId: number,
+            reason: string | null,
+            ban: boolean,
+            byId: number,
+        ): void;
+    };
+
+    type RoomObject = LegacyHeadlessRoomObject &
+        NodeHaxballRoomObject & {
+            /**
+             * Cancels room creation while opening, or leaves after open.
+             */
+            cancel?: () => void;
+            /**
+             * Sends a recaptcha token to node-haxball room creation.
+             */
+            useRecaptchaToken?: (token: string) => void;
+        };
 }

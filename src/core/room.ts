@@ -29,7 +29,19 @@ export type RegisteredCommand = {
     description?: string;
 };
 
-const DEFAULT_STADIUM_NAMES = [
+type DefaultStadiumName =
+    | "Classic"
+    | "Easy"
+    | "Small"
+    | "Big"
+    | "Rounded"
+    | "Hockey"
+    | "BigHockey"
+    | "BigEasy"
+    | "BigRounded"
+    | "Huge";
+
+const DEFAULT_STADIUM_NAMES: readonly DefaultStadiumName[] = [
     "Classic",
     "Easy",
     "Small",
@@ -40,9 +52,7 @@ const DEFAULT_STADIUM_NAMES = [
     "BigEasy",
     "BigRounded",
     "Huge",
-] as const;
-
-type DefaultStadiumName = (typeof DEFAULT_STADIUM_NAMES)[number];
+];
 
 const DEFAULT_STADIUM_NAME_SET = new Set<string>(DEFAULT_STADIUM_NAMES);
 
@@ -61,7 +71,7 @@ const cloneStadiumObject = (stadium: StadiumObject): StadiumObject => {
         return globalThis.structuredClone(stadium);
     }
 
-    return JSON.parse(JSON.stringify(stadium)) as StadiumObject;
+    return JSON.parse(JSON.stringify(stadium));
 };
 
 const cloneTrackedStadium = (stadium: TrackedStadium): TrackedStadium => {
@@ -302,6 +312,26 @@ export class Room {
         this.invalidateCaches();
     }
 
+    public addPlayerBan(playerId: number): NodeHaxballBanEntryId | null {
+        return this.room.addPlayerBan(playerId);
+    }
+
+    public addIpBan(
+        ...ips: NodeHaxballIpBanTarget[]
+    ): Array<NodeHaxballBanEntryId | null> {
+        return this.room.addIpBan(...ips);
+    }
+
+    public addAuthBan(
+        ...auths: string[]
+    ): Array<NodeHaxballBanEntryId | null> {
+        return this.room.addAuthBan(...auths);
+    }
+
+    public removeBan(banId: NodeHaxballBanEntryId): boolean {
+        return this.room.removeBan(banId);
+    }
+
     public getPlayer(playerId: number): PlayerObject | null {
         return this.room.getPlayer(playerId);
     }
@@ -321,14 +351,28 @@ export class Room {
         this.invalidatePlayerListCache();
     }
 
+    public setAvatar(avatar: string): void;
     public setAvatar(player: PlayerObject, avatar: string | null): void;
     public setAvatar(playerId: number, avatar: string | null): void;
     public setAvatar(
-        player: number | PlayerObject,
-        avatar: string | null,
+        playerOrAvatar: number | PlayerObject | string,
+        avatar?: string | null,
     ): void {
-        const playerId = typeof player === "number" ? player : player.id;
-        this.room.setPlayerAvatar(playerId, avatar);
+        if (typeof playerOrAvatar === "string" && arguments.length === 1) {
+            this.room.setAvatar(playerOrAvatar);
+            return;
+        }
+
+        if (typeof playerOrAvatar === "string") {
+            this.room.setAvatar(playerOrAvatar);
+            return;
+        }
+
+        const playerId =
+            typeof playerOrAvatar === "number"
+                ? playerOrAvatar
+                : playerOrAvatar.id;
+        this.room.setPlayerAvatar(playerId, avatar ?? null);
         this.invalidatePlayerListCache();
     }
 
@@ -470,6 +514,11 @@ export class Room {
         this.room.setRequireRecaptcha(required);
     }
 
+    public setProperties(properties: NodeHaxballSetRoomProperties): void {
+        this.room.setProperties(properties);
+        this.invalidateCaches();
+    }
+
     public setKickRateLimit(min: number, rate: number, burst: number): void {
         this.room.setKickRateLimit(min, rate, burst);
     }
@@ -542,6 +591,526 @@ export class Room {
 
     public stopRecording(): Uint8Array | null {
         return this.room.stopRecording();
+    }
+
+    public executeEvent(event: NodeHaxballHaxballEvent, byId: number): void {
+        this.room.executeEvent(event, byId);
+        this.invalidateCaches();
+    }
+
+    public executeEventWithTarget(
+        event: NodeHaxballHaxballEvent,
+        targetId: number,
+    ): void {
+        this.room.executeEventWithTarget(event, targetId);
+        this.invalidateCaches();
+    }
+
+    public clearEvents(): void {
+        this.room.clearEvents();
+    }
+
+    public sendCustomEvent(
+        type: number,
+        data: object,
+        targetId?: number,
+    ): void {
+        this.room.sendCustomEvent(type, data, targetId);
+    }
+
+    public sendBinaryCustomEvent(
+        type: number,
+        data: Uint8Array,
+        targetId?: number,
+    ): void {
+        this.room.sendBinaryCustomEvent(type, data, targetId);
+    }
+
+    public setPlayerIdentity(
+        playerId: number,
+        data: object,
+        targetId?: number,
+    ): void {
+        this.room.setPlayerIdentity(playerId, data, targetId);
+    }
+
+    public exportStadium(): object {
+        return this.room.exportStadium();
+    }
+
+    public fakePlayerJoin(
+        id: number,
+        name: string,
+        flag: string,
+        avatar: string,
+        conn: string,
+        auth: string,
+    ): void {
+        this.room.fakePlayerJoin(id, name, flag, avatar, conn, auth);
+        this.invalidatePlayerListCache();
+    }
+
+    public fakePlayerLeave(playerId: number): unknown {
+        const player = this.room.fakePlayerLeave(playerId);
+        this.invalidatePlayerListCache();
+        return player;
+    }
+
+    public fakeKickPlayer(
+        playerId: number,
+        reason: string | null,
+        ban: boolean,
+        byId: number,
+    ): void {
+        this.room.fakeKickPlayer(playerId, reason, ban, byId);
+        this.invalidateCaches();
+    }
+
+    public leave(): void {
+        this.room.leave();
+        this.invalidateCaches();
+    }
+
+    public setHandicap(handicap: number): void {
+        this.room.setHandicap(handicap);
+    }
+
+    public setChatIndicatorActive(active: boolean): void {
+        this.room.setChatIndicatorActive(active);
+    }
+
+    public setUnlimitedPlayerCount(on: boolean): void {
+        this.room.setUnlimitedPlayerCount(on);
+    }
+
+    public setFakePassword(fakePassword: boolean | null): void {
+        this.room.setFakePassword(fakePassword);
+    }
+
+    public getKeyState(): number {
+        return this.room.getKeyState();
+    }
+
+    public setKeyState(state: number, instant: boolean = true): void {
+        this.room.setKeyState(state, instant);
+    }
+
+    public isGamePaused(): boolean {
+        return this.room.isGamePaused();
+    }
+
+    public autoTeams(): void {
+        this.room.autoTeams();
+        this.invalidatePlayerListCache();
+    }
+
+    public changeTeam(teamId: TeamID): void {
+        this.room.changeTeam(teamId);
+        this.invalidatePlayerListCache();
+    }
+
+    public resetTeam(teamId: TeamID): void {
+        this.room.resetTeam(teamId);
+        this.invalidatePlayerListCache();
+    }
+
+    public resetTeams(): void {
+        this.room.resetTeams();
+        this.invalidatePlayerListCache();
+    }
+
+    public randTeams(): void {
+        this.room.randTeams();
+        this.invalidatePlayerListCache();
+    }
+
+    public setSync(value: boolean): void {
+        this.room.setSync(value);
+    }
+
+    public setCurrentStadium(stadium: NodeHaxballStadium): void {
+        this.room.setCurrentStadium(stadium);
+        this.invalidateCaches();
+    }
+
+    public getBall(extrapolated: boolean = false): NodeHaxballDisc {
+        return this.room.getBall(extrapolated);
+    }
+
+    public getDiscs(extrapolated: boolean = false): NodeHaxballDisc[] {
+        return this.room.getDiscs(extrapolated);
+    }
+
+    public getDisc(discId: number, extrapolated: boolean = false): NodeHaxballDisc {
+        return this.room.getDisc(discId, extrapolated);
+    }
+
+    public getPlayerDisc(
+        playerId: number,
+        extrapolated: boolean = false,
+    ): NodeHaxballDisc {
+        return this.room.getPlayerDisc(playerId, extrapolated);
+    }
+
+    public getPlayerDisc_exp(playerId: number): NodeHaxballDisc {
+        return this.room.getPlayerDisc_exp(playerId);
+    }
+
+    public setPluginActive(name: string, active: boolean): void {
+        this.room.setPluginActive(name, active);
+    }
+
+    public startStreaming(
+        params: NodeHaxballStartStreamingParams,
+    ): NodeHaxballStartStreamingReturnValue | null {
+        return this.room.startStreaming(params);
+    }
+
+    public stopStreaming(): void {
+        this.room.stopStreaming();
+    }
+
+    public isRecording(): boolean {
+        return this.room.isRecording();
+    }
+
+    public extrapolate(
+        milliseconds: number,
+        ignoreMultipleCalls: boolean = false,
+    ): object {
+        return this.room.extrapolate(milliseconds, ignoreMultipleCalls);
+    }
+
+    public setConfig(roomConfig: NodeHaxballRoomConfig): void {
+        this.room.setConfig(roomConfig);
+    }
+
+    public mixConfig(roomConfig: NodeHaxballRoomConfig): void {
+        this.room.mixConfig(roomConfig);
+    }
+
+    public addPlugin(plugin: NodeHaxballPlugin): void {
+        this.room.addPlugin(plugin);
+    }
+
+    public movePlugin(pluginIndex: number, newIndex: number): void {
+        this.room.movePlugin(pluginIndex, newIndex);
+    }
+
+    public updatePlugin(pluginIndex: number, plugin: NodeHaxballPlugin): void {
+        this.room.updatePlugin(pluginIndex, plugin);
+    }
+
+    public removePlugin(plugin: NodeHaxballPlugin): void {
+        this.room.removePlugin(plugin);
+    }
+
+    public setRenderer(renderer: NodeHaxballRenderer): void {
+        this.room.setRenderer(renderer);
+    }
+
+    public addLibrary(library: NodeHaxballLibrary): void {
+        this.room.addLibrary(library);
+    }
+
+    public moveLibrary(libraryIndex: number, newIndex: number): void {
+        this.room.moveLibrary(libraryIndex, newIndex);
+    }
+
+    public updateLibrary(libraryIndex: number, library: NodeHaxballLibrary): void {
+        this.room.updateLibrary(libraryIndex, library);
+    }
+
+    public removeLibrary(library: NodeHaxballLibrary): void {
+        this.room.removeLibrary(library);
+    }
+
+    public takeSnapshot(): object {
+        return this.room.takeSnapshot();
+    }
+
+    public createVertex(data: NodeHaxballVertexParams): NodeHaxballVertex {
+        return this.room.createVertex(data);
+    }
+
+    public createSegment(data: NodeHaxballSegmentParams): NodeHaxballSegment {
+        return this.room.createSegment(data);
+    }
+
+    public createSegmentFromObj(
+        data: NodeHaxballSegmentFromObjParams,
+    ): NodeHaxballSegment {
+        return this.room.createSegmentFromObj(data);
+    }
+
+    public createGoal(data: NodeHaxballGoalParams): NodeHaxballGoal {
+        return this.room.createGoal(data);
+    }
+
+    public createPlane(data: NodeHaxballPlaneParams): NodeHaxballPlane {
+        return this.room.createPlane(data);
+    }
+
+    public createDisc(data: NodeHaxballDiscParams): NodeHaxballDisc {
+        return this.room.createDisc(data);
+    }
+
+    public createJoint(data: NodeHaxballJointParams): NodeHaxballJoint {
+        return this.room.createJoint(data);
+    }
+
+    public createJointFromObj(
+        data: NodeHaxballJointFromObjParams,
+    ): NodeHaxballJoint {
+        return this.room.createJointFromObj(data);
+    }
+
+    public addVertex(data: NodeHaxballVertexParams): void {
+        this.room.addVertex(data);
+    }
+
+    public addSegment(data: NodeHaxballSegmentParams): void {
+        this.room.addSegment(data);
+    }
+
+    public addGoal(data: NodeHaxballGoalParams): void {
+        this.room.addGoal(data);
+    }
+
+    public addPlane(data: NodeHaxballPlaneParams): void {
+        this.room.addPlane(data);
+    }
+
+    public addDisc(data: NodeHaxballDiscParams): void {
+        this.room.addDisc(data);
+        this.invalidateDiscCache();
+    }
+
+    public addJoint(data: NodeHaxballJointParams): void {
+        this.room.addJoint(data);
+    }
+
+    public addSpawnPoint(data: NodeHaxballSpawnPointParams): void {
+        this.room.addSpawnPoint(data);
+    }
+
+    public addPlayer(data: NodeHaxballAddPlayerParams): void {
+        this.room.addPlayer(data);
+        this.invalidatePlayerListCache();
+    }
+
+    public findVertexIndicesOfSegmentObj(segment: NodeHaxballSegment): number[] {
+        return this.room.findVertexIndicesOfSegmentObj(segment);
+    }
+
+    public findVertexIndicesOfSegment(segmentIndex: number): number[] | null {
+        return this.room.findVertexIndicesOfSegment(segmentIndex);
+    }
+
+    public updateVertex(
+        index: number,
+        data: NodeHaxballUpdateVertexParams,
+    ): void {
+        this.room.updateVertex(index, data);
+    }
+
+    public updateSegment(
+        index: number,
+        data: NodeHaxballUpdateSegmentParams,
+    ): void {
+        this.room.updateSegment(index, data);
+    }
+
+    public updateGoal(index: number, data: NodeHaxballUpdateGoalParams): void {
+        this.room.updateGoal(index, data);
+    }
+
+    public updatePlane(index: number, data: NodeHaxballUpdatePlaneParams): void {
+        this.room.updatePlane(index, data);
+    }
+
+    public updateDisc(index: number, data: NodeHaxballUpdateDiscParams): void {
+        this.room.updateDisc(index, data);
+        this.invalidateDiscCache(index);
+    }
+
+    public updateDiscObj(
+        disc: NodeHaxballDisc,
+        data: NodeHaxballUpdateDiscParams,
+    ): void {
+        this.room.updateDiscObj(disc, data);
+        this.invalidateDiscCache();
+    }
+
+    public updateJoint(index: number, data: NodeHaxballUpdateJointParams): void {
+        this.room.updateJoint(index, data);
+    }
+
+    public updateSpawnPoint(
+        index: number,
+        team: NodeHaxballTeamName,
+        data: NodeHaxballUpdateSpawnPointParams,
+    ): void {
+        this.room.updateSpawnPoint(index, team, data);
+    }
+
+    public updatePlayer(
+        playerId: number,
+        data: NodeHaxballUpdatePlayerParams,
+    ): void {
+        this.room.updatePlayer(playerId, data);
+        this.invalidatePlayerListCache();
+        this.invalidatePlayerDiscCache(playerId);
+    }
+
+    public removeVertex(index: number): void {
+        this.room.removeVertex(index);
+    }
+
+    public removeSegment(index: number): void {
+        this.room.removeSegment(index);
+    }
+
+    public removeGoal(index: number): void {
+        this.room.removeGoal(index);
+    }
+
+    public removePlane(index: number): void {
+        this.room.removePlane(index);
+    }
+
+    public removeDisc(index: number): void {
+        this.room.removeDisc(index);
+        this.invalidateDiscCache(index);
+    }
+
+    public removeJoint(index: number): void {
+        this.room.removeJoint(index);
+    }
+
+    public removeSpawnPoint(index: number, team: NodeHaxballTeamName): void {
+        this.room.removeSpawnPoint(index, team);
+    }
+
+    public removePlayer(playerId: number): void {
+        this.room.removePlayer(playerId);
+        this.invalidatePlayerListCache();
+        this.invalidatePlayerDiscCache(playerId);
+    }
+
+    public updateStadiumPlayerPhysics(
+        data: NodeHaxballUpdateStadiumPlayerPhysicsParams,
+    ): void {
+        this.room.updateStadiumPlayerPhysics(data);
+        this.invalidateCaches();
+    }
+
+    public updateStadiumBg(data: NodeHaxballUpdateStadiumBgParams): void {
+        this.room.updateStadiumBg(data);
+        this.invalidateCaches();
+    }
+
+    public updateStadiumGeneral(
+        data: NodeHaxballUpdateStadiumGeneralParams,
+    ): void {
+        this.room.updateStadiumGeneral(data);
+        this.invalidateCaches();
+    }
+
+    public fakeSendPlayerInput(input: number, byId: number): void {
+        this.room.fakeSendPlayerInput(input, byId);
+    }
+
+    public fakeSendPlayerChat(message: string, byId: number): void {
+        this.room.fakeSendPlayerChat(message, byId);
+    }
+
+    public fakeSetPlayerChatIndicator(value: boolean, byId: number): void {
+        this.room.fakeSetPlayerChatIndicator(value, byId);
+    }
+
+    public fakeSetPlayerAvatar(value: string, byId: number): void {
+        this.room.fakeSetPlayerAvatar(value, byId);
+        this.invalidatePlayerListCache();
+    }
+
+    public fakeSetPlayerAdmin(
+        playerId: number,
+        value: boolean,
+        byId: number,
+    ): void {
+        this.room.fakeSetPlayerAdmin(playerId, value, byId);
+        this.invalidatePlayerListCache();
+    }
+
+    public fakeSetPlayerSync(value: boolean, byId: number): void {
+        this.room.fakeSetPlayerSync(value, byId);
+    }
+
+    public fakeSetStadium(stadium: NodeHaxballStadium, byId: number): void {
+        this.room.fakeSetStadium(stadium, byId);
+        this.invalidateCaches();
+    }
+
+    public fakeStartGame(byId: number): void {
+        this.room.fakeStartGame(byId);
+        this.invalidateCaches();
+    }
+
+    public fakeStopGame(byId: number): void {
+        this.room.fakeStopGame(byId);
+        this.invalidateCaches();
+    }
+
+    public fakeSetGamePaused(value: boolean, byId: number): void {
+        this.room.fakeSetGamePaused(value, byId);
+        this.invalidateCaches();
+    }
+
+    public fakeSetScoreLimit(value: number, byId: number): void {
+        this.room.fakeSetScoreLimit(value, byId);
+    }
+
+    public fakeSetTimeLimit(value: number, byId: number): void {
+        this.room.fakeSetTimeLimit(value, byId);
+    }
+
+    public fakeSetTeamsLock(value: boolean, byId: number): void {
+        this.room.fakeSetTeamsLock(value, byId);
+        this.invalidatePlayerListCache();
+    }
+
+    public fakeAutoTeams(byId: number): void {
+        this.room.fakeAutoTeams(byId);
+        this.invalidatePlayerListCache();
+    }
+
+    public fakeSetPlayerTeam(
+        playerId: number,
+        teamId: TeamID,
+        byId: number,
+    ): void {
+        this.room.fakeSetPlayerTeam(playerId, teamId, byId);
+        this.invalidatePlayerListCache();
+        this.invalidatePlayerDiscCache(playerId);
+    }
+
+    public fakeSetKickRateLimit(
+        min: number,
+        rate: number,
+        burst: number,
+        byId: number,
+    ): void {
+        this.room.fakeSetKickRateLimit(min, rate, burst, byId);
+    }
+
+    public fakeSetTeamColors(
+        teamId: TeamID,
+        angle: number,
+        colors: number[],
+        byId: number,
+    ): void {
+        this.room.fakeSetTeamColors(teamId, angle, colors, byId);
     }
 
     public get collisionFlags(): CollisionFlagsObject {

@@ -281,7 +281,7 @@ msgstr "• Enabled: {0}"
 #~ msgstr "• TURNOVER ON DOWNS!"
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/shared/commands/handlers/undo.ts:28
+#: src/meta/legacy/shared/commands/handlers/undo.ts:26
 msgid "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgstr "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 
@@ -304,7 +304,7 @@ msgstr "⚙️ {0} is no longer the quarterback."
 #~ msgstr "⚙️ {0} is now the QB."
 
 #. placeholder {0}: player.name
-#: src/meta/legacy/shared/commands/handlers/qb.ts:97
+#: src/meta/legacy/shared/commands/handlers/qb.ts:109
 msgid "⚙️ {0} is now the quarterback."
 msgstr "⚙️ {0} is now the quarterback."
 
@@ -319,7 +319,7 @@ msgstr "⚙️ {0} moved LOS to {sideName} {yards}."
 
 #. placeholder {0}: player.name
 #. placeholder {1}: targetResolution.player.name
-#: src/meta/legacy/shared/commands/handlers/qb.ts:166
+#: src/meta/legacy/shared/commands/handlers/qb.ts:181
 msgid "⚙️ {0} set {1} as quarterback."
 msgstr "⚙️ {0} set {1} as quarterback."
 
@@ -375,11 +375,11 @@ msgstr "⚠️ Flags cannot be changed while a game is in progress."
 msgid "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 msgstr "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 
-#: src/meta/legacy/shared/commands/handlers/qb.ts:151
+#: src/meta/legacy/shared/commands/handlers/qb.ts:166
 msgid "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
 msgstr "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
 
-#: src/meta/legacy/shared/commands/handlers/undo.ts:20
+#: src/meta/legacy/shared/commands/handlers/undo.ts:18
 msgid "⚠️ No checkpoints available to undo."
 msgstr "⚠️ No checkpoints available to undo."
 
@@ -387,7 +387,7 @@ msgstr "⚠️ No checkpoints available to undo."
 #~ msgid "⚠️ No eligible player matched that QB target."
 #~ msgstr "⚠️ No eligible player matched that QB target."
 
-#: src/meta/legacy/shared/commands/handlers/qb.ts:140
+#: src/meta/legacy/shared/commands/handlers/qb.ts:155
 msgid "⚠️ No eligible player matched that quarterback target."
 msgstr "⚠️ No eligible player matched that quarterback target."
 
@@ -395,11 +395,11 @@ msgstr "⚠️ No eligible player matched that quarterback target."
 #~ msgid "⚠️ Only admins can assign QB targets."
 #~ msgstr "⚠️ Only admins can assign QB targets."
 
-#: src/meta/legacy/shared/commands/handlers/qb.ts:108
+#: src/meta/legacy/shared/commands/handlers/qb.ts:120
 msgid "⚠️ Only admins can assign quarterback targets."
 msgstr "⚠️ Only admins can assign quarterback targets."
 
-#: src/meta/legacy/shared/commands/handlers/undo.ts:10
+#: src/meta/legacy/shared/commands/handlers/undo.ts:8
 msgid "⚠️ Only admins can call for an undo."
 msgstr "⚠️ Only admins can call for an undo."
 
@@ -454,6 +454,10 @@ msgstr "⚠️ Please provide a new password."
 #~ msgid "⚠️ QB selection is disabled."
 #~ msgstr "⚠️ QB selection is disabled."
 
+#: src/meta/legacy/shared/commands/handlers/qb.ts:91
+msgid "⚠️ Quarterback position is already occupied."
+msgstr "⚠️ Quarterback position is already occupied."
+
 #: src/meta/legacy/shared/commands/handlers/qb.ts:76
 #: src/meta/legacy/states/presnap.ts:157
 msgid "⚠️ Quarterback position is vacant. Use !qb to become the quarterback."
@@ -507,7 +511,7 @@ msgstr "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 msgid "⚠️ Usage: !los <red/blue> <1-50>."
 msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 
-#: src/meta/legacy/shared/commands/handlers/qb.ts:133
+#: src/meta/legacy/shared/commands/handlers/qb.ts:148
 msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Usage: !qb [#id|name]."
 
@@ -857,7 +861,7 @@ msgstr "❌ Offensive foul"
 #~ msgstr "❌ Offensive foul • two-point try failed."
 
 #. placeholder {0}: frame.outOfBoundsCatcher!.name
-#: src/meta/legacy/states/extra-point-snap-in-flight.ts:90
+#: src/meta/legacy/states/extra-point-snap-in-flight.ts:95
 #: src/meta/legacy/states/kickoff-in-flight.ts:60
 #: src/meta/legacy/states/safety-kick-in-flight.ts:69
 msgid "❌ Out-of-bounds reception by {0}"
@@ -897,8 +901,8 @@ msgstr "❌ Safety kick out of bounds"
 #: src/meta/legacy/states/extra-point-run.ts:158
 #: src/meta/legacy/states/extra-point-run.ts:178
 #: src/meta/legacy/states/extra-point-run.ts:199
-#: src/meta/legacy/states/extra-point-snap-in-flight.ts:109
-#: src/meta/legacy/states/extra-point-snap-in-flight.ts:163
+#: src/meta/legacy/states/extra-point-snap-in-flight.ts:114
+#: src/meta/legacy/states/extra-point-snap-in-flight.ts:183
 #: src/meta/legacy/states/extra-point-snap.ts:308
 #: src/meta/legacy/states/extra-point-snap.ts:641
 msgid "❌ Two-point try failed."
@@ -1019,7 +1023,7 @@ msgid "🏈 Kickoff return by {0}!"
 msgstr "🏈 Kickoff return by {0}!"
 
 #. placeholder {0}: catcher.name
-#: src/meta/legacy/states/snap-in-flight.ts:203
+#: src/meta/legacy/states/snap-in-flight.ts:208
 msgid "🏈 Pass complete to {0}!"
 msgstr "🏈 Pass complete to {0}!"
 
@@ -1034,7 +1038,7 @@ msgid "🏈 Safety-kick return by {0}!"
 msgstr "🏈 Safety-kick return by {0}!"
 
 #. placeholder {0}: catcher.name
-#: src/meta/legacy/states/extra-point-snap-in-flight.ts:127
+#: src/meta/legacy/states/extra-point-snap-in-flight.ts:132
 msgid "🏈 Two-point pass complete to {0}!"
 msgstr "🏈 Two-point pass complete to {0}!"
 
@@ -1432,9 +1436,9 @@ msgstr "ball is live"
 #~ msgid "ball is live!"
 #~ msgstr "ball is live!"
 
-#: src/meta/legacy/states/snap-in-flight.ts:159
-#: src/meta/legacy/states/snap-in-flight.ts:170
-#: src/meta/legacy/states/snap-in-flight.ts:181
+#: src/meta/legacy/states/snap-in-flight.ts:164
+#: src/meta/legacy/states/snap-in-flight.ts:175
+#: src/meta/legacy/states/snap-in-flight.ts:186
 #: src/meta/legacy/states/snap.ts:771
 #: src/meta/legacy/states/snap.ts:785
 msgid "ball out of bounds"
@@ -1560,7 +1564,7 @@ msgstr "defensive offside"
 #: src/meta/legacy/states/extra-point-quarterback-run.ts:212
 #: src/meta/legacy/states/extra-point-retry.ts:209
 #: src/meta/legacy/states/extra-point-run.ts:226
-#: src/meta/legacy/states/extra-point-snap-in-flight.ts:179
+#: src/meta/legacy/states/extra-point-snap-in-flight.ts:199
 #: src/meta/legacy/states/extra-point-snap.ts:751
 #: src/meta/legacy/states/extra-point.ts:364
 msgid "Extra point"
@@ -1598,8 +1602,8 @@ msgstr "field goal is good!"
 #: src/meta/legacy/states/quarterback-run.ts:277
 #: src/meta/legacy/states/run.ts:141
 #: src/meta/legacy/states/run.ts:277
-#: src/meta/legacy/states/snap-in-flight.ts:103
-#: src/meta/legacy/states/snap-in-flight.ts:160
+#: src/meta/legacy/states/snap-in-flight.ts:108
+#: src/meta/legacy/states/snap-in-flight.ts:165
 msgid "FIRST DOWN!"
 msgstr "FIRST DOWN!"
 
@@ -1737,8 +1741,8 @@ msgid "No gain"
 msgstr "No gain"
 
 #: src/meta/legacy/states/blocked-pass.ts:82
-#: src/meta/legacy/states/snap-in-flight.ts:114
-#: src/meta/legacy/states/snap-in-flight.ts:171
+#: src/meta/legacy/states/snap-in-flight.ts:119
+#: src/meta/legacy/states/snap-in-flight.ts:176
 msgid "no gain."
 msgstr "no gain."
 
@@ -1749,9 +1753,9 @@ msgid "none"
 msgstr "none"
 
 #. placeholder {0}: frame.outOfBoundsCatcher!.name
-#: src/meta/legacy/states/snap-in-flight.ts:102
-#: src/meta/legacy/states/snap-in-flight.ts:113
-#: src/meta/legacy/states/snap-in-flight.ts:124
+#: src/meta/legacy/states/snap-in-flight.ts:107
+#: src/meta/legacy/states/snap-in-flight.ts:118
+#: src/meta/legacy/states/snap-in-flight.ts:129
 msgid "out-of-bounds reception by {0}"
 msgstr "out-of-bounds reception by {0}"
 
@@ -2028,8 +2032,8 @@ msgstr "turnover at the {0}-yard line!"
 #: src/meta/legacy/states/quarterback-run.ts:334
 #: src/meta/legacy/states/run.ts:191
 #: src/meta/legacy/states/run.ts:334
-#: src/meta/legacy/states/snap-in-flight.ts:125
-#: src/meta/legacy/states/snap-in-flight.ts:182
+#: src/meta/legacy/states/snap-in-flight.ts:130
+#: src/meta/legacy/states/snap-in-flight.ts:187
 msgid "TURNOVER ON DOWNS!"
 msgstr "TURNOVER ON DOWNS!"
 
@@ -2055,7 +2059,7 @@ msgstr "two-point try awarded."
 
 #: src/meta/legacy/states/extra-point-blitz.ts:118
 #: src/meta/legacy/states/extra-point-blocked-pass.ts:58
-#: src/meta/legacy/states/extra-point-snap-in-flight.ts:91
+#: src/meta/legacy/states/extra-point-snap-in-flight.ts:96
 #: src/meta/legacy/states/extra-point-snap.ts:244
 #: src/meta/legacy/states/extra-point-snap.ts:628
 #: src/meta/legacy/states/extra-point-snap.ts:716
