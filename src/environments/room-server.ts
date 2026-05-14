@@ -1,3 +1,4 @@
+import { createHaxFootballRoomApiClient } from "@haxbrasil/haxfootball-api-sdk";
 import Haxball from "@haxball/game";
 import { updateRoomModules } from "@core/module";
 import { initI18n } from "@i18n";
@@ -27,6 +28,47 @@ function sendInvite(invite: string): void {
 
 function sendOpenFailed(code: string, message?: string): void {
     process.send?.({ type: "open_failed", code, message });
+}
+
+type RoomReadyReportConfig = {
+    roomId: string;
+    commId: string;
+};
+
+function getRoomReadyReportConfig(): RoomReadyReportConfig | null {
+    const roomId =
+        process.env["__ROOM_ID"] ??
+        process.env["ROOM_ID"] ??
+        process.env["ROOM_API_ROOM_ID"];
+    const commId = process.env["__ROOM_COMM_ID"] ?? process.env["ROOM_COMM_ID"];
+
+    if (!roomId || !commId) {
+        return null;
+    }
+
+    return { roomId, commId };
+}
+
+async function reportRoomReady(roomLink: string): Promise<void> {
+    const config = getRoomReadyReportConfig();
+
+    if (!config) {
+        return;
+    }
+
+    try {
+        const api = createHaxFootballRoomApiClient();
+        const result = await api.rooms.reportReady(config.roomId, {
+            commId: config.commId,
+            roomLink,
+        });
+
+        if (!result.ok) {
+            console.error("Failed to report room ready:", result.error);
+        }
+    } catch (error) {
+        console.error("Failed to report room ready:", error);
+    }
 }
 
 async function bootstrap() {
@@ -68,6 +110,7 @@ async function bootstrap() {
     const originalOnRoomLink = room.onRoomLink;
     room.onRoomLink = (url: string) => {
         sendInvite(url);
+        void reportRoomReady(url);
         originalOnRoomLink?.(url);
     };
 }

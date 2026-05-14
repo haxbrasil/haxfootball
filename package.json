@@ -42,6 +42,7 @@
         "vitest": "^4.0.18"
     },
     "dependencies": {
+        "@haxbrasil/haxfootball-api-sdk": "github:haxbrasil/haxfootball-api-sdk",
         "@lingui/core": "^5.5.2",
         "@peculiar/webcrypto": "^1.5.0",
         "envalid": "^8.1.1",
