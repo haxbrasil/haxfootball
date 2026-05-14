@@ -1,124 +1,69 @@
-import { createHaxFootballRoomApiClient } from "@haxbrasil/haxfootball-api-sdk";
 import Haxball from "@haxball/game";
-import { updateRoomModules } from "@core/module";
+import { createModule, updateRoomModules } from "@core/module";
+import { api } from "@api/client";
+import { env, type RoomServerEnvironment } from "@env/room-server";
 import { initI18n } from "@i18n";
 
-type RoomProperties = {
-    name: string;
-    geo: { code: string; lat: number; lon: number };
-    max_player_count: number;
-    show_in_room_list: boolean;
-    password?: string | null;
-    no_player: boolean;
-};
-
-function parseRoomProperties(): RoomProperties {
-    const raw = process.env["ROOM_PROPERTIES_JSON"];
-
-    if (!raw) {
-        throw new Error("ROOM_PROPERTIES_JSON is not set");
-    }
-
-    return JSON.parse(raw) as RoomProperties;
-}
-
-function sendInvite(invite: string): void {
-    process.send?.({ type: "invite", invite });
-}
-
-function sendOpenFailed(code: string, message?: string): void {
-    process.send?.({ type: "open_failed", code, message });
-}
-
-type RoomReadyReportConfig = {
-    roomId: string;
-    commId: string;
-};
-
-function getRoomReadyReportConfig(): RoomReadyReportConfig | null {
-    const roomId =
-        process.env["__ROOM_ID"] ??
-        process.env["ROOM_ID"] ??
-        process.env["ROOM_API_ROOM_ID"];
-    const commId = process.env["__ROOM_COMM_ID"] ?? process.env["ROOM_COMM_ID"];
-
-    if (!roomId || !commId) {
-        return null;
-    }
-
-    return { roomId, commId };
-}
-
-async function reportRoomReady(roomLink: string): Promise<void> {
-    const config = getRoomReadyReportConfig();
-
-    if (!config) {
-        return;
-    }
-
-    try {
-        const api = createHaxFootballRoomApiClient();
-        const result = await api.rooms.reportReady(config.roomId, {
-            commId: config.commId,
-            roomLink,
-        });
-
-        if (!result.ok) {
-            console.error("Failed to report room ready:", result.error);
-        }
-    } catch (error) {
-        console.error("Failed to report room ready:", error);
-    }
-}
-
 async function bootstrap() {
-    const properties = parseRoomProperties();
-    const token = process.env["ROOM_TOKEN"] ?? "";
-    const proxy = process.env["PROXY"];
-    const language = process.env["LANGUAGE"];
-
-    initI18n(language);
+    initI18n(env.language);
 
     const { getConfig, modules } = await import("@room/manual");
-    const baseConfig = getConfig();
-
-    const config: RoomConfigObject = {
-        ...baseConfig,
-        roomName: properties.name,
-        maxPlayers: properties.max_player_count,
-        public: properties.show_in_room_list,
-        noPlayer: properties.no_player,
-        token,
-        ...(properties.password ? { password: properties.password } : {}),
-        ...(properties.geo
-            ? {
-                  geo: {
-                      code: properties.geo.code,
-                      lat: properties.geo.lat,
-                      lon: properties.geo.lon,
-                  },
-              }
-            : {}),
-        ...(proxy ? { proxy } : {}),
-    };
 
     const HBInit: Function = await Haxball;
-    const room = HBInit(config);
+    const room = HBInit(createRoomConfig(env, getConfig()));
 
-    updateRoomModules(room, modules);
+    updateRoomModules(room, [
+        ...modules,
+        createModule().onRoomLink(async (_room, url) => {
+            if (!env.apiReadiness) {
+                return;
+            }
 
-    const originalOnRoomLink = room.onRoomLink;
-    room.onRoomLink = (url: string) => {
-        sendInvite(url);
-        void reportRoomReady(url);
-        originalOnRoomLink?.(url);
-    };
+            try {
+                const result = await api.rooms.reportReady(
+                    env.apiReadiness.roomId,
+                    {
+                        commId: env.apiReadiness.commId,
+                        roomLink: url,
+                    },
+                );
+
+                if (!result.ok) {
+                    throw result.error;
+                }
+            } catch (error) {
+                console.error("Failed to report room ready:", error);
+            }
+        }),
+    ]);
 }
 
 bootstrap().catch((error) => {
-    const message =
-        error instanceof Error ? error.message : "Unknown bootstrap error";
-    sendOpenFailed("bootstrap_failed", message);
     console.error("Failed to bootstrap room-server environment:", error);
     process.exitCode = 1;
 });
+
+function createRoomConfig(
+    environment: RoomServerEnvironment,
+    baseConfig: RoomConfigObject,
+): RoomConfigObject {
+    const { roomProperties } = environment;
+
+    return {
+        ...baseConfig,
+        roomName: roomProperties.name,
+        maxPlayers: roomProperties.max_player_count,
+        public: roomProperties.show_in_room_list,
+        noPlayer: roomProperties.no_player,
+        token: environment.roomToken,
+        ...(roomProperties.password
+            ? { password: roomProperties.password }
+            : {}),
+        geo: {
+            code: roomProperties.geo.code,
+            lat: roomProperties.geo.lat,
+            lon: roomProperties.geo.lon,
+        },
+        ...(environment.proxy ? { proxy: environment.proxy } : {}),
+    };
+}

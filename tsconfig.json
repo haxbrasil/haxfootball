@@ -29,7 +29,8 @@
             "@dev/*": ["./src/dev/*"],
             "@i18n": ["./src/i18n.ts"],
             "@common/*": ["./src/common/*"],
-            "@env": ["./src/env.ts"]
+            "@api/*": ["./src/api/*"],
+            "@env/*": ["./src/env/*"]
         }
     },
     "exclude": ["prettier.config.js"]

@@ -1,7 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { modules as roomModules } from "./modules/room";
 import { modules as gameModules } from "./modules/game";
-import { env } from "@env";
+import { env } from "@env/room";
 
 const config: RoomConfigObject = {
     roomName: t`🏈 HaxFootball - American Football 🏈`,

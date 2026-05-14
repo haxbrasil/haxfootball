@@ -4,7 +4,7 @@ import { t } from "@lingui/core/macro";
 import { randomBytes } from "node:crypto";
 import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
-import { env } from "@env";
+import { env } from "@env/room";
 import { CommandCategory } from "../utils/commands";
 import {
     isOfficialAdmin,

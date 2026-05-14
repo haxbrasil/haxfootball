@@ -30,6 +30,7 @@ module.exports = {
                     "@runtime": "./src/runtime",
                     "@types": "./src/types",
                     "@dev": "./src/dev",
+                    "@api": "./src/api",
                     "@i18n": "./src/i18n",
                     "@stadium": "./src/stadium",
                     "@env": "./src/env",

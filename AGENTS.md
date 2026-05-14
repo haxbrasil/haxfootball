@@ -27,13 +27,13 @@ Run a room in dev mode with:
 LANGUAGE=pt-BR DEBUG=true TOKEN="<haxball-token>" pnpm run dev:node
 ```
 
-`TOKEN` is required by `src/env.ts`. Optional environment variables include `PROXY`, `DEBUG`, `LANGUAGE`, `TUTORIAL_LINK`, and `DISCORD_LINK`.
+`TOKEN` is required by the dev `src/environments/node.ts` entrypoint. Optional room-module environment variables include `PROXY`, `DEBUG`, `LANGUAGE`, `TUTORIAL_LINK`, and `DISCORD_LINK`. Environment schemas live in `src/env/room.ts`, `src/env/node.ts`, and `src/env/room-server.ts`; shared validation helpers live under `src/env/validator/`.
 
 ## Repository Layout
 
 `src/environments/node.ts` is the dev room bootstrap. It initializes i18n, loads `@room/manual`, opens the room through `@haxball/game`, and installs modules.
 
-`src/environments/room-server.ts` is the production/API bootstrap. It reads `ROOM_PROPERTIES_JSON`, `ROOM_TOKEN`, `PROXY`, and `LANGUAGE`, opens a room, installs modules, and reports the invite link to the parent process.
+`src/environments/room-server.ts` is the production/API bootstrap. It reads the room-server environment, opens a room, installs modules, and reports readiness to the API when readiness credentials are available. The API still discovers room links from room logs.
 
 `src/haxball/game.ts` implements room creation and the public headless room API. Keep the public `HBInit`/`RoomObject` shape stable here.
 
@@ -121,7 +121,7 @@ For player lists and football-context messages, prefer helpers such as `formatNa
 
 ## TypeScript and Style
 
-The project is strict TypeScript with `moduleResolution: "bundler"` and path aliases in `tsconfig.json`. Use aliases like `@runtime/*`, `@core/*`, `@haxball/*`, `@meta/*`, `@room/*`, `@common/*`, `@i18n`, and `@env`.
+The project is strict TypeScript with `moduleResolution: "bundler"` and path aliases in `tsconfig.json`. Use aliases like `@runtime/*`, `@core/*`, `@haxball/*`, `@meta/*`, `@room/*`, `@common/*`, `@api/*`, `@i18n`, and `@env/*`.
 
 Prefer explicit domain types and small pure helpers. Avoid hidden side effects, exception-based control flow for normal gameplay rules, unnecessary `let`, IIFEs for simple derivations, and mutation of arrays/objects unless it is clearly contained and simpler.
 
