@@ -1,6 +1,6 @@
 {
     "name": "@haxbrasil/haxfootball",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "HaxBall headless room package for room-server",
     "packageManager": "pnpm@11.0.9",
     "main": "dist/environments/room-server.js",
@@ -25,32 +25,32 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "@babel/cli": "^7.28.3",
-        "@babel/core": "^7.28.5",
-        "@babel/node": "^7.28.0",
-        "@babel/preset-env": "^7.28.5",
+        "@babel/cli": "^7.28.6",
+        "@babel/core": "^7.29.0",
+        "@babel/node": "^7.29.0",
+        "@babel/preset-env": "^7.29.5",
         "@babel/preset-typescript": "^7.28.5",
-        "@babel/register": "^7.28.3",
-        "@lingui/cli": "^5.5.2",
-        "@lingui/macro": "^5.5.2",
+        "@babel/register": "^7.29.3",
+        "@lingui/cli": "^5.9.5",
+        "@lingui/macro": "^5.9.5",
         "@types/node": "^24.10.0",
         "babel-plugin-macros": "^3.1.0",
-        "babel-plugin-module-resolver": "^5.0.2",
-        "prettier": "^3.6.2",
+        "babel-plugin-module-resolver": "^5.0.3",
+        "prettier": "^3.8.3",
         "tsx": "^4.20.6",
         "typescript": "^5.9.3",
-        "vitest": "^4.0.18"
+        "vitest": "^4.1.6"
     },
     "dependencies": {
         "@haxbrasil/haxfootball-api-sdk": "github:haxbrasil/haxfootball-api-sdk",
-        "@lingui/core": "^5.5.2",
+        "@lingui/core": "^5.9.5",
         "@peculiar/webcrypto": "^1.5.0",
         "https-proxy-agent": "^7.0.6",
         "json5": "^2.2.3",
         "node-haxball": "^2.3.0",
         "pako": "^2.1.0",
-        "ws": "^8.18.3",
+        "ws": "^8.20.1",
         "zod": "^4.4.3",
-        "zustand": "^5.0.8"
+        "zustand": "^5.0.13"
     }
 }
