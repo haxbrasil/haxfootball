@@ -79,12 +79,23 @@ type NativeRoom = NodeHaxballRoomObject & {
     getDisc(discId: number, extrapolated?: boolean): NativeDisc;
     getPlayerDisc(playerId: number, extrapolated?: boolean): NativeDisc;
     getPlayerDisc_exp(playerId: number): NativeDisc;
-    setTeamColors(teamId: number, angle: number, textColor: number, ...colors: number[]): void;
+    setTeamColors(
+        teamId: number,
+        angle: number,
+        textColor: number,
+        ...colors: number[]
+    ): void;
     pauseGame(): void;
     lockTeams(): void;
     setPlayerAvatar(id: number, value: string | null, headless: boolean): void;
-    setDiscProperties(discIndex: number, properties: DiscPropertiesObject): void;
-    setPlayerDiscProperties(playerId: number, properties: DiscPropertiesObject): void;
+    setDiscProperties(
+        discIndex: number,
+        properties: DiscPropertiesObject,
+    ): void;
+    setPlayerDiscProperties(
+        playerId: number,
+        properties: DiscPropertiesObject,
+    ): void;
     sendAnnouncement(
         message: string,
         targetId: number | null,
@@ -158,7 +169,11 @@ type KickBanOperation = {
 
 const haxball = createHaxballApi();
 
-function normalizeGeo(geo: RoomGeoLocation): { lat: number; lon: number; flag: string } {
+function normalizeGeo(geo: RoomGeoLocation): {
+    lat: number;
+    lon: number;
+    flag: string;
+} {
     return {
         lat: geo.lat ?? 0,
         lon: geo.lon ?? 0,
@@ -188,7 +203,9 @@ function toTeamId(teamId: number): TeamID {
     return 0;
 }
 
-function convertPlayer(player: NativePlayer | null | undefined): PlayerObject | null {
+function convertPlayer(
+    player: NativePlayer | null | undefined,
+): PlayerObject | null {
     if (!player) return null;
 
     const position = player.disc
@@ -208,7 +225,9 @@ function convertPlayer(player: NativePlayer | null | undefined): PlayerObject | 
         ip: decodeIp(player.conn),
     };
 
-    return player.auth === null ? converted : { ...converted, auth: player.auth };
+    return player.auth === null
+        ? converted
+        : { ...converted, auth: player.auth };
 }
 
 function getScoresObject(room: NativeRoom): ScoresObject | null {
@@ -299,7 +318,8 @@ class HaxballCompatibilityRoom {
     public onPlayerJoin = (_player: PlayerObject): void => {};
     public onPlayerLeave = (_player: PlayerObject): void => {};
     public onTeamVictory = (_scores: ScoresObject): void => {};
-    public onPlayerChat = (_player: PlayerObject, _message: string): boolean => true;
+    public onPlayerChat = (_player: PlayerObject, _message: string): boolean =>
+        true;
     public onPlayerBallKick = (_player: PlayerObject): void => {};
     public onTeamGoal = (_team: TeamID): void => {};
     public onGameStart = (_byPlayer: PlayerObject | null): void => {};
@@ -354,7 +374,9 @@ class HaxballCompatibilityRoom {
     }
 
     public async open(config: RoomConfigObject): Promise<void> {
-        const geo = config.geo ? normalizeGeo(config.geo) : await haxball.Utils.getGeo();
+        const geo = config.geo
+            ? normalizeGeo(config.geo)
+            : await haxball.Utils.getGeo();
         const proxyAgent = createProxyAgent(config.proxy);
         const creation = haxball.Room.create(
             {
@@ -364,7 +386,9 @@ class HaxballCompatibilityRoom {
                 maxPlayerCount: config.maxPlayers,
                 showInRoomList: config.public ?? false,
                 ...(config.password ? { password: config.password } : {}),
-                ...(config.noPlayer === undefined ? {} : { noPlayer: config.noPlayer }),
+                ...(config.noPlayer === undefined
+                    ? {}
+                    : { noPlayer: config.noPlayer }),
             },
             {
                 storage: {
@@ -439,17 +463,31 @@ class HaxballCompatibilityRoom {
         room.onGameStop = (byId: number) =>
             this.onGameStop(convertPlayer(room.getPlayer(byId)));
 
-        room.onPlayerAdminChange = (id: number, _isAdmin: boolean, byId: number) => {
+        room.onPlayerAdminChange = (
+            id: number,
+            _isAdmin: boolean,
+            byId: number,
+        ) => {
             const changedPlayer = convertPlayer(room.getPlayer(id));
             if (changedPlayer) {
-                this.onPlayerAdminChange(changedPlayer, convertPlayer(room.getPlayer(byId)));
+                this.onPlayerAdminChange(
+                    changedPlayer,
+                    convertPlayer(room.getPlayer(byId)),
+                );
             }
         };
 
-        room.onPlayerTeamChange = (id: number, _teamId: number, byId: number) => {
+        room.onPlayerTeamChange = (
+            id: number,
+            _teamId: number,
+            byId: number,
+        ) => {
             const changedPlayer = convertPlayer(room.getPlayer(id));
             if (changedPlayer) {
-                this.onPlayerTeamChange(changedPlayer, convertPlayer(room.getPlayer(byId)));
+                this.onPlayerTeamChange(
+                    changedPlayer,
+                    convertPlayer(room.getPlayer(byId)),
+                );
             }
         };
 
@@ -472,7 +510,10 @@ class HaxballCompatibilityRoom {
         };
 
         room.onStadiumChange = (stadium: { name: string }, byId: number) =>
-            this.onStadiumChange(stadium.name, convertPlayer(room.getPlayer(byId)));
+            this.onStadiumChange(
+                stadium.name,
+                convertPlayer(room.getPlayer(byId)),
+            );
 
         room.onRoomLink = (link: string) => this.onRoomLink(link);
 
@@ -482,16 +523,26 @@ class HaxballCompatibilityRoom {
             burst: number,
             byId: number,
         ) =>
-            this.onKickRateLimitSet(min, rate, burst, convertPlayer(room.getPlayer(byId)));
+            this.onKickRateLimitSet(
+                min,
+                rate,
+                burst,
+                convertPlayer(room.getPlayer(byId)),
+            );
 
         room.onTeamsLockChange = (value: boolean, byId: number) =>
             this.onTeamsLockChange(value, convertPlayer(room.getPlayer(byId)));
 
         room.onBeforeOperationReceived = (type: number, message: unknown) => {
-            if (type === haxball.OperationType.SendChat && isChatOperation(message)) {
+            if (
+                type === haxball.OperationType.SendChat &&
+                isChatOperation(message)
+            ) {
                 if (message.byId === 0) return true;
                 const player = convertPlayer(room.getPlayer(message.byId));
-                return player ? this.onPlayerChat(player, message.text) !== false : true;
+                return player
+                    ? this.onPlayerChat(player, message.text) !== false
+                    : true;
             }
 
             if (
@@ -542,7 +593,11 @@ class HaxballCompatibilityRoom {
         this.afterTick(() => this.room.setPlayerTeam(playerId, team));
     }
 
-    public kickPlayer(playerId: number, reason: string | null, ban: boolean): void {
+    public kickPlayer(
+        playerId: number,
+        reason: string | null,
+        ban: boolean,
+    ): void {
         this.afterTick(() => this.room.kickPlayer(playerId, reason, ban));
     }
 
@@ -599,7 +654,9 @@ class HaxballCompatibilityRoom {
         textColor: number,
         colors: number[],
     ): void {
-        this.afterTick(() => this.room.setTeamColors(team, angle, textColor, ...colors));
+        this.afterTick(() =>
+            this.room.setTeamColors(team, angle, textColor, ...colors),
+        );
     }
 
     public startGame(): void {
@@ -621,7 +678,9 @@ class HaxballCompatibilityRoom {
     }
 
     public getPlayerList(): PlayerObject[] {
-        return this.room.players.map(convertPlayer).filter((player) => player !== null);
+        return this.room.players
+            .map(convertPlayer)
+            .filter((player) => player !== null);
     }
 
     public getScores(): ScoresObject | null {
@@ -682,8 +741,13 @@ class HaxballCompatibilityRoom {
         this.afterTick(() => this.room.setPlayerAvatar(playerId, avatar, true));
     }
 
-    public setDiscProperties(discIndex: number, properties: DiscPropertiesObject): void {
-        this.afterTick(() => this.room.setDiscProperties(discIndex, properties));
+    public setDiscProperties(
+        discIndex: number,
+        properties: DiscPropertiesObject,
+    ): void {
+        this.afterTick(() =>
+            this.room.setDiscProperties(discIndex, properties),
+        );
     }
 
     public getDiscProperties(discIndex: number): DiscPropertiesObject | null {
@@ -694,10 +758,14 @@ class HaxballCompatibilityRoom {
         playerId: number,
         properties: DiscPropertiesObject,
     ): void {
-        this.afterTick(() => this.room.setPlayerDiscProperties(playerId, properties));
+        this.afterTick(() =>
+            this.room.setPlayerDiscProperties(playerId, properties),
+        );
     }
 
-    public getPlayerDiscProperties(playerId: number): DiscPropertiesObject | null {
+    public getPlayerDiscProperties(
+        playerId: number,
+    ): DiscPropertiesObject | null {
         return getDiscPropertiesObject(this.room.getPlayer(playerId)?.disc);
     }
 
@@ -918,7 +986,11 @@ class HaxballCompatibilityRoom {
         this.room.setFakePassword(fakePassword);
     }
 
-    public sendCustomEvent(type: number, data: object, targetId?: number): void {
+    public sendCustomEvent(
+        type: number,
+        data: object,
+        targetId?: number,
+    ): void {
         this.room.sendCustomEvent(type, data, targetId);
     }
 
@@ -1056,7 +1128,10 @@ class HaxballCompatibilityRoom {
         this.room.moveLibrary(libraryIndex, newIndex);
     }
 
-    public updateLibrary(libraryIndex: number, library: NodeHaxballLibrary): void {
+    public updateLibrary(
+        libraryIndex: number,
+        library: NodeHaxballLibrary,
+    ): void {
         this.room.updateLibrary(libraryIndex, library);
     }
 
@@ -1099,7 +1174,11 @@ class HaxballCompatibilityRoom {
         this.room.fakeSetPlayerAvatar(value, byId);
     }
 
-    public fakeSetPlayerAdmin(playerId: number, value: boolean, byId: number): void {
+    public fakeSetPlayerAdmin(
+        playerId: number,
+        value: boolean,
+        byId: number,
+    ): void {
         this.room.fakeSetPlayerAdmin(playerId, value, byId);
     }
 
@@ -1139,7 +1218,11 @@ class HaxballCompatibilityRoom {
         this.room.fakeAutoTeams(byId);
     }
 
-    public fakeSetPlayerTeam(playerId: number, teamId: TeamID, byId: number): void {
+    public fakeSetPlayerTeam(
+        playerId: number,
+        teamId: TeamID,
+        byId: number,
+    ): void {
         this.room.fakeSetPlayerTeam(playerId, teamId, byId);
     }
 

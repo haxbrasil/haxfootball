@@ -1,4 +1,4 @@
 allowBuilds:
-  core-js: false
-  esbuild: true
-  node-datachannel: true
+    core-js: false
+    esbuild: true
+    node-datachannel: true

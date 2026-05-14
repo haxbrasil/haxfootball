@@ -1016,7 +1016,10 @@ declare global {
         ): NodeHaxballStartStreamingReturnValue | null;
         stopStreaming(): void;
         isRecording(): boolean;
-        extrapolate(milliseconds: number, ignoreMultipleCalls?: boolean): object;
+        extrapolate(
+            milliseconds: number,
+            ignoreMultipleCalls?: boolean,
+        ): object;
         setConfig(roomConfig: NodeHaxballRoomConfig): void;
         mixConfig(roomConfig: NodeHaxballRoomConfig): void;
         addPlugin(plugin: NodeHaxballPlugin): void;

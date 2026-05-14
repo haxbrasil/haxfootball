@@ -8,15 +8,15 @@ Most methods that change room state are applied asynchronously by the room. If c
 
 ```ts
 const room = HBInit({
-  roomName: "HaxFootball",
-  maxPlayers: 30,
-  public: true,
-  noPlayer: true,
-  token: process.env.TOKEN,
+    roomName: "HaxFootball",
+    maxPlayers: 30,
+    public: true,
+    noPlayer: true,
+    token: process.env.TOKEN,
 });
 
 room.onRoomLink = (link) => {
-  console.log(link);
+    console.log(link);
 };
 ```
 
@@ -26,15 +26,15 @@ room.onRoomLink = (link) => {
 
 ```ts
 interface RoomConfigObject {
-  roomName: string;
-  playerName?: string;
-  password?: string;
-  maxPlayers: number;
-  public?: boolean;
-  geo?: { code: string; lat: number; lon: number };
-  token?: string;
-  noPlayer?: boolean;
-  proxy?: string;
+    roomName: string;
+    playerName?: string;
+    password?: string;
+    maxPlayers: number;
+    public?: boolean;
+    geo?: { code: string; lat: number; lon: number };
+    token?: string;
+    noPlayer?: boolean;
+    proxy?: string;
 }
 ```
 
@@ -705,14 +705,14 @@ Called when team lock is enabled or disabled.
 
 ```ts
 interface PlayerObject {
-  id: number;
-  name: string;
-  team: 0 | 1 | 2;
-  admin: boolean;
-  position: { x: number; y: number } | null;
-  conn: string;
-  auth?: string;
-  ip: string;
+    id: number;
+    name: string;
+    team: 0 | 1 | 2;
+    admin: boolean;
+    position: { x: number; y: number } | null;
+    conn: string;
+    auth?: string;
+    ip: string;
 }
 ```
 
@@ -720,11 +720,11 @@ interface PlayerObject {
 
 ```ts
 interface ScoresObject {
-  red: number;
-  blue: number;
-  time: number;
-  scoreLimit: number;
-  timeLimit: number;
+    red: number;
+    blue: number;
+    time: number;
+    scoreLimit: number;
+    timeLimit: number;
 }
 ```
 
@@ -732,19 +732,19 @@ interface ScoresObject {
 
 ```ts
 interface DiscPropertiesObject {
-  x?: number | null;
-  y?: number | null;
-  xspeed?: number | null;
-  yspeed?: number | null;
-  xgravity?: number | null;
-  ygravity?: number | null;
-  radius?: number | null;
-  bCoeff?: number | null;
-  invMass?: number | null;
-  damping?: number | null;
-  color?: number | null;
-  cMask?: number | null;
-  cGroup?: number | null;
+    x?: number | null;
+    y?: number | null;
+    xspeed?: number | null;
+    yspeed?: number | null;
+    xgravity?: number | null;
+    ygravity?: number | null;
+    radius?: number | null;
+    bCoeff?: number | null;
+    invMass?: number | null;
+    damping?: number | null;
+    color?: number | null;
+    cMask?: number | null;
+    cGroup?: number | null;
 }
 ```
 
@@ -769,6 +769,6 @@ const disc = room.getDiscProperties(4);
 const hasBallFlag = (disc.cGroup & room.CollisionFlags.ball) !== 0;
 
 room.setDiscProperties(5, {
-  cMask: disc.cMask | room.CollisionFlags.wall,
+    cMask: disc.cMask | room.CollisionFlags.wall,
 });
 ```

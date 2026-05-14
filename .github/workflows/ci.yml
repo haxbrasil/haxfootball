@@ -22,23 +22,25 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
-                  cache: npm
+                  node-version: 22
+
+            - name: Setup pnpm
+              run: corepack enable
 
             - name: Install dependencies
-              run: npm ci
+              run: pnpm install --frozen-lockfile
 
             - name: Build
-              run: npm run build
+              run: pnpm run build
 
             - name: Lint (Prettier check)
-              run: npm run format:ci
+              run: pnpm run format:ci
 
             - name: Typecheck
-              run: npx tsc --noEmit
+              run: pnpm exec tsc --noEmit
 
             - name: Test
-              run: npm test -- --run
+              run: pnpm test -- --run
 
             - name: Build OpenAI prompt
               if: always() && env.OPENAI_API_KEY != ''

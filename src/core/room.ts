@@ -322,9 +322,7 @@ export class Room {
         return this.room.addIpBan(...ips);
     }
 
-    public addAuthBan(
-        ...auths: string[]
-    ): Array<NodeHaxballBanEntryId | null> {
+    public addAuthBan(...auths: string[]): Array<NodeHaxballBanEntryId | null> {
         return this.room.addAuthBan(...auths);
     }
 
@@ -737,7 +735,10 @@ export class Room {
         return this.room.getDiscs(extrapolated);
     }
 
-    public getDisc(discId: number, extrapolated: boolean = false): NodeHaxballDisc {
+    public getDisc(
+        discId: number,
+        extrapolated: boolean = false,
+    ): NodeHaxballDisc {
         return this.room.getDisc(discId, extrapolated);
     }
 
@@ -813,7 +814,10 @@ export class Room {
         this.room.moveLibrary(libraryIndex, newIndex);
     }
 
-    public updateLibrary(libraryIndex: number, library: NodeHaxballLibrary): void {
+    public updateLibrary(
+        libraryIndex: number,
+        library: NodeHaxballLibrary,
+    ): void {
         this.room.updateLibrary(libraryIndex, library);
     }
 
