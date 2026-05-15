@@ -364,7 +364,7 @@ jobs:
               run: |
                   api_url="${STAGING_API_URL%/}"
                   token="$(
-                    curl --fail-with-body -fsS "$api_url/auth" \
+                    curl --fail-with-body -sS "$api_url/auth" \
                       -H 'content-type: application/json' \
                       -d "$(jq -nc --arg apiKey "$STAGING_API_KEY" '{ apiKey: $apiKey }')" |
                     jq -r '.token'
@@ -390,7 +390,7 @@ jobs:
                   api_url="${STAGING_API_URL%/}"
                   response_path="$RUNNER_TEMP/staging-upload.json"
 
-                  curl --fail-with-body -fsS \
+                  curl --fail-with-body -sS \
                     "$api_url/api/room-programs/$STAGING_ROOM_PROGRAM_ID/artifacts" \
                     -H "authorization: Bearer $TOKEN" \
                     -F "branch=$BRANCH_KEY" \
@@ -439,7 +439,7 @@ jobs:
                       }'
                   )"
 
-                  curl --fail-with-body -fsS \
+                  curl --fail-with-body -sS \
                     "$api_url/api/room-programs/$STAGING_ROOM_PROGRAM_ID/versions" \
                     -H "authorization: Bearer $TOKEN" \
                     -H 'content-type: application/json' \
@@ -448,7 +448,7 @@ jobs:
 
                   alias_body="$(jq -nc --arg version "$VERSION" '{ version: $version }')"
 
-                  curl --fail-with-body -fsS -X PUT \
+                  curl --fail-with-body -sS -X PUT \
                     "$api_url/api/room-programs/$STAGING_ROOM_PROGRAM_ID/version-aliases/$ALIAS" \
                     -H "authorization: Bearer $TOKEN" \
                     -H 'content-type: application/json' \
