@@ -164,6 +164,8 @@ type NativeModifyPlayerDataRoom = NativeRoom & {
     ) => NativeModifyPlayerDataResult | Promise<NativeModifyPlayerDataResult>;
 };
 
+type MutableHaxballEvent = NodeHaxballHaxballEvent & { byId?: number };
+
 type NativePlayerDisc = NativeDisc & {
     playerId: number | null;
     ext: NativePlayerDisc | null;
@@ -313,6 +315,12 @@ function isKickBanOperation(message: unknown): message is KickBanOperation {
         (typeof message.reason === "string" || message.reason === null) &&
         typeof message.ban === "boolean"
     );
+}
+
+function createHostEvent(event: NodeHaxballHaxballEvent): MutableHaxballEvent {
+    const hostEvent = event as MutableHaxballEvent;
+    hostEvent.byId = 0;
+    return hostEvent;
 }
 
 function getOperationNumber(
@@ -1307,6 +1315,55 @@ class HaxballCompatibilityRoom {
         auth: string,
     ): void {
         this.room.fakePlayerJoin(id, name, flag, avatar, conn, auth);
+    }
+
+    public getPlayerIdentity(playerId: number): PlayerIdentityObject | null {
+        const player = this.room.getPlayer(playerId);
+
+        if (!player) {
+            return null;
+        }
+
+        return {
+            id: player.id,
+            name: player.name,
+            flag: player.flag,
+            avatar: player.avatar ?? "",
+            conn: player.conn ?? "",
+            auth: player.auth ?? "",
+        };
+    }
+
+    public sendPlayerJoinTo(
+        identity: PlayerIdentityObject,
+        targetId: number,
+    ): void {
+        this.room.executeEventWithTarget(
+            createHostEvent(
+                haxball.EventFactory.joinRoom(
+                    identity.id,
+                    identity.name,
+                    identity.flag,
+                    identity.avatar,
+                    identity.conn,
+                    identity.auth,
+                ),
+            ),
+            targetId,
+        );
+    }
+
+    public sendPlayerLeaveTo(playerId: number, targetId: number): void {
+        this.room.executeEventWithTarget(
+            createHostEvent(
+                haxball.EventFactory.kickBanPlayer(
+                    playerId,
+                    null as unknown as string,
+                    false,
+                ),
+            ),
+            targetId,
+        );
     }
 
     public fakePlayerLeave(id: number) {
