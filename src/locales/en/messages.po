@@ -475,12 +475,12 @@ msgstr "⚠️ Quarterback selection is disabled."
 msgid "⚠️ Select a quarterback with !qb before snapping."
 msgstr "⚠️ Select a quarterback with !qb before snapping."
 
-#: src/room/manual/modules/authentication.ts:387
+#: src/room/manual/modules/authentication.ts:376
 msgid "⚠️ Sign-in is unavailable in this room."
 msgstr "⚠️ Sign-in is unavailable in this room."
 
-#: src/room/manual/modules/authentication.ts:230
-#: src/room/manual/modules/authentication.ts:413
+#: src/room/manual/modules/authentication.ts:270
+#: src/room/manual/modules/authentication.ts:398
 msgid "⚠️ Sign-in is unavailable right now. Try again in a moment."
 msgstr "⚠️ Sign-in is unavailable right now. Try again in a moment."
 
@@ -613,7 +613,7 @@ msgstr "✅ Password updated successfully."
 #~ msgstr "✅ PAT is good!"
 
 #. placeholder {0}: account.name
-#: src/room/manual/modules/authentication.ts:539
+#: src/room/manual/modules/authentication.ts:522
 msgid "✅ Signed in as {0}."
 msgstr "✅ Signed in as {0}."
 
@@ -846,7 +846,7 @@ msgstr "❌ Illegal touch by {offenderNames} before the kick"
 msgid "❌ Incorrect password."
 msgstr "❌ Incorrect password."
 
-#: src/room/manual/modules/authentication.ts:423
+#: src/room/manual/modules/authentication.ts:408
 msgid "❌ Incorrect password. Try again."
 msgstr "❌ Incorrect password. Try again."
 
@@ -1218,27 +1218,24 @@ msgstr "📘 {COMMAND_PREFIX}{0}: No description available."
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Aliases: {formattedAliases}"
 
-#: src/room/manual/modules/authentication.ts:143
-msgid "🔐 Checking your account..."
-msgstr "🔐 Checking your account..."
-
 #: src/room/manual/modules/authentication.ts:245
-msgid "🔐 Sign in before using room commands."
-msgstr "🔐 Sign in before using room commands."
+#~ msgid "🔐 Sign in before using room commands."
+#~ msgstr "🔐 Sign in before using room commands."
 
-#: src/room/manual/modules/authentication.ts:192
+#: src/room/manual/modules/authentication.ts:149
+#: src/room/manual/modules/authentication.ts:176
 msgid "🔐 Still checking your account. Please wait a moment."
 msgstr "🔐 Still checking your account. Please wait a moment."
 
-#: src/room/manual/modules/authentication.ts:272
+#: src/room/manual/modules/authentication.ts:217
 msgid "🔐 That player is signing in."
 msgstr "🔐 That player is signing in."
 
-#: src/room/manual/modules/authentication.ts:478
+#: src/room/manual/modules/authentication.ts:462
 msgid "🔐 This name is registered. Type your password in chat to sign in."
 msgstr "🔐 This name is registered. Type your password in chat to sign in."
 
-#: src/room/manual/modules/authentication.ts:208
+#: src/room/manual/modules/authentication.ts:248
 msgid "🔐 Type your password in chat to sign in."
 msgstr "🔐 Type your password in chat to sign in."
 
@@ -2030,7 +2027,7 @@ msgstr "Show the score"
 msgid "Show the tutorial link"
 msgstr "Show the tutorial link"
 
-#: src/room/manual/modules/authentication.ts:467
+#: src/room/manual/modules/authentication.ts:451
 msgid "Sign-in timed out."
 msgstr "Sign-in timed out."
 

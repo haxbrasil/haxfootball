@@ -475,14 +475,14 @@ msgstr "⚠️ A seleção de quarterback está desativada."
 msgid "⚠️ Select a quarterback with !qb before snapping."
 msgstr "⚠️ Selecione um quarterback com !qb antes do snap."
 
-#: src/room/manual/modules/authentication.ts:387
+#: src/room/manual/modules/authentication.ts:376
 msgid "⚠️ Sign-in is unavailable in this room."
-msgstr ""
+msgstr "⚠️ Login indisponível nesta sala."
 
-#: src/room/manual/modules/authentication.ts:230
-#: src/room/manual/modules/authentication.ts:413
+#: src/room/manual/modules/authentication.ts:270
+#: src/room/manual/modules/authentication.ts:398
 msgid "⚠️ Sign-in is unavailable right now. Try again in a moment."
-msgstr ""
+msgstr "⚠️ Login indisponível no momento. Tente novamente em instantes."
 
 #: src/room/manual/modules/game.ts:420
 msgid "⚠️ The game has not been started yet."
@@ -613,9 +613,9 @@ msgstr "✅ Senha atualizada com sucesso."
 #~ msgstr "✅ Extra point convertido!"
 
 #. placeholder {0}: account.name
-#: src/room/manual/modules/authentication.ts:539
+#: src/room/manual/modules/authentication.ts:522
 msgid "✅ Signed in as {0}."
-msgstr ""
+msgstr "✅ Você entrou como {0}."
 
 #: src/meta/legacy/states/extra-point-quarterback-run.ts:97
 #: src/meta/legacy/states/extra-point-run.ts:114
@@ -864,9 +864,9 @@ msgstr "❌ Toque ilegal por {offenderNames} antes do chute"
 msgid "❌ Incorrect password."
 msgstr "❌ Senha incorreta."
 
-#: src/room/manual/modules/authentication.ts:423
+#: src/room/manual/modules/authentication.ts:408
 msgid "❌ Incorrect password. Try again."
-msgstr ""
+msgstr "❌ Senha incorreta. Tente novamente."
 
 #: src/meta/legacy/states/kickoff-in-flight.ts:91
 msgid "❌ Kickoff out of bounds"
@@ -1236,29 +1236,26 @@ msgstr "📘 {COMMAND_PREFIX}{0}: Sem descrição disponível."
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Atalhos: {formattedAliases}"
 
-#: src/room/manual/modules/authentication.ts:143
-msgid "🔐 Checking your account..."
-msgstr ""
-
 #: src/room/manual/modules/authentication.ts:245
-msgid "🔐 Sign in before using room commands."
-msgstr ""
+#~ msgid "🔐 Sign in before using room commands."
+#~ msgstr "🔐 Faça login antes de usar comandos da sala."
 
-#: src/room/manual/modules/authentication.ts:192
+#: src/room/manual/modules/authentication.ts:149
+#: src/room/manual/modules/authentication.ts:176
 msgid "🔐 Still checking your account. Please wait a moment."
-msgstr ""
+msgstr "🔐 Ainda estamos verificando sua conta. Aguarde um momento."
 
-#: src/room/manual/modules/authentication.ts:272
+#: src/room/manual/modules/authentication.ts:217
 msgid "🔐 That player is signing in."
-msgstr ""
+msgstr "🔐 Esse jogador está fazendo login."
 
-#: src/room/manual/modules/authentication.ts:478
+#: src/room/manual/modules/authentication.ts:462
 msgid "🔐 This name is registered. Type your password in chat to sign in."
-msgstr ""
+msgstr "🔐 Este nome está registrado. Digite sua senha no chat para entrar."
 
-#: src/room/manual/modules/authentication.ts:208
+#: src/room/manual/modules/authentication.ts:248
 msgid "🔐 Type your password in chat to sign in."
-msgstr ""
+msgstr "🔐 Digite sua senha no chat para entrar."
 
 #. placeholder {0}: formatCommands(adminCommands)
 #: src/room/manual/modules/room.ts:242
@@ -2048,9 +2045,9 @@ msgstr "Mostrar o placar"
 msgid "Show the tutorial link"
 msgstr "Mostrar o link do tutorial"
 
-#: src/room/manual/modules/authentication.ts:467
+#: src/room/manual/modules/authentication.ts:451
 msgid "Sign-in timed out."
-msgstr ""
+msgstr "Tempo para login esgotado."
 
 #: src/room/manual/index.ts:237
 #~ msgid "The game has not been started yet."

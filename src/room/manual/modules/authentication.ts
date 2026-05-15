@@ -103,13 +103,6 @@ export function createAuthenticationModule({
 
             sessions.set(player.id, { kind: "resolving", token });
 
-            room.send({
-                message: t`🔐 Checking your account...`,
-                color: COLOR.SYSTEM,
-                to: player.id,
-                sound: "notification",
-            });
-
             void resolveJoinedPlayer({
                 room,
                 player,
