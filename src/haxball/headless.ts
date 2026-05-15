@@ -240,15 +240,6 @@ declare global {
         avatar?: string;
     } | null | void;
 
-    type PlayerIdentityObject = {
-        id: number;
-        name: string;
-        flag: string;
-        avatar: string;
-        conn: string;
-        auth: string;
-    };
-
     type NodeHaxballBanEntryId = number;
 
     type NodeHaxballIPv4Range = { ip: number; mask: number };
@@ -1156,12 +1147,6 @@ declare global {
             onBeforePlayerJoin?: (
                 player: PlayerJoinDataObject,
             ) => PlayerJoinDataResponse | Promise<PlayerJoinDataResponse>;
-            getPlayerIdentity(playerId: number): PlayerIdentityObject | null;
-            sendPlayerJoinTo(
-                identity: PlayerIdentityObject,
-                targetId: number,
-            ): void;
-            sendPlayerLeaveTo(playerId: number, targetId: number): void;
             /**
              * Cancels room creation while opening, or leaves after open.
              */

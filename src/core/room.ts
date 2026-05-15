@@ -38,8 +38,6 @@ export type FakePlayerIdentity = {
     auth: string;
 };
 
-export type PlayerIdentity = FakePlayerIdentity;
-
 type DefaultStadiumName =
     | "Classic"
     | "Easy"
@@ -728,18 +726,6 @@ export class Room {
     ): void {
         this.room.fakePlayerJoin(id, name, flag, avatar, conn, auth);
         this.invalidatePlayerListCache();
-    }
-
-    public getPlayerIdentity(playerId: number): PlayerIdentity | null {
-        return this.room.getPlayerIdentity(playerId);
-    }
-
-    public sendPlayerJoinTo(identity: PlayerIdentity, targetId: number): void {
-        this.room.sendPlayerJoinTo(identity, targetId);
-    }
-
-    public sendPlayerLeaveTo(playerId: number, targetId: number): void {
-        this.room.sendPlayerLeaveTo(playerId, targetId);
     }
 
     public fakePlayerLeave(playerId: number): FakePlayerIdentity {

@@ -5,7 +5,7 @@ import {
     PlayerJoinData,
     PlayerJoinDataResponse,
 } from "@core/module";
-import { PlayerIdentity, Room } from "@core/room";
+import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
 import { t } from "@lingui/core/macro";
 import type {
@@ -22,7 +22,6 @@ type SigningInSession = {
     kind: "signing-in";
     account: SessionAccount;
     playerId: string;
-    identity: PlayerIdentity;
     timeout: ReturnType<typeof setTimeout>;
 };
 
@@ -58,7 +57,6 @@ type PreJoinSession =
           kind: "password-required";
           account: SessionAccount;
           playerId: string;
-          identity: PlayerIdentity;
       };
 
 type SessionIdentityPlayer = Pick<
@@ -365,7 +363,6 @@ async function resolvePlayerBeforeJoin({
                     kind: "password-required",
                     account: result.data.account,
                     playerId: result.data.playerId,
-                    identity: createPlayerIdentity(player),
                 });
                 return;
         }
@@ -415,7 +412,6 @@ function acceptPreResolvedPlayer({
                 playerId,
                 account: session.account,
                 backendPlayerId: session.playerId,
-                identity: session.identity,
             });
             return;
     }
@@ -540,7 +536,6 @@ async function resolveJoinedPlayer({
                 playerId: player.id,
                 account: result.data.account,
                 backendPlayerId: result.data.playerId,
-                identity: room.getPlayerIdentity(player.id) ?? undefined,
             });
             return;
     }
@@ -623,21 +618,13 @@ function requirePassword({
     playerId,
     account,
     backendPlayerId,
-    identity,
 }: {
     room: Room;
     playerId: number;
     account: SessionAccount;
     backendPlayerId: string;
-    identity?: PlayerIdentity | undefined;
 }): void {
     if (!room.getPlayer(playerId)) {
-        return;
-    }
-
-    const playerIdentity = identity ?? room.getPlayerIdentity(playerId);
-
-    if (!playerIdentity) {
         return;
     }
 
@@ -657,11 +644,8 @@ function requirePassword({
         kind: "signing-in",
         account,
         playerId: backendPlayerId,
-        identity: playerIdentity,
         timeout,
     });
-
-    hideSigningInPlayer(room, playerId);
 
     room.send({
         message: t`🔐 This name is registered. Type your password in chat to sign in.`,
@@ -688,7 +672,6 @@ function acceptGuest({
 
     sessions.set(playerId, { kind: "guest", playerId: backendPlayerId });
 
-    reconcileAcceptedPlayerVisibility(room, playerId);
     releasePlayerJoin(room, playerId, downstreamModules);
 }
 
@@ -708,16 +691,12 @@ function acceptSignedIn({
     downstreamModules: Module[];
 }): void {
     const player = room.getPlayer(playerId);
-    const previousSession = sessions.get(playerId);
 
     if (!player) {
         return;
     }
 
-    if (
-        player.name !== canonicalName &&
-        previousSession?.kind !== "signing-in"
-    ) {
+    if (player.name !== canonicalName) {
         renamingPlayerIds.add(playerId);
         room.renamePlayer(player, canonicalName);
     }
@@ -728,15 +707,6 @@ function acceptSignedIn({
         playerId: backendPlayerId,
     });
 
-    if (previousSession?.kind === "signing-in") {
-        revealSigningInPlayer(room, {
-            ...previousSession.identity,
-            name: canonicalName,
-        });
-    } else {
-        reconcileAcceptedPlayerVisibility(room, playerId);
-    }
-
     room.send({
         message: t`✅ Signed in as ${account.name}.`,
         color: COLOR.SUCCESS,
@@ -745,55 +715,6 @@ function acceptSignedIn({
     });
 
     releasePlayerJoin(room, playerId, downstreamModules);
-}
-
-function hideSigningInPlayer(room: Room, playerId: number): void {
-    for (const player of room.getPlayerList()) {
-        if (player.id === playerId) {
-            continue;
-        }
-
-        room.sendPlayerLeaveTo(playerId, player.id);
-        room.sendPlayerLeaveTo(player.id, playerId);
-    }
-}
-
-function reconcileAcceptedPlayerVisibility(room: Room, playerId: number): void {
-    for (const player of room.getPlayerList()) {
-        if (player.id === playerId || !isAuthenticationPending(player.id)) {
-            continue;
-        }
-
-        room.sendPlayerLeaveTo(player.id, playerId);
-        room.sendPlayerLeaveTo(playerId, player.id);
-    }
-}
-
-function revealSigningInPlayer(room: Room, identity: PlayerIdentity): void {
-    for (const player of room.getPlayerList()) {
-        if (player.id === identity.id || isAuthenticationPending(player.id)) {
-            continue;
-        }
-
-        const playerIdentity = room.getPlayerIdentity(player.id);
-
-        if (playerIdentity) {
-            room.sendPlayerJoinTo(playerIdentity, identity.id);
-        }
-
-        room.sendPlayerJoinTo(identity, player.id);
-    }
-}
-
-function createPlayerIdentity(player: PlayerJoinData): PlayerIdentity {
-    return {
-        id: player.id,
-        name: player.name,
-        flag: player.flag,
-        avatar: player.avatar,
-        conn: player.conn ?? "",
-        auth: player.auth ?? "",
-    };
 }
 
 function releasePlayerJoin(
