@@ -106,6 +106,7 @@ export class Room {
     private previousStadium: TrackedStadium | null = null;
     private pendingStadiumName: string | null = null;
     private registeredCommands: RegisteredCommand[] = [];
+    private announcementRecipientFilters: AnnouncementTargetFilter[] = [];
 
     constructor(private room: RoomObject) {}
 
@@ -169,6 +170,41 @@ export class Room {
         }));
     }
 
+    public addAnnouncementRecipientFilter(
+        filter: AnnouncementTargetFilter,
+    ): () => void {
+        this.announcementRecipientFilters.push(filter);
+
+        return () => {
+            this.announcementRecipientFilters =
+                this.announcementRecipientFilters.filter(
+                    (currentFilter) => currentFilter !== filter,
+                );
+        };
+    }
+
+    private canReceiveAnnouncement(player: PlayerObject): boolean {
+        return this.announcementRecipientFilters.every((filter) =>
+            filter(player),
+        );
+    }
+
+    private sendAnnouncementToPlayer(
+        message: string,
+        playerId: number,
+        color: number | null,
+        style: ChatStyle,
+        sound: ChatSoundString,
+    ): void {
+        this.room.sendAnnouncement(
+            message,
+            playerId,
+            color,
+            style,
+            toChatSound(sound),
+        );
+    }
+
     public send({
         message,
         color = null,
@@ -179,13 +215,14 @@ export class Room {
         if (typeof to === "function") {
             this.getPlayerList()
                 .filter((player) => to(player))
+                .filter((player) => this.canReceiveAnnouncement(player))
                 .forEach((player) => {
-                    this.room.sendAnnouncement(
+                    this.sendAnnouncementToPlayer(
                         message,
                         player.id,
                         color,
                         style,
-                        toChatSound(sound),
+                        sound,
                     );
                 });
 
@@ -193,17 +230,19 @@ export class Room {
         }
 
         if (to === "mixed") {
-            this.getPlayerList().forEach((player) => {
-                const isTeamPlayer = player.team === 1 || player.team === 2;
+            this.getPlayerList()
+                .filter((player) => this.canReceiveAnnouncement(player))
+                .forEach((player) => {
+                    const isTeamPlayer = player.team === 1 || player.team === 2;
 
-                this.room.sendAnnouncement(
-                    message,
-                    player.id,
-                    color,
-                    isTeamPlayer ? style : "normal",
-                    toChatSound(isTeamPlayer ? sound : "normal"),
-                );
-            });
+                    this.sendAnnouncementToPlayer(
+                        message,
+                        player.id,
+                        color,
+                        isTeamPlayer ? style : "normal",
+                        isTeamPlayer ? sound : "normal",
+                    );
+                });
 
             return;
         }
@@ -214,13 +253,14 @@ export class Room {
 
             this.getPlayerList()
                 .filter((player) => teamIds.includes(player.team))
+                .filter((player) => this.canReceiveAnnouncement(player))
                 .forEach((player) => {
-                    this.room.sendAnnouncement(
+                    this.sendAnnouncementToPlayer(
                         message,
                         player.id,
                         color,
                         style,
-                        toChatSound(sound),
+                        sound,
                     );
                 });
 
@@ -228,18 +268,15 @@ export class Room {
         }
 
         if (Array.isArray(to)) {
-            const ids = to.map((entry) =>
-                typeof entry === "number" ? entry : entry.id,
-            );
+            const ids = to
+                .map((entry) => (typeof entry === "number" ? entry : entry.id))
+                .filter((id) => {
+                    const player = this.getPlayer(id);
+                    return !player || this.canReceiveAnnouncement(player);
+                });
 
             for (const id of ids) {
-                this.room.sendAnnouncement(
-                    message,
-                    id,
-                    color,
-                    style,
-                    toChatSound(sound),
-                );
+                this.sendAnnouncementToPlayer(message, id, color, style, sound);
             }
 
             return;
@@ -257,9 +294,36 @@ export class Room {
             return;
         }
 
+        if (to === undefined || to === null) {
+            if (this.announcementRecipientFilters.length === 0) {
+                this.room.sendAnnouncement(
+                    message,
+                    null,
+                    color,
+                    style,
+                    toChatSound(sound),
+                );
+                return;
+            }
+
+            this.getPlayerList()
+                .filter((player) => this.canReceiveAnnouncement(player))
+                .forEach((player) => {
+                    this.sendAnnouncementToPlayer(
+                        message,
+                        player.id,
+                        color,
+                        style,
+                        sound,
+                    );
+                });
+
+            return;
+        }
+
         this.room.sendAnnouncement(
             message,
-            to ?? null,
+            to,
             color,
             style,
             toChatSound(sound),
@@ -267,6 +331,17 @@ export class Room {
     }
 
     public chat(message: string, to?: number | null): void {
+        if (
+            (to === undefined || to === null) &&
+            this.announcementRecipientFilters.length > 0
+        ) {
+            this.getPlayerList()
+                .filter((player) => this.canReceiveAnnouncement(player))
+                .forEach((player) => this.room.sendChat(message, player.id));
+
+            return;
+        }
+
         this.room.sendChat(message, to);
     }
 
@@ -648,6 +723,20 @@ export class Room {
         const player = this.room.fakePlayerLeave(playerId);
         this.invalidatePlayerListCache();
         return player;
+    }
+
+    public renamePlayer(player: PlayerObject, name: string): void {
+        const identity = this.room.fakePlayerLeave(player.id);
+
+        this.room.fakePlayerJoin(
+            player.id,
+            name,
+            identity.flag,
+            identity.avatar,
+            identity.conn,
+            identity.auth,
+        );
+        this.invalidatePlayerListCache();
     }
 
     public fakeKickPlayer(

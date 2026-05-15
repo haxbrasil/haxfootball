@@ -34,12 +34,16 @@ export class Module {
             : false;
     }
 
-    onPlayerJoin(handler: (room: Room, player: PlayerObject) => void): this {
+    onPlayerJoin(
+        handler: (room: Room, player: PlayerObject) => boolean | void,
+    ): this {
         this.events.push(["onPlayerJoin", handler]);
         return this;
     }
 
-    onPlayerLeave(handler: (room: Room, player: PlayerObject) => void): this {
+    onPlayerLeave(
+        handler: (room: Room, player: PlayerObject) => boolean | void,
+    ): this {
         this.events.push(["onPlayerLeave", handler]);
         return this;
     }
@@ -68,6 +72,18 @@ export class Module {
         ) => CommandResponse | void,
     ): this {
         this.events.push(["onPlayerSendCommand", handler]);
+        return this;
+    }
+
+    onBeforePlayerSendCommand(
+        handler: (
+            room: Room,
+            player: PlayerObject,
+            command: CommandSpec,
+            rawMessage: string,
+        ) => boolean | void,
+    ): this {
+        this.events.push(["onBeforePlayerSendCommand", handler]);
         return this;
     }
 
@@ -129,6 +145,13 @@ export class Module {
         ) => boolean | void,
     ): this {
         this.events.push(["onBeforeKick", handler]);
+        return this;
+    }
+
+    onBeforeOperation(
+        handler: (room: Room, operation: RoomOperationObject) => boolean | void,
+    ): this {
+        this.events.push(["onBeforeOperation", handler]);
         return this;
     }
 
@@ -288,7 +311,10 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
         (eventName: string) =>
         (...args: any[]) => {
             room.invalidateCaches();
-            modules.forEach((module) => module.call(eventName, room, ...args));
+            return modules.reduce((allow, module) => {
+                const moduleAllows = module.call(eventName, room, ...args);
+                return allow && moduleAllows;
+            }, true);
         };
 
     const shouldUndoStadiumChange = (response: unknown): boolean => {
@@ -342,6 +368,22 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
             const command = parseCommand(message);
 
             if (command) {
+                const allowCommand = modules.reduce((allow, module) => {
+                    const moduleAllows = module.call(
+                        "onBeforePlayerSendCommand",
+                        room,
+                        player,
+                        command,
+                        message,
+                    );
+
+                    return allow && moduleAllows;
+                }, true);
+
+                if (!allowCommand) {
+                    return false;
+                }
+
                 const bufferedMessages: Array<
                     | { type: "send"; args: Parameters<Room["send"]>[0] }
                     | {
@@ -440,6 +482,7 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
     roomObject.onPlayerAdminChange = emit("onPlayerAdminChange");
     roomObject.onPlayerTeamChange = emit("onPlayerTeamChange");
     roomObject.onBeforeKick = emitBeforeKick();
+    roomObject.onBeforeOperation = emit("onBeforeOperation");
     roomObject.onPlayerKicked = emit("onPlayerKicked");
     roomObject.onGameTick = emit("onGameTick");
     roomObject.onGamePause = emit("onGamePause");

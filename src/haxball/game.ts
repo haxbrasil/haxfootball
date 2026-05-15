@@ -167,6 +167,13 @@ type KickBanOperation = {
     ban: boolean;
 };
 
+type OperationMessage = {
+    byId?: unknown;
+    id?: unknown;
+    playerId?: unknown;
+    playerIdList?: unknown;
+};
+
 const haxball = createHaxballApi();
 
 function normalizeGeo(geo: RoomGeoLocation): {
@@ -294,6 +301,99 @@ function isKickBanOperation(message: unknown): message is KickBanOperation {
     );
 }
 
+function getOperationNumber(
+    message: OperationMessage,
+    key: keyof OperationMessage,
+): number | null {
+    const value = message[key];
+    return typeof value === "number" ? value : null;
+}
+
+function getOperationNumberList(
+    message: OperationMessage,
+    key: keyof OperationMessage,
+): number[] {
+    const value = message[key];
+
+    if (!Array.isArray(value)) {
+        return [];
+    }
+
+    return value.filter((item): item is number => typeof item === "number");
+}
+
+function toRoomOperationKind(type: number): RoomOperationKind {
+    switch (type) {
+        case haxball.OperationType.SendChat:
+            return "chat";
+        case haxball.OperationType.SendChatIndicator:
+            return "chat-indicator";
+        case haxball.OperationType.SendInput:
+            return "input";
+        case haxball.OperationType.KickBanPlayer:
+            return "kick-ban";
+        case haxball.OperationType.StartGame:
+            return "start-game";
+        case haxball.OperationType.StopGame:
+            return "stop-game";
+        case haxball.OperationType.PauseResumeGame:
+            return "pause-game";
+        case haxball.OperationType.SetGamePlayLimit:
+            return "game-limit";
+        case haxball.OperationType.SetStadium:
+            return "stadium";
+        case haxball.OperationType.SetPlayerTeam:
+            return "player-team";
+        case haxball.OperationType.SetTeamsLock:
+            return "teams-lock";
+        case haxball.OperationType.SetPlayerAdmin:
+            return "player-admin";
+        case haxball.OperationType.AutoTeams:
+            return "auto-teams";
+        case haxball.OperationType.SetPlayerSync:
+            return "player-sync";
+        case haxball.OperationType.SetAvatar:
+            return "avatar";
+        case haxball.OperationType.SetTeamColors:
+            return "team-colors";
+        case haxball.OperationType.ReorderPlayers:
+            return "reorder-players";
+        case haxball.OperationType.SetKickRateLimit:
+            return "kick-rate-limit";
+        default:
+            return "other";
+    }
+}
+
+function createRoomOperation(
+    room: NativeRoom,
+    type: number,
+    message: unknown,
+): RoomOperationObject {
+    const operationMessage =
+        typeof message === "object" && message !== null
+            ? (message as OperationMessage)
+            : {};
+    const byId = getOperationNumber(operationMessage, "byId");
+    const byPlayer =
+        byId && byId !== 0 ? convertPlayer(room.getPlayer(byId)) : null;
+    const targetIds = [
+        getOperationNumber(operationMessage, "id"),
+        getOperationNumber(operationMessage, "playerId"),
+        ...getOperationNumberList(operationMessage, "playerIdList"),
+    ].filter((id): id is number => id !== null && id !== byId);
+
+    return {
+        kind: toRoomOperationKind(type),
+        rawType: type,
+        byPlayer,
+        targetPlayers: targetIds
+            .map((id) => convertPlayer(room.getPlayer(id)))
+            .filter((player): player is PlayerObject => player !== null),
+        message,
+    };
+}
+
 class HaxballCompatibilityRoom {
     public readonly CollisionFlags: CollisionFlagsObject = {
         all: 63,
@@ -315,8 +415,8 @@ class HaxballCompatibilityRoom {
     private cancelCreation: (() => void) | null = null;
     private sendRecaptchaToken: ((token: string) => void) | null = null;
 
-    public onPlayerJoin = (_player: PlayerObject): void => {};
-    public onPlayerLeave = (_player: PlayerObject): void => {};
+    public onPlayerJoin = (_player: PlayerObject): boolean | void => {};
+    public onPlayerLeave = (_player: PlayerObject): boolean | void => {};
     public onTeamVictory = (_scores: ScoresObject): void => {};
     public onPlayerChat = (_player: PlayerObject, _message: string): boolean =>
         true;
@@ -338,6 +438,8 @@ class HaxballCompatibilityRoom {
         _ban: boolean,
         _byPlayer: PlayerObject,
     ): boolean => true;
+    public onBeforeOperation = (_operation: RoomOperationObject): boolean =>
+        true;
     public onPlayerKicked = (
         _kickedPlayer: PlayerObject,
         _reason: string,
@@ -534,6 +636,14 @@ class HaxballCompatibilityRoom {
             this.onTeamsLockChange(value, convertPlayer(room.getPlayer(byId)));
 
         room.onBeforeOperationReceived = (type: number, message: unknown) => {
+            if (
+                this.onBeforeOperation(
+                    createRoomOperation(room, type, message),
+                ) === false
+            ) {
+                return false;
+            }
+
             if (
                 type === haxball.OperationType.SendChat &&
                 isChatOperation(message)

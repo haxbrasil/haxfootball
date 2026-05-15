@@ -235,12 +235,12 @@ msgstr "•"
 #~ msgstr "• Bola fora de campo • sem ganho."
 
 #. placeholder {0}: disabledFlags.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:300
+#: src/room/manual/modules/game.ts:301
 msgid "• Disabled: {0}"
 msgstr "• Desativadas: {0}"
 
 #. placeholder {0}: enabledFlags.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:294
+#: src/room/manual/modules/game.ts:295
 msgid "• Enabled: {0}"
 msgstr "• Ativas: {0}"
 
@@ -328,7 +328,7 @@ msgstr "⚙️ {0} definiu {1} como quarterback."
 #~ msgstr ""
 
 #. placeholder {0}: player.name
-#: src/room/manual/modules/game.ts:396
+#: src/room/manual/modules/game.ts:397
 msgid "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 msgstr "⚙️ {0} definiu {requestedFlagName} como {newFlagState}."
 
@@ -350,16 +350,16 @@ msgstr "⚙️ {0} definiu a descida para {down}."
 #~ msgid "⚙️ {requestedFlagName}: {0}."
 #~ msgstr "⚙️ {requestedFlagName}: {0}."
 
-#: src/room/manual/modules/game.ts:341
+#: src/room/manual/modules/game.ts:342
 msgid "⚙️ {requestedFlagName}: {flagState}."
 msgstr "⚙️ {requestedFlagName}: {flagState}."
 
-#: src/room/manual/modules/game.ts:288
+#: src/room/manual/modules/game.ts:289
 msgid "⚙️ Available flags:"
 msgstr "⚙️ Flags disponíveis:"
 
 #. placeholder {0}: flagNames.join(", ") || t`none`
-#: src/room/manual/modules/game.ts:279
+#: src/room/manual/modules/game.ts:280
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Flags disponíveis: {0}."
 
@@ -367,11 +367,11 @@ msgstr "⚙️ Flags disponíveis: {0}."
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal está disponível somente no campo da defesa."
 
-#: src/room/manual/modules/game.ts:367
+#: src/room/manual/modules/game.ts:368
 msgid "⚠️ Flags cannot be changed while a game is in progress."
 msgstr "⚠️ As flags não podem ser alteradas com o jogo em andamento."
 
-#: src/room/manual/modules/game.ts:379
+#: src/room/manual/modules/game.ts:380
 msgid "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 msgstr "⚠️ Valor inválido. Use true/false, on/off, 1/0, yes/no."
 
@@ -413,7 +413,7 @@ msgstr "⚠️ Apenas admins podem pedir reposicionamento."
 msgid "⚠️ Only admins can change game positioning."
 msgstr "⚠️ Apenas admins podem alterar o posicionamento do jogo."
 
-#: src/room/manual/modules/game.ts:357
+#: src/room/manual/modules/game.ts:358
 msgid "⚠️ Only admins can modify flags."
 msgstr "⚠️ Apenas admins podem alterar flags."
 
@@ -475,7 +475,16 @@ msgstr "⚠️ A seleção de quarterback está desativada."
 msgid "⚠️ Select a quarterback with !qb before snapping."
 msgstr "⚠️ Selecione um quarterback com !qb antes do snap."
 
-#: src/room/manual/modules/game.ts:419
+#: src/room/manual/modules/authentication.ts:387
+msgid "⚠️ Sign-in is unavailable in this room."
+msgstr ""
+
+#: src/room/manual/modules/authentication.ts:230
+#: src/room/manual/modules/authentication.ts:413
+msgid "⚠️ Sign-in is unavailable right now. Try again in a moment."
+msgstr ""
+
+#: src/room/manual/modules/game.ts:420
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ A partida ainda não foi iniciada."
 
@@ -491,7 +500,7 @@ msgstr "⚠️ Tentativa de 2 pontos não está mais disponível"
 msgid "⚠️ Unknown command. Use !help to see available commands."
 msgstr "⚠️ Comando desconhecido. Use !help para ver os comandos disponíveis."
 
-#: src/room/manual/modules/game.ts:322
+#: src/room/manual/modules/game.ts:323
 msgid "⚠️ Unknown flag. Use !flags to list available flags."
 msgstr "⚠️ Flag desconhecida. Use !flags para listar as flags disponíveis."
 
@@ -503,7 +512,7 @@ msgstr "⚠️ Uso: !distance <1-20>."
 msgid "⚠️ Usage: !down <1-4>."
 msgstr "⚠️ Uso: !down <1-4>."
 
-#: src/room/manual/modules/game.ts:310
+#: src/room/manual/modules/game.ts:311
 msgid "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 msgstr "⚠️ Uso: !flag <FLAG_NAME> [VALUE]."
 
@@ -566,7 +575,7 @@ msgstr "⚠️ Você não pode chutar punt enquanto um companheiro estiver além
 msgid "⚠️ You cannot snap while a teammate is past the LOS."
 msgstr "⚠️ Você não pode dar hike enquanto um companheiro estiver além da linha de scrimmage."
 
-#: src/room/manual/modules/game.ts:418
+#: src/room/manual/modules/game.ts:419
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ Você não pode usar esse comando agora."
 
@@ -602,6 +611,11 @@ msgstr "✅ Senha atualizada com sucesso."
 #: src/meta/legacy/states/extra-point-kick.ts:66
 #~ msgid "✅ PAT is good!"
 #~ msgstr "✅ Extra point convertido!"
+
+#. placeholder {0}: account.name
+#: src/room/manual/modules/authentication.ts:539
+msgid "✅ Signed in as {0}."
+msgstr ""
 
 #: src/meta/legacy/states/extra-point-quarterback-run.ts:97
 #: src/meta/legacy/states/extra-point-run.ts:114
@@ -850,6 +864,10 @@ msgstr "❌ Toque ilegal por {offenderNames} antes do chute"
 msgid "❌ Incorrect password."
 msgstr "❌ Senha incorreta."
 
+#: src/room/manual/modules/authentication.ts:423
+msgid "❌ Incorrect password. Try again."
+msgstr ""
+
 #: src/meta/legacy/states/kickoff-in-flight.ts:91
 msgid "❌ Kickoff out of bounds"
 msgstr "❌ Kickoff fora de campo"
@@ -1027,11 +1045,11 @@ msgstr "🏈 {0} deu o hike"
 msgid "🏈 Game: {0}"
 msgstr "🏈 Jogo: {0}"
 
-#: src/room/manual/index.ts:7
+#: src/room/manual/index.ts:12
 msgid "🏈 HaxFootball - American Football 🏈"
 msgstr "🏈 HaxFootball - Futebol Americano 🏈"
 
-#: src/room/manual/modules/game.ts:409
+#: src/room/manual/modules/game.ts:410
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
@@ -1217,6 +1235,30 @@ msgstr "📘 {COMMAND_PREFIX}{0}: Sem descrição disponível."
 #: src/room/manual/modules/room.ts:301
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Atalhos: {formattedAliases}"
+
+#: src/room/manual/modules/authentication.ts:143
+msgid "🔐 Checking your account..."
+msgstr ""
+
+#: src/room/manual/modules/authentication.ts:245
+msgid "🔐 Sign in before using room commands."
+msgstr ""
+
+#: src/room/manual/modules/authentication.ts:192
+msgid "🔐 Still checking your account. Please wait a moment."
+msgstr ""
+
+#: src/room/manual/modules/authentication.ts:272
+msgid "🔐 That player is signing in."
+msgstr ""
+
+#: src/room/manual/modules/authentication.ts:478
+msgid "🔐 This name is registered. Type your password in chat to sign in."
+msgstr ""
+
+#: src/room/manual/modules/authentication.ts:208
+msgid "🔐 Type your password in chat to sign in."
+msgstr ""
 
 #. placeholder {0}: formatCommands(adminCommands)
 #: src/room/manual/modules/room.ts:242
@@ -1426,7 +1468,7 @@ msgstr "🛡️ INTERCEPTAÇÃO de {0}!"
 msgid "Already connected ({0})."
 msgstr "Você já está conectado ({0})."
 
-#: src/room/manual/modules/game.ts:176
+#: src/room/manual/modules/game.ts:177
 msgid "Attempt a field goal"
 msgstr "Tentar um field goal"
 
@@ -1625,7 +1667,7 @@ msgstr "field goal é bom!"
 msgid "FIRST DOWN!"
 msgstr "FIRST DOWN!"
 
-#: src/room/manual/modules/game.ts:149
+#: src/room/manual/modules/game.ts:150
 msgid "Game ended in a tie!"
 msgstr "Jogo terminou empatado!"
 
@@ -1697,7 +1739,7 @@ msgstr "Retorno de kickoff"
 msgid "kickoff return touchdown by {0}!"
 msgstr "touchdown no retorno de kickoff por {0}!"
 
-#: src/room/manual/modules/game.ts:231
+#: src/room/manual/modules/game.ts:232
 msgid "List all config flags"
 msgstr "Listar todas as flags de configuração"
 
@@ -1764,9 +1806,9 @@ msgstr "Sem ganho"
 msgid "no gain."
 msgstr "sem ganho."
 
-#: src/room/manual/modules/game.ts:279
-#: src/room/manual/modules/game.ts:294
-#: src/room/manual/modules/game.ts:300
+#: src/room/manual/modules/game.ts:280
+#: src/room/manual/modules/game.ts:295
+#: src/room/manual/modules/game.ts:301
 msgid "none"
 msgstr "nenhuma"
 
@@ -1835,7 +1877,7 @@ msgstr "Retorno de punt"
 msgid "punt return touchdown by {0}!"
 msgstr "touchdown no retorno de punt por {0}!"
 
-#: src/room/manual/modules/game.ts:171
+#: src/room/manual/modules/game.ts:172
 msgid "Punt the ball"
 msgstr "Chutar punt"
 
@@ -1901,7 +1943,7 @@ msgstr "Remover a senha da sala"
 msgid "replay the try."
 msgstr "repete a tentativa."
 
-#: src/room/manual/modules/game.ts:211
+#: src/room/manual/modules/game.ts:212
 msgid "Reposition players"
 msgstr "Reposicionar jogadores"
 
@@ -1962,19 +2004,19 @@ msgstr "SAFETY!"
 #~ msgid "Set or clear the current QB"
 #~ msgstr "Definir ou remover o QB atual"
 
-#: src/room/manual/modules/game.ts:221
+#: src/room/manual/modules/game.ts:222
 msgid "Set or clear the current quarterback"
 msgstr "Definir ou remover o quarterback atual"
 
-#: src/room/manual/modules/game.ts:186
+#: src/room/manual/modules/game.ts:187
 msgid "Set the current down"
 msgstr "Definir a descida atual"
 
-#: src/room/manual/modules/game.ts:181
+#: src/room/manual/modules/game.ts:182
 msgid "Set the distance to first down"
 msgstr "Definir a distância para o first down"
 
-#: src/room/manual/modules/game.ts:191
+#: src/room/manual/modules/game.ts:192
 msgid "Set the line of scrimmage"
 msgstr "Definir a linha de scrimmage"
 
@@ -1986,7 +2028,7 @@ msgstr "Definir a senha da sala"
 msgid "Show available commands or details for one command"
 msgstr "Mostrar comandos disponíveis ou detalhes de um comando"
 
-#: src/room/manual/modules/game.ts:206
+#: src/room/manual/modules/game.ts:207
 msgid "Show game info"
 msgstr "Mostrar informações da partida"
 
@@ -1994,17 +2036,21 @@ msgstr "Mostrar informações da partida"
 msgid "Show the Discord invite link"
 msgstr "Mostrar o link de convite do Discord"
 
-#: src/room/manual/modules/game.ts:196
+#: src/room/manual/modules/game.ts:197
 msgid "Show the game version"
 msgstr "Mostrar a versão do jogo"
 
-#: src/room/manual/modules/game.ts:216
+#: src/room/manual/modules/game.ts:217
 msgid "Show the score"
 msgstr "Mostrar o placar"
 
 #: src/room/manual/modules/room.ts:53
 msgid "Show the tutorial link"
 msgstr "Mostrar o link do tutorial"
+
+#: src/room/manual/modules/authentication.ts:467
+msgid "Sign-in timed out."
+msgstr ""
 
 #: src/room/manual/index.ts:237
 #~ msgid "The game has not been started yet."
@@ -2093,16 +2139,16 @@ msgstr "tentativa de 2 pontos é boa!"
 msgid "two-point try is no longer available."
 msgstr "tentativa de 2 pontos não está mais disponível."
 
-#: src/room/manual/modules/game.ts:201
+#: src/room/manual/modules/game.ts:202
 msgid "Undo the last play"
 msgstr "Desfazer a última jogada"
 
 #. placeholder {0}: formatTeamName(winnerTeam)
-#: src/room/manual/modules/game.ts:158
+#: src/room/manual/modules/game.ts:159
 msgid "Victory for the {0} team!"
 msgstr "Vitória do time {0}!"
 
-#: src/room/manual/modules/game.ts:226
+#: src/room/manual/modules/game.ts:227
 msgid "View or set a config flag"
 msgstr "Ver ou alterar uma flag de configuração"
 

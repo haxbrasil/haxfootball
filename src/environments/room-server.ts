@@ -7,7 +7,10 @@ import { initI18n } from "@i18n";
 async function bootstrap() {
     initI18n(env.language);
 
-    const { getConfig, modules } = await import("@room/manual");
+    const { getConfig, createModules } = await import("@room/manual");
+    const modules = createModules({
+        roomId: env.apiReadiness?.roomId,
+    });
 
     const HBInit: Function = await Haxball;
     const room = HBInit(createRoomConfig(env, getConfig()));

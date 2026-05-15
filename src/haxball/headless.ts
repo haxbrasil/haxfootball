@@ -196,6 +196,35 @@ declare global {
         ip: string;
     }
 
+    type RoomOperationKind =
+        | "chat"
+        | "chat-indicator"
+        | "input"
+        | "kick-ban"
+        | "start-game"
+        | "stop-game"
+        | "pause-game"
+        | "game-limit"
+        | "stadium"
+        | "player-team"
+        | "teams-lock"
+        | "player-admin"
+        | "auto-teams"
+        | "player-sync"
+        | "avatar"
+        | "team-colors"
+        | "reorder-players"
+        | "kick-rate-limit"
+        | "other";
+
+    interface RoomOperationObject {
+        kind: RoomOperationKind;
+        rawType: number;
+        byPlayer: PlayerObject | null;
+        targetPlayers: PlayerObject[];
+        message: unknown;
+    }
+
     type NodeHaxballBanEntryId = number;
 
     type NodeHaxballIPv4Range = { ip: number; mask: number };
@@ -836,11 +865,11 @@ declare global {
         /**
          * Event called when a new player joins the room.
          */
-        onPlayerJoin(player: PlayerObject): void;
+        onPlayerJoin(player: PlayerObject): boolean | void;
         /**
          * Event called when a player leaves the room.
          */
-        onPlayerLeave(player: PlayerObject): void;
+        onPlayerLeave(player: PlayerObject): boolean | void;
         /**
          * Event called when a team wins.
          */
@@ -900,6 +929,12 @@ declare global {
             ban: boolean,
             byPlayer: PlayerObject,
         ): boolean | void;
+        /**
+         * Event called before a low-level room operation is applied.
+         *
+         * Return `false` to cancel the operation.
+         */
+        onBeforeOperation(operation: RoomOperationObject): boolean | void;
         /**
          * Event called when a player has been kicked from the room. This is always called after the onPlayerLeave event.
          *

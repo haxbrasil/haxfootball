@@ -22,6 +22,7 @@ import { cn, formatTeamName } from "@meta/legacy/shared/message";
 import { type ScoreState } from "@common/game/game";
 import { type GlobalSchemaState } from "@runtime/global";
 import { CommandCategory } from "../utils/commands";
+import { getPlayerDisplayName } from "./authentication";
 
 type LegacyGlobalSnapshot = GlobalSchemaState<typeof legacyGlobalSchema>;
 
@@ -56,7 +57,7 @@ const getPlayerNamePrefix = (team: number): string => {
 };
 
 const formatChatMessage = (player: PlayerObject, rawMessage: string): string =>
-    `${getPlayerNamePrefix(player.team)} ${player.name}: ${rawMessage}`;
+    `${getPlayerNamePrefix(player.team)} ${getPlayerDisplayName(player)}: ${rawMessage}`;
 
 const getMentionedPlayerIds = (
     message: string,
@@ -441,7 +442,7 @@ const gameModule = createModule()
         const teamTarget = player.team === Team.RED ? "red" : "blue";
 
         room.send({
-            message: `☎️ ${player.name}: ${teamMessage}`,
+            message: `☎️ ${getPlayerDisplayName(player)}: ${teamMessage}`,
             color: COLOR.ALERT,
             to: teamTarget,
             sound: "notification",
