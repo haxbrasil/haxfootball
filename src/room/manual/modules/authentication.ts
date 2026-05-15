@@ -231,11 +231,17 @@ export function createAuthenticationModule({
         .onBeforeOperation((room, operation) => {
             const actor = operation.byPlayer;
 
-            if (
-                actor &&
-                isAuthenticationPending(actor.id) &&
-                operation.kind !== "chat"
-            ) {
+            if (actor && isAuthenticationPending(actor.id)) {
+                if (operation.kind === "chat") {
+                    handlePendingPlayerChatOperation({
+                        room,
+                        player: actor,
+                        message: operation.message,
+                        roomId,
+                        downstreamModules,
+                    });
+                }
+
                 return false;
             }
 
@@ -259,6 +265,57 @@ export function createAuthenticationModule({
 
             return true;
         });
+}
+
+function handlePendingPlayerChatOperation({
+    room,
+    player,
+    message,
+    roomId,
+    downstreamModules,
+}: {
+    room: Room;
+    player: PlayerObject;
+    message: unknown;
+    roomId?: string | undefined;
+    downstreamModules: Module[];
+}): void {
+    const session = sessions.get(player.id);
+    const text = getChatOperationText(message);
+
+    if (session?.kind === "resolving") {
+        room.send({
+            message: t`🔐 Still checking your account. Please wait a moment.`,
+            color: COLOR.SYSTEM,
+            to: player.id,
+            sound: "notification",
+        });
+        return;
+    }
+
+    if (session?.kind !== "signing-in" || text === null) {
+        return;
+    }
+
+    handlePasswordAttempt({
+        room,
+        player,
+        roomId,
+        password: text,
+        downstreamModules,
+    });
+}
+
+function getChatOperationText(message: unknown): string | null {
+    if (!message || typeof message !== "object") {
+        return null;
+    }
+
+    if (!("text" in message) || typeof message.text !== "string") {
+        return null;
+    }
+
+    return message.text;
 }
 
 async function resolvePlayerBeforeJoin({
