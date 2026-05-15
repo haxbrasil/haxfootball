@@ -55,20 +55,6 @@ export function getPlayerBackendId(playerId: number): string | null {
     return session && session.kind !== "resolving" ? session.playerId : null;
 }
 
-export function getPlayerDisplayName(player: PlayerObject): string {
-    const session = sessions.get(player.id);
-
-    if (session?.kind === "signed-in") {
-        return `✅ ${player.name}`;
-    }
-
-    if (session?.kind === "guest") {
-        return `✖️ ${player.name}`;
-    }
-
-    return player.name;
-}
-
 export function createAuthenticationModule({
     roomId,
     downstreamModules,
