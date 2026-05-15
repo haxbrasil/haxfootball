@@ -29,6 +29,15 @@ export type RegisteredCommand = {
     description?: string;
 };
 
+export type FakePlayerIdentity = {
+    id: number;
+    name: string;
+    flag: string;
+    avatar: string;
+    conn: string;
+    auth: string;
+};
+
 type DefaultStadiumName =
     | "Classic"
     | "Easy"
@@ -719,7 +728,7 @@ export class Room {
         this.invalidatePlayerListCache();
     }
 
-    public fakePlayerLeave(playerId: number): unknown {
+    public fakePlayerLeave(playerId: number): FakePlayerIdentity {
         const player = this.room.fakePlayerLeave(playerId);
         this.invalidatePlayerListCache();
         return player;

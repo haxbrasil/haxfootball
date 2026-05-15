@@ -14,6 +14,21 @@ export type StadiumChangeHandlerResponse = {
     undo?: boolean;
 };
 
+export type PlayerJoinData = {
+    id: number;
+    name: string;
+    flag: string;
+    avatar: string;
+    conn: string | null;
+    auth: string | null;
+};
+
+export type PlayerJoinDataResponse = {
+    name?: string;
+    flag?: string;
+    avatar?: string;
+} | null | void;
+
 export class Module {
     private events: [string, Function][] = [];
     private commandConfig: NormalizedCommandConfig | null = null;
@@ -38,6 +53,16 @@ export class Module {
         handler: (room: Room, player: PlayerObject) => boolean | void,
     ): this {
         this.events.push(["onPlayerJoin", handler]);
+        return this;
+    }
+
+    onBeforePlayerJoin(
+        handler: (
+            room: Room,
+            player: PlayerJoinData,
+        ) => PlayerJoinDataResponse | Promise<PlayerJoinDataResponse>,
+    ): this {
+        this.events.push(["onBeforePlayerJoin", handler]);
         return this;
     }
 
@@ -248,6 +273,20 @@ export class Module {
         for (const [name, handler] of this.events) {
             if (name !== eventName) continue;
             responses.push(handler(...args));
+        }
+
+        return responses;
+    }
+
+    async callWithAsyncResponses(
+        eventName: string,
+        ...args: any[]
+    ): Promise<unknown[]> {
+        const responses: unknown[] = [];
+
+        for (const [name, handler] of this.events) {
+            if (name !== eventName) continue;
+            responses.push(await handler(...args));
         }
 
         return responses;
@@ -475,6 +514,39 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
             }, true);
         };
 
+    const emitBeforePlayerJoin = async (
+        joinData: PlayerJoinData,
+    ): Promise<PlayerJoinDataResponse> => {
+        room.invalidateCaches();
+
+        const response: Exclude<PlayerJoinDataResponse, null | void> = {};
+
+        for (const module of modules) {
+            const moduleResponses = await module.callWithAsyncResponses(
+                "onBeforePlayerJoin",
+                room,
+                { ...joinData, ...response },
+            );
+
+            if (
+                moduleResponses.some(
+                    (moduleResponse) => moduleResponse === null,
+                )
+            ) {
+                return null;
+            }
+
+            for (const moduleResponse of moduleResponses) {
+                if (moduleResponse && typeof moduleResponse === "object") {
+                    Object.assign(response, moduleResponse);
+                }
+            }
+        }
+
+        return response;
+    };
+
+    roomObject.onBeforePlayerJoin = emitBeforePlayerJoin;
     roomObject.onPlayerJoin = emit("onPlayerJoin");
     roomObject.onPlayerLeave = emit("onPlayerLeave");
     roomObject.onTeamVictory = emit("onTeamVictory");

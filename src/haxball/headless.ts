@@ -225,6 +225,21 @@ declare global {
         message: unknown;
     }
 
+    type PlayerJoinDataObject = {
+        id: number;
+        name: string;
+        flag: string;
+        avatar: string;
+        conn: string | null;
+        auth: string | null;
+    };
+
+    type PlayerJoinDataResponse = {
+        name?: string;
+        flag?: string;
+        avatar?: string;
+    } | null | void;
+
     type NodeHaxballBanEntryId = number;
 
     type NodeHaxballIPv4Range = { ip: number; mask: number };
@@ -1124,6 +1139,14 @@ declare global {
 
     type RoomObject = LegacyHeadlessRoomObject &
         NodeHaxballRoomObject & {
+            /**
+             * Event called before a new player is accepted by the room.
+             *
+             * Return null to block the join, or return changed name/flag/avatar fields to alter the visible player data.
+             */
+            onBeforePlayerJoin?: (
+                player: PlayerJoinDataObject,
+            ) => PlayerJoinDataResponse | Promise<PlayerJoinDataResponse>;
             /**
              * Cancels room creation while opening, or leaves after open.
              */

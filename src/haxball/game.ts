@@ -150,6 +150,20 @@ type NativeDisc = {
     cGroup: number;
 };
 
+type NativeModifyPlayerDataResult = null | [string, string, string];
+
+type NativeModifyPlayerDataRoom = NativeRoom & {
+    modifyPlayerData?: (
+        playerId: number,
+        name: string,
+        flag: string,
+        avatar: string,
+        conn: string,
+        auth: string,
+        customData?: unknown,
+    ) => NativeModifyPlayerDataResult | Promise<NativeModifyPlayerDataResult>;
+};
+
 type NativePlayerDisc = NativeDisc & {
     playerId: number | null;
     ext: NativePlayerDisc | null;
@@ -416,6 +430,9 @@ class HaxballCompatibilityRoom {
     private sendRecaptchaToken: ((token: string) => void) | null = null;
 
     public onPlayerJoin = (_player: PlayerObject): boolean | void => {};
+    public onBeforePlayerJoin = (
+        _player: PlayerJoinDataObject,
+    ): PlayerJoinDataResponse | Promise<PlayerJoinDataResponse> => {};
     public onPlayerLeave = (_player: PlayerObject): boolean | void => {};
     public onTeamVictory = (_scores: ScoresObject): void => {};
     public onPlayerChat = (_player: PlayerObject, _message: string): boolean =>
@@ -521,6 +538,34 @@ class HaxballCompatibilityRoom {
     }
 
     private installCallbacks(room: NativeRoom): void {
+        (room as NativeModifyPlayerDataRoom).modifyPlayerData = async (
+            id,
+            name,
+            flag,
+            avatar,
+            conn,
+            auth,
+        ) => {
+            const response = await this.onBeforePlayerJoin({
+                id,
+                name,
+                flag,
+                avatar,
+                conn: conn || null,
+                auth: auth || null,
+            });
+
+            if (response === null) {
+                return null;
+            }
+
+            return [
+                response?.name ?? name,
+                response?.flag ?? flag,
+                response?.avatar ?? avatar,
+            ];
+        };
+
         room.onPlayerJoin = (player: NativePlayer) => {
             const convertedPlayer = convertPlayer(player);
             if (convertedPlayer) this.onPlayerJoin(convertedPlayer);

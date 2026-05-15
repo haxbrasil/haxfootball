@@ -1,5 +1,10 @@
 import { api } from "@api/client";
-import { createModule, Module } from "@core/module";
+import {
+    createModule,
+    Module,
+    PlayerJoinData,
+    PlayerJoinDataResponse,
+} from "@core/module";
 import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
 import { t } from "@lingui/core/macro";
@@ -37,6 +42,28 @@ export type PlayerSession =
     | SignedInSession
     | GuestSession;
 
+type PreJoinSession =
+    | {
+          kind: "guest";
+          playerId: string;
+      }
+    | {
+          kind: "signed-in";
+          account: SessionAccount;
+          playerId: string;
+          canonicalName: string;
+      }
+    | {
+          kind: "password-required";
+          account: SessionAccount;
+          playerId: string;
+      };
+
+type SessionIdentityPlayer = Pick<
+    PlayerJoinData,
+    "id" | "name" | "auth" | "conn"
+>;
+
 type AuthenticationModuleOptions = {
     roomId?: string | undefined;
     downstreamModules: Module[];
@@ -44,6 +71,7 @@ type AuthenticationModuleOptions = {
 
 const SIGN_IN_TIMEOUT_MS = 30_000;
 const sessions = new Map<number, PlayerSession>();
+const preJoinSessions = new Map<number, PreJoinSession>();
 const renamingPlayerIds = new Set<number>();
 
 export function getPlayerSession(playerId: number): PlayerSession | null {
@@ -74,6 +102,12 @@ export function createAuthenticationModule({
     };
 
     return createModule()
+        .onBeforePlayerJoin((_room, player) =>
+            resolvePlayerBeforeJoin({
+                player,
+                roomId,
+            }),
+        )
         .onRoomLink((room) => {
             installAnnouncementFilter(room);
         })
@@ -84,6 +118,19 @@ export function createAuthenticationModule({
             }
 
             installAnnouncementFilter(room);
+
+            const preJoinSession = preJoinSessions.get(player.id);
+
+            if (preJoinSession) {
+                preJoinSessions.delete(player.id);
+                acceptPreResolvedPlayer({
+                    room,
+                    playerId: player.id,
+                    session: preJoinSession,
+                    downstreamModules,
+                });
+                return false;
+            }
 
             const token = Symbol(`player:${player.id}`);
 
@@ -212,6 +259,105 @@ export function createAuthenticationModule({
 
             return true;
         });
+}
+
+async function resolvePlayerBeforeJoin({
+    player,
+    roomId,
+}: {
+    player: PlayerJoinData;
+    roomId?: string | undefined;
+}): Promise<PlayerJoinDataResponse> {
+    if (!roomId) {
+        return;
+    }
+
+    try {
+        const result = await api.sessions.resolve(
+            createSessionIdentityFromJoinData(roomId, player),
+        );
+
+        if (!result.ok) {
+            console.error("Failed to resolve player session:", result.error);
+            preJoinSessions.set(player.id, {
+                kind: "guest",
+                playerId: `unavailable:${player.id}`,
+            });
+            return;
+        }
+
+        switch (result.data.status) {
+            case "guest":
+                preJoinSessions.set(player.id, {
+                    kind: "guest",
+                    playerId: result.data.playerId,
+                });
+                return;
+            case "signed_in":
+                preJoinSessions.set(player.id, {
+                    kind: "signed-in",
+                    account: result.data.account,
+                    playerId: result.data.playerId,
+                    canonicalName: result.data.canonicalName,
+                });
+                return { name: result.data.canonicalName };
+            case "password_required":
+                preJoinSessions.set(player.id, {
+                    kind: "password-required",
+                    account: result.data.account,
+                    playerId: result.data.playerId,
+                });
+                return;
+        }
+    } catch (error) {
+        console.error("Failed to resolve player session:", error);
+        preJoinSessions.set(player.id, {
+            kind: "guest",
+            playerId: `unavailable:${player.id}`,
+        });
+        return;
+    }
+}
+
+function acceptPreResolvedPlayer({
+    room,
+    playerId,
+    session,
+    downstreamModules,
+}: {
+    room: Room;
+    playerId: number;
+    session: PreJoinSession;
+    downstreamModules: Module[];
+}): void {
+    switch (session.kind) {
+        case "guest":
+            acceptGuest({
+                room,
+                playerId,
+                backendPlayerId: session.playerId,
+                downstreamModules,
+            });
+            return;
+        case "signed-in":
+            acceptSignedIn({
+                room,
+                playerId,
+                account: session.account,
+                backendPlayerId: session.playerId,
+                canonicalName: session.canonicalName,
+                downstreamModules,
+            });
+            return;
+        case "password-required":
+            requirePassword({
+                room,
+                playerId,
+                account: session.account,
+                backendPlayerId: session.playerId,
+            });
+            return;
+    }
 }
 
 function handlePasswordAttempt({
@@ -534,11 +680,23 @@ function createSessionIdentity(
     roomId: string,
     player: PlayerObject,
 ): ResolveSessionInput {
+    return createSessionIdentityFromJoinData(roomId, {
+        id: player.id,
+        name: player.name,
+        auth: player.auth ?? null,
+        conn: player.conn || null,
+    });
+}
+
+function createSessionIdentityFromJoinData(
+    roomId: string,
+    player: SessionIdentityPlayer,
+): ResolveSessionInput {
     return {
         roomId,
         roomPlayerId: player.id,
         name: player.name,
-        auth: player.auth ?? null,
+        auth: player.auth,
         conn: player.conn || null,
     };
 }
