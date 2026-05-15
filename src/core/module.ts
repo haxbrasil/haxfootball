@@ -311,10 +311,14 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
         (eventName: string) =>
         (...args: any[]) => {
             room.invalidateCaches();
-            return modules.reduce((allow, module) => {
-                const moduleAllows = module.call(eventName, room, ...args);
-                return allow && moduleAllows;
-            }, true);
+
+            for (const module of modules) {
+                if (module.call(eventName, room, ...args) === false) {
+                    return false;
+                }
+            }
+
+            return true;
         };
 
     const shouldUndoStadiumChange = (response: unknown): boolean => {
