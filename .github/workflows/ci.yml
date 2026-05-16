@@ -351,7 +351,7 @@ jobs:
                   mv "$packed_path" "$asset_path"
 
                   tar -tzf "$asset_path" | grep -Fx 'package/package.json'
-                  tar -tzf "$asset_path" | grep -Fx 'package/dist/environments/node.js'
+                  tar -tzf "$asset_path" | grep -Fx 'package/dist/environments/room-server.js'
                   npm install --omit=dev --prefix "$install_dir" "$asset_path"
 
                   {
@@ -434,7 +434,7 @@ jobs:
                           publishedAt: (now | todateiso8601),
                           checksumSha256: $checksumSha256
                         },
-                        nodeEntrypoint: "dist/environments/node.js",
+                        entrypoint: "dist/environments/room-server.js",
                         installStrategy: "npm-install"
                       }'
                   )"
