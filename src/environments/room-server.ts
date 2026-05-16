@@ -62,11 +62,15 @@ function createRoomConfig(
         ...(roomProperties.password
             ? { password: roomProperties.password }
             : {}),
-        geo: {
-            code: roomProperties.geo.code,
-            lat: roomProperties.geo.lat,
-            lon: roomProperties.geo.lon,
-        },
+        ...(roomProperties.geo
+            ? {
+                  geo: {
+                      code: roomProperties.geo.code,
+                      lat: roomProperties.geo.lat,
+                      lon: roomProperties.geo.lon,
+                  },
+              }
+            : {}),
         ...(environment.proxy ? { proxy: environment.proxy } : {}),
     };
 }

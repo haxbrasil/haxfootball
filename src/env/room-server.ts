@@ -3,11 +3,13 @@ import { createEnv } from "./validator";
 
 const roomServerPropertiesSchema = z.object({
     name: z.string(),
-    geo: z.object({
-        code: z.string(),
-        lat: z.number(),
-        lon: z.number(),
-    }),
+    geo: z
+        .object({
+            code: z.string(),
+            lat: z.number(),
+            lon: z.number(),
+        })
+        .optional(),
     max_player_count: z.number(),
     show_in_room_list: z.boolean(),
     password: z.string().nullable().optional(),
