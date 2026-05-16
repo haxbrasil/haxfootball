@@ -31,9 +31,9 @@ LANGUAGE=pt-BR DEBUG=true TOKEN="<haxball-token>" pnpm run dev:node
 
 ## Repository Layout
 
-`src/environments/node.ts` is the dev room bootstrap. It initializes i18n, loads `@room/manual`, opens the room through `@haxball/game`, and installs modules.
+`src/environments/node.ts` is the dev/manual room bootstrap. It initializes i18n, loads the agnostic `@room/manual` mode, opens the room through `@haxball/game`, and installs modules.
 
-`src/environments/room-server.ts` is the production/API bootstrap. It reads the room-server environment, opens a room, installs modules, and reports readiness to the API when readiness credentials are available. The API still discovers room links from room logs.
+`src/environments/room-server.ts` is the production/API bootstrap. It loads the SDK-backed `@room/managed` mode, reads the room-server environment, opens a room, installs modules, and reports readiness to the API when readiness credentials are available. The API still discovers room links from room logs.
 
 `src/haxball/game.ts` implements room creation and the public headless room API. Keep the public `HBInit`/`RoomObject` shape stable here.
 
@@ -49,7 +49,13 @@ LANGUAGE=pt-BR DEBUG=true TOKEN="<haxball-token>" pnpm run dev:node
 
 `src/common/*` contains reusable game, geometry, stadium-builder, stadium-generator, and general helpers. Prefer these over duplicating geometry or physics logic in states.
 
-`src/room/manual/*` defines the currently exported manual room package, room commands, game commands, and admin helpers.
+`src/room/manual/*` defines the agnostic room mode. It must not depend on the HaxFootball API SDK.
+
+`src/room/managed/*` defines the API-managed room mode. SDK-backed account/session behavior belongs here.
+
+`src/room/shared/domain/*` contains generic room config, command categories, session stores, and authorization concepts shared by room modes.
+
+`src/room/shared/modules/*` contains reusable room modules shared by room modes.
 
 `docs/ENGINE-GUIDE.md` and `docs/STYLE-GUIDE.md` are required reading before changing gameplay states. `docs/headless/*` documents the public headless/stadium API and should stay standalone for users.
 
@@ -61,7 +67,7 @@ Do this before editing gameplay states, shared rule helpers, runtime hooks used 
 
 ## Modules and Commands
 
-Modules are created with `createModule()` and registered from `src/room/manual/index.ts`. Multiple modules can subscribe to the same room event.
+Modules are created with `createModule()` and composed by the room mode entrypoints under `src/room/manual/index.ts` and `src/room/managed/index.ts`. Multiple modules can subscribe to the same room event.
 
 All command configs must use the same prefix, currently `COMMAND_PREFIX` from `src/core/commands.ts` (`!`). Command names and aliases are normalized to lowercase.
 

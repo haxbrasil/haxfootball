@@ -7,7 +7,7 @@ import { initI18n } from "@i18n";
 async function bootstrap() {
     initI18n(env.language);
 
-    const { getConfig, createModules } = await import("@room/manual");
+    const { getConfig, createModules } = await import("@room/managed");
     const modules = createModules({
         roomId: env.apiReadiness?.roomId,
     });
