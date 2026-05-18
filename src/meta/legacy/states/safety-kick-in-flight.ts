@@ -129,7 +129,11 @@ export function SafetyKickInFlight({
 
         $next({
             to: "SAFETY_KICK_RETURN",
-            params: { playerId: catcher.id, receivingTeam },
+            params: {
+                playerId: catcher.id,
+                receivingTeam,
+                startFieldPosition: getFieldPosition(catcher.x),
+            },
         });
     }
 

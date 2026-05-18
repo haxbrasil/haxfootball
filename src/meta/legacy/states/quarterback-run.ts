@@ -7,11 +7,13 @@ import {
 } from "@meta/legacy/shared/down";
 import { cn, formatNames } from "@meta/legacy/shared/message";
 import { isTouchdown, SCORES } from "@meta/legacy/shared/scoring";
-import { $dispose, $effect, $next } from "@runtime/runtime";
+import { $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
+    calculateYardsGained,
     getFieldPosition,
+    getDistanceToGoalLine,
     isInMainField,
     isOutOfBounds,
 } from "@meta/legacy/shared/stadium";
@@ -27,6 +29,7 @@ import { $global } from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 type Frame = {
     player: GameStatePlayer;
@@ -84,6 +87,35 @@ export function QuarterbackRun({
         $global((state) =>
             state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
         );
+        const yards = getDistanceToGoalLine(offensiveTeam, downState.fieldPos);
+        const endFieldPosition = { side: opposite(offensiveTeam), yards: 0 };
+
+        $stat({
+            type: Stat.QuarterbackCarry,
+            playerId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                endFieldPosition,
+                yards,
+                touchdown: true,
+            },
+        });
+        $stat({
+            type: Stat.RushingTouchdown,
+            playerId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                endFieldPosition,
+                yards,
+                touchdown: true,
+            },
+        });
 
         const { scores } = $global();
 
@@ -128,6 +160,24 @@ export function QuarterbackRun({
                 fieldPos,
             );
             const nextDownState = withLastBallY(baseDownState, frame.player.y);
+            const yards = calculateYardsGained(
+                offensiveTeam,
+                downState.fieldPos,
+                fieldPos,
+            );
+
+            $stat({
+                type: Stat.QuarterbackCarry,
+                playerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                },
+            });
 
             processDownEvent({
                 event,
@@ -264,6 +314,40 @@ export function QuarterbackRun({
             fieldPos,
         );
         const nextDownState = withLastBallY(baseDownState, frame.player.y);
+        const yards = calculateYardsGained(
+            offensiveTeam,
+            downState.fieldPos,
+            fieldPos,
+        );
+
+        $stat({
+            type: Stat.QuarterbackCarry,
+            playerId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                endFieldPosition: fieldPos,
+                yards,
+                tacklers: catchers.map((player) => player.id),
+            },
+        });
+        catchers.forEach((player) => {
+            $stat({
+                type: Stat.Tackle,
+                playerId: player.id,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                    tackled: playerId,
+                },
+            });
+        });
 
         processDownEvent({
             event,

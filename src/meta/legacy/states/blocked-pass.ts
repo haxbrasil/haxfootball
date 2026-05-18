@@ -1,5 +1,5 @@
 import { GameState } from "@runtime/engine";
-import { $dispose, $effect, $next } from "@runtime/runtime";
+import { $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import {
     DownState,
     incrementDownState,
@@ -21,13 +21,16 @@ import { cn } from "@meta/legacy/shared/message";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 export function BlockedPass({
     blockerId,
     downState,
+    passerId,
 }: {
     blockerId: number;
     downState: DownState;
+    passerId?: number;
 }) {
     const { offensiveTeam, fieldPos, downAndDistance } = downState;
 
@@ -59,6 +62,17 @@ export function BlockedPass({
         const { event, downState: baseDownState } =
             incrementDownState(downState);
         const nextDownState = withLastBallYAtCenter(baseDownState);
+        $stat({
+            type: Stat.PassBlocked,
+            playerId: blockerId,
+            value: {
+                team: downState.offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                ...(passerId ? { passer: passerId } : {}),
+            },
+        });
 
         $effect(($) => {
             $.setAvatar(blockerId, AVATARS.CONSTRUCTION);

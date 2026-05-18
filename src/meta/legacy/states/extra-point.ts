@@ -311,6 +311,7 @@ export function ExtraPoint({
             to: "EXTRA_POINT_KICK",
             params: {
                 offensiveTeam,
+                kickerId: frame.kicker.id,
             },
         });
     }

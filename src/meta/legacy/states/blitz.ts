@@ -1,5 +1,5 @@
 import type { GameState, GameStatePlayer } from "@runtime/engine";
-import { $dispose, $effect, $global, $next } from "@runtime/runtime";
+import { $dispose, $effect, $global, $next, $stat } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
@@ -14,6 +14,7 @@ import {
     processOffensivePenalty,
 } from "@meta/legacy/shared/penalty";
 import {
+    calculateYardsGained,
     calculateDirectionalGain,
     getFieldPosition,
     getPositionFromFieldPosition,
@@ -34,6 +35,7 @@ import {
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { SCORES } from "@meta/legacy/shared/scoring";
+import { Stat } from "@meta/legacy/stats";
 
 const OFFENSIVE_FOUL_PENALTY_YARDS = 5;
 
@@ -104,9 +106,23 @@ export function Blitz({
     function $handleQuarterbackKick(frame: Frame) {
         if (ballIsDead || !frame.quarterback.isKickingBall) return;
 
+        $stat({
+            type: Stat.PassAttempt,
+            playerId: quarterbackId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+            },
+        });
+
         $next({
             to: "SNAP_IN_FLIGHT",
-            params: { downState },
+            params: {
+                downState,
+                passerId: quarterbackId,
+            },
         });
     }
 
@@ -128,6 +144,20 @@ export function Blitz({
             downState,
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
+
+        offensiveTouchers.forEach((player) => {
+            $stat({
+                type: Stat.Foul,
+                playerId: player.id,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                },
+            });
+        });
 
         processOffensivePenalty({
             event: penaltyResult.event,
@@ -226,6 +256,24 @@ export function Blitz({
                 baseDownState,
                 frame.quarterback.y,
             );
+            const yards = calculateYardsGained(
+                offensiveTeam,
+                downState.fieldPos,
+                fieldPos,
+            );
+
+            $stat({
+                type: Stat.QuarterbackCarry,
+                playerId: quarterbackId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                },
+            });
 
             processDownEvent({
                 event,
@@ -362,6 +410,51 @@ export function Blitz({
             fieldPos,
         );
         const nextDownState = withLastBallY(baseDownState, frame.quarterback.y);
+        const sackYards = Math.max(
+            0,
+            -calculateYardsGained(offensiveTeam, downState.fieldPos, fieldPos),
+        );
+
+        $stat({
+            type: Stat.SackTaken,
+            playerId: quarterbackId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                endFieldPosition: fieldPos,
+                yards: sackYards,
+                sackers: catchers.map((player) => player.id),
+            },
+        });
+        catchers.forEach((player) => {
+            $stat({
+                type: Stat.Sack,
+                playerId: player.id,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards: sackYards,
+                    sacked: quarterbackId,
+                },
+            });
+            $stat({
+                type: Stat.Tackle,
+                playerId: player.id,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    tackled: quarterbackId,
+                },
+            });
+        });
 
         processDownEvent({
             event,

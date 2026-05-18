@@ -482,6 +482,10 @@ export class Room {
         return this.room.getScores();
     }
 
+    public getCurrentFrameNo(): number {
+        return this.room.currentFrameNo;
+    }
+
     public setScoreLimit(limit: number): void {
         this.room.setScoreLimit(limit);
     }

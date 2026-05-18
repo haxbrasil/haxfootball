@@ -13,7 +13,7 @@ import {
 import { ticks } from "@common/general/time";
 import { findCatchers, opposite } from "@common/game/game";
 import { t } from "@lingui/core/macro";
-import { $before, $dispose, $effect, $next } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import {
     $setFirstDownLine,
     $setLineOfScrimmage,
@@ -46,6 +46,7 @@ import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import { findEligibleBallCatchers } from "@meta/legacy/shared/reception";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 const FIELD_GOAL_LINE_HEIGHT = 200;
 const OFFENSE_LINE_OFFSET_YARDS = 15;
@@ -296,6 +297,17 @@ export function FieldGoal({
         $lockBall();
 
         if (isEarlyOutOfBounds(frame.state.ball)) {
+            $stat({
+                type: Stat.FieldGoalMissed,
+                playerId: kickerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: fieldPos,
+                },
+            });
+
             $effect(($) => {
                 $.send({
                     message: t`❌ Field goal went out of bounds.`,
@@ -316,6 +328,7 @@ export function FieldGoal({
             to: "FIELD_GOAL_IN_FLIGHT",
             params: {
                 downState,
+                kickerId,
             },
         });
     }

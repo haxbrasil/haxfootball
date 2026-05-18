@@ -1012,6 +1012,10 @@ declare global {
     };
 
     type NodeHaxballRoomObject = {
+        /**
+         * Current simulation frame number exposed by node-haxball.
+         */
+        currentFrameNo: number;
         leave(): void;
         setProperties(properties: NodeHaxballSetRoomProperties): void;
         setHandicap(handicap: number): void;

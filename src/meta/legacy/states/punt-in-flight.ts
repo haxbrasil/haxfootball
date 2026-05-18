@@ -167,7 +167,11 @@ export function PuntInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
 
         $next({
             to: "PUNT_RETURN",
-            params: { playerId: catcher.id, receivingTeam },
+            params: {
+                playerId: catcher.id,
+                receivingTeam,
+                startFieldPosition: getFieldPosition(catcher.x),
+            },
         });
     }
 

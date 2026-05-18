@@ -116,7 +116,9 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         if (kicker) {
             $next({
                 to: "KICKOFF_IN_FLIGHT",
-                params: { kickingTeam: forTeam },
+                params: {
+                    kickingTeam: forTeam,
+                },
             });
         }
     }

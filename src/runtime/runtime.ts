@@ -67,6 +67,21 @@ export type TickState = {
     self: number;
 };
 
+export type RuntimeStatEvent = {
+    type: string;
+    playerId: number;
+    value: Record<string, unknown>;
+    tick: number;
+};
+
+export type RuntimeStatEventInput = {
+    type: string;
+    playerId: number;
+    value?: Record<string, unknown>;
+};
+
+export type RuntimeStatEventSink = (event: RuntimeStatEvent) => void;
+
 const BALL_DEFAULT_INDEX = 0;
 
 const mergeProps =
@@ -191,6 +206,7 @@ let RUNTIME: {
     beforeGameState: GameState | null;
     muteEffects: boolean;
     globalStore: GlobalStoreApi<any> | null;
+    statEvents: RuntimeStatEventSink | null;
     checkpointDrafts: Array<CheckpointDraft>;
     resolveCheckpoint:
         | ((args: CheckpointRestoreArgs) => {
@@ -202,6 +218,7 @@ let RUNTIME: {
     isPaused: boolean;
     stateStartedTick: number;
     selfStartedTick: number;
+    sourceState: string | null;
 } | null = null;
 
 const normalizeTransition = (args: {
@@ -245,6 +262,7 @@ export function installRuntime(ctx: {
     beforeGameState?: GameState | null;
     muteEffects?: boolean;
     globalStore?: GlobalStoreApi<any> | null;
+    statEvents?: RuntimeStatEventSink | null;
     checkpointDrafts?: Array<CheckpointDraft>;
     resolveCheckpoint?: (args: CheckpointRestoreArgs) => {
         transition: Transition;
@@ -254,6 +272,7 @@ export function installRuntime(ctx: {
     isPaused?: boolean;
     stateStartedTick?: number;
     selfStartedTick?: number;
+    sourceState?: string | null;
 }) {
     const mutations = ctx.mutations ?? createMutationBuffer(ctx.room);
     const disposals = ctx.disposals ?? [];
@@ -281,12 +300,14 @@ export function installRuntime(ctx: {
             ctx.beforeGameState === undefined ? null : ctx.beforeGameState,
         muteEffects: !!ctx.muteEffects,
         globalStore: ctx.globalStore ?? null,
+        statEvents: ctx.statEvents ?? null,
         checkpointDrafts: ctx.checkpointDrafts ?? [],
         resolveCheckpoint: ctx.resolveCheckpoint ?? null,
         listCheckpoints: ctx.listCheckpoints ?? null,
         isPaused: !!ctx.isPaused,
         stateStartedTick,
         selfStartedTick,
+        sourceState: ctx.sourceState ?? null,
     };
 
     return function uninstall() {
@@ -415,6 +436,24 @@ export function $config<Cfg>(): Cfg {
     if (!RUNTIME) throw new Error("$config used outside of runtime");
 
     return RUNTIME.config as Cfg;
+}
+
+export function $stat(event: RuntimeStatEventInput): void {
+    if (!RUNTIME) throw new Error("$stat used outside of runtime");
+    if (!RUNTIME.sourceState) {
+        throw new Error("$stat used without a source state");
+    }
+    if (!RUNTIME.statEvents) return;
+
+    RUNTIME.statEvents({
+        type: event.type,
+        playerId: event.playerId,
+        value: {
+            source: RUNTIME.sourceState,
+            ...(event.value ?? {}),
+        },
+        tick: RUNTIME.tickNumber,
+    });
 }
 
 export function $global<Schema extends GlobalSchema<any, any>>(

@@ -8,11 +8,13 @@ import {
 } from "@meta/legacy/shared/down";
 import { cn, formatNames } from "@meta/legacy/shared/message";
 import { isTouchdown, SCORES } from "@meta/legacy/shared/scoring";
-import { $before, $dispose, $effect, $next } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
+    calculateYardsGained,
     getFieldPosition,
+    getDistanceToGoalLine,
     isInMainField,
     isOutOfBounds,
 } from "@meta/legacy/shared/stadium";
@@ -28,6 +30,8 @@ import { $global } from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import type { FieldPosition } from "@common/game/game";
+import { Stat } from "@meta/legacy/stats";
 
 const FUMBLE_CATCHER_DISTANCE = 1.0;
 
@@ -40,9 +44,13 @@ type Frame = {
 export function LiveBall({
     playerId,
     downState,
+    passerId,
+    catchFieldPos,
 }: {
     playerId: number;
     downState: DownState;
+    passerId?: number;
+    catchFieldPos?: FieldPosition;
 }) {
     const { offensiveTeam, fieldPos, downAndDistance } = downState;
 
@@ -102,6 +110,84 @@ export function LiveBall({
             player.y,
         );
 
+        const yards = calculateYardsGained(
+            offensiveTeam,
+            downState.fieldPos,
+            fieldPos,
+        );
+
+        if (passerId) {
+            const airYards = catchFieldPos
+                ? calculateYardsGained(
+                      offensiveTeam,
+                      downState.fieldPos,
+                      catchFieldPos,
+                  )
+                : yards;
+            const yardsAfterCatch = yards - airYards;
+
+            $stat({
+                type: Stat.PassCompletion,
+                playerId: passerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                    airYards,
+                    yardsAfterCatch,
+                    receiver: playerId,
+                },
+            });
+
+            $stat({
+                type: Stat.Reception,
+                playerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                    airYards,
+                    yardsAfterCatch,
+                    passer: passerId,
+                },
+            });
+        }
+
+        $stat({
+            type: Stat.FumbleLost,
+            playerId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                endFieldPosition: fieldPos,
+                yards,
+                forcedBy: catcherIds,
+            },
+        });
+
+        catcherIds.forEach((catcherId) => {
+            $stat({
+                type: Stat.ForcedFumble,
+                playerId: catcherId,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    fumbler: playerId,
+                },
+            });
+        });
+
         $effect(($) => {
             $.send({
                 message: cn(
@@ -158,6 +244,82 @@ export function LiveBall({
         $global((state) =>
             state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
         );
+        const yards = getDistanceToGoalLine(offensiveTeam, downState.fieldPos);
+        const endFieldPosition = { side: opposite(offensiveTeam), yards: 0 };
+
+        if (passerId) {
+            const airYards = catchFieldPos
+                ? calculateYardsGained(
+                      offensiveTeam,
+                      downState.fieldPos,
+                      catchFieldPos,
+                  )
+                : yards;
+            const yardsAfterCatch = yards - airYards;
+
+            $stat({
+                type: Stat.PassCompletion,
+                playerId: passerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition,
+                    yards,
+                    airYards,
+                    yardsAfterCatch,
+                    receiver: playerId,
+                },
+            });
+
+            $stat({
+                type: Stat.Reception,
+                playerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition,
+                    yards,
+                    airYards,
+                    yardsAfterCatch,
+                    passer: passerId,
+                },
+            });
+        }
+        $stat({
+            type: Stat.ReceivingTouchdown,
+            playerId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                endFieldPosition,
+                yards,
+                touchdown: true,
+                ...(passerId ? { passer: passerId } : {}),
+            },
+        });
+
+        if (passerId) {
+            $stat({
+                type: Stat.PassingTouchdown,
+                playerId: passerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition,
+                    yards,
+                    touchdown: true,
+                    receiver: playerId,
+                },
+            });
+        }
 
         const { scores } = $global();
 
@@ -202,6 +364,54 @@ export function LiveBall({
                 fieldPos,
             );
             const nextDownState = withLastBallY(baseDownState, frame.player.y);
+            const yards = calculateYardsGained(
+                offensiveTeam,
+                downState.fieldPos,
+                fieldPos,
+            );
+
+            if (passerId) {
+                const airYards = catchFieldPos
+                    ? calculateYardsGained(
+                          offensiveTeam,
+                          downState.fieldPos,
+                          catchFieldPos,
+                      )
+                    : yards;
+                const yardsAfterCatch = yards - airYards;
+
+                $stat({
+                    type: Stat.PassCompletion,
+                    playerId: passerId,
+                    value: {
+                        team: offensiveTeam,
+                        down: downState.downAndDistance.down,
+                        distance: downState.downAndDistance.distance,
+                        startFieldPosition: downState.fieldPos,
+                        endFieldPosition: fieldPos,
+                        yards,
+                        airYards,
+                        yardsAfterCatch,
+                        receiver: playerId,
+                    },
+                });
+
+                $stat({
+                    type: Stat.Reception,
+                    playerId,
+                    value: {
+                        team: offensiveTeam,
+                        down: downState.downAndDistance.down,
+                        distance: downState.downAndDistance.distance,
+                        startFieldPosition: downState.fieldPos,
+                        endFieldPosition: fieldPos,
+                        yards,
+                        airYards,
+                        yardsAfterCatch,
+                        passer: passerId,
+                    },
+                });
+            }
 
             processDownEvent({
                 event,
@@ -338,6 +548,69 @@ export function LiveBall({
             fieldPos,
         );
         const nextDownState = withLastBallY(baseDownState, frame.player.y);
+        const yards = calculateYardsGained(
+            offensiveTeam,
+            downState.fieldPos,
+            fieldPos,
+        );
+
+        if (passerId) {
+            const airYards = catchFieldPos
+                ? calculateYardsGained(
+                      offensiveTeam,
+                      downState.fieldPos,
+                      catchFieldPos,
+                  )
+                : yards;
+            const yardsAfterCatch = yards - airYards;
+
+            $stat({
+                type: Stat.PassCompletion,
+                playerId: passerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                    airYards,
+                    yardsAfterCatch,
+                    receiver: playerId,
+                },
+            });
+
+            $stat({
+                type: Stat.Reception,
+                playerId,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                    airYards,
+                    yardsAfterCatch,
+                    passer: passerId,
+                },
+            });
+        }
+        catchers.forEach((player) => {
+            $stat({
+                type: Stat.Tackle,
+                playerId: player.id,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    endFieldPosition: fieldPos,
+                    yards,
+                    tackled: playerId,
+                },
+            });
+        });
 
         processDownEvent({
             event,
