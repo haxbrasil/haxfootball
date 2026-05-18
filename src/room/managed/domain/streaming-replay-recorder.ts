@@ -30,10 +30,9 @@ export class StreamingReplayRecorder {
         if (!this.replay || typeof operation.message !== "object") return;
         if (operation.message === null) return;
 
-        this.replay.events.push({
-            ...(operation.message as Record<string, unknown>),
-            frameNo: room.getCurrentFrameNo(),
-        });
+        const replayEvent = operation.message as { frameNo: number };
+        replayEvent.frameNo = room.getCurrentFrameNo();
+        this.replay.events.push(replayEvent);
     }
 
     stop(room: Room): Uint8Array | null {
@@ -50,9 +49,14 @@ export class StreamingReplayRecorder {
             const replayEvent = event as { frameNo: number };
             replayEvent.frameNo -= this.startFrameNo;
         });
-        this.replay = null;
-
-        return haxball.Replay.writeAll(replay);
+        try {
+            return haxball.Replay.writeAll(replay);
+        } catch (error) {
+            console.error("Failed to write HaxBall replay:", error);
+            return null;
+        } finally {
+            this.replay = null;
+        }
     }
 
     private stopStreaming(room: Room): void {
