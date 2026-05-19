@@ -507,7 +507,10 @@ class HaxballCompatibilityRoom {
                     this.nativeRoom = room;
                 },
                 onClose: (reason) => {
-                    this.nativeRoom = null;
+                    if (this.nativeRoom === room) {
+                        this.nativeRoom = null;
+                    }
+
                     if (reason) {
                         console.error("node-haxball room closed:", reason);
                     }
@@ -637,7 +640,11 @@ class HaxballCompatibilityRoom {
                 convertPlayer(room.getPlayer(byId)),
             );
 
-        room.onRoomLink = (link: string) => this.onRoomLink(link);
+        room.onRoomLink = (link: string) => {
+            if (this.nativeRoom !== room) return;
+
+            this.onRoomLink(link);
+        };
 
         room.onKickRateLimitChange = (
             min: number,
