@@ -16,6 +16,7 @@ import type {
 } from "@room/shared/domain/player-sessions";
 import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
 import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
+import { t } from "@lingui/core/macro";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
 
@@ -277,7 +278,7 @@ async function completeMatch(
             console.error("Failed to associate recording:", association.error);
         } else {
             room.send({
-                message: `🎥 Match recorded: ${recording.url}`,
+                message: t`🎥 Match recorded: ${recording.url}`,
                 color: COLOR.SYSTEM,
                 sound: "notification",
             });
