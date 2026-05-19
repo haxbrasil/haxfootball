@@ -4,8 +4,6 @@ import type {
     MatchEventInput,
     Recording,
 } from "@haxbrasil/haxfootball-api-sdk";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { api } from "@api/client";
 import { COLOR } from "@common/general/color";
 import { createModule, type Module } from "@core/module";
@@ -20,9 +18,6 @@ import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
 import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
-const FAILED_RECORDING_DIAGNOSTICS_DIR =
-    process.env["HAXFOOTBALL_FAILED_RECORDING_DIAGNOSTICS_DIR"] ??
-    "/tmp/haxfootball-failed-recordings";
 
 type MatchScore = {
     red: number;
@@ -318,42 +313,10 @@ async function uploadRecording(
 
     if (!result.ok) {
         console.error("Failed to upload recording:", result.error);
-        await saveFailedRecording(matchId, replayBytes);
         return null;
     }
 
     return result.data;
-}
-
-async function saveFailedRecording(
-    matchId: string,
-    replayBytes: Uint8Array,
-): Promise<void> {
-    try {
-        await mkdir(FAILED_RECORDING_DIAGNOSTICS_DIR, { recursive: true });
-
-        const filename = `${sanitizeFilenamePart(matchId)}-${Date.now()}.hbr2`;
-        const path = join(FAILED_RECORDING_DIAGNOSTICS_DIR, filename);
-        await writeFile(path, replayBytes);
-
-        console.error("Saved failed recording for diagnostics:", {
-            path,
-            byteLength: replayBytes.byteLength,
-            header: formatByteHeader(replayBytes),
-        });
-    } catch (error) {
-        console.error("Failed to save recording diagnostics:", error);
-    }
-}
-
-function sanitizeFilenamePart(value: string): string {
-    return value.replace(/[^a-zA-Z0-9_-]/g, "_");
-}
-
-function formatByteHeader(bytes: Uint8Array): string {
-    return Array.from(bytes.slice(0, 16))
-        .map((byte) => byte.toString(16).padStart(2, "0"))
-        .join(" ");
 }
 
 function appendPlayerEvent(
