@@ -671,8 +671,8 @@ export class Room {
         this.invalidatePlayerDiscCache(playerId);
     }
 
-    public startRecording(): void {
-        this.room.startRecording();
+    public startRecording(): boolean {
+        return this.room.startRecording();
     }
 
     public stopRecording(): Uint8Array | null {
@@ -929,10 +929,6 @@ export class Room {
 
     public takeSnapshot(): object {
         return this.room.takeSnapshot();
-    }
-
-    public copyStateForReplay(): NodeHaxballRoomState {
-        return this.room.copyStateForReplay();
     }
 
     public fakeSendPlayerInput(input: number, byId: number): void {

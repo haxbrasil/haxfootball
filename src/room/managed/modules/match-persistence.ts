@@ -15,7 +15,7 @@ import type {
     PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
 import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
-import { StreamingReplayRecorder } from "@room/managed/domain/streaming-replay-recorder";
+import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
 
@@ -35,7 +35,7 @@ type MatchSession = {
     events: MatchEventInput[];
     stats: RuntimeStatEvent[];
     playerIds: Map<number, string>;
-    replay: StreamingReplayRecorder;
+    replay: ReplayRecorder;
 };
 
 type CreateManagedMatchPersistenceOptions = {
@@ -96,7 +96,7 @@ export function createManagedMatchPersistence({
                 events: [],
                 stats: [],
                 playerIds: new Map(),
-                replay: new StreamingReplayRecorder(),
+                replay: new ReplayRecorder(),
             };
 
             session.replay.start(room);
@@ -109,9 +109,6 @@ export function createManagedMatchPersistence({
                     sessionStore.get,
                 );
             }
-        })
-        .onBeforeOperation((_room, operation) => {
-            session?.replay.recordOperation(operation);
         })
         .onGameTick((room) => {
             if (session) {

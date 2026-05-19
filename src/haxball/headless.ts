@@ -1,16 +1,6 @@
-import type createHaxballApi from "node-haxball";
-
-type NodeHaxballApi = ReturnType<typeof createHaxballApi>;
-type NodeHaxballReplayData = InstanceType<
-    NodeHaxballApi["Replay"]["ReplayData"]
->;
+export {};
 
 declare global {
-    type NodeHaxballRoomState = NodeHaxballReplayData["roomData"];
-    type NodeHaxballReplayEvent = NodeHaxballReplayData["events"][number] & {
-        frameNo: number;
-    };
-
     interface Window {
         /**
          * Use this function to initialize the room, it returns the room object used to control the room.
@@ -230,10 +220,9 @@ declare global {
     interface RoomOperationObject {
         kind: RoomOperationKind;
         rawType: number;
-        frameNo: number;
         byPlayer: PlayerObject | null;
         targetPlayers: PlayerObject[];
-        message: NodeHaxballReplayEvent;
+        message: unknown;
     }
 
     type PlayerJoinDataObject = {
@@ -306,7 +295,7 @@ declare global {
 
     type NodeHaxballJoint = object;
 
-    type NodeHaxballHaxballEvent = NodeHaxballReplayData["events"][number];
+    type NodeHaxballHaxballEvent = object;
 
     type NodeHaxballRoomConfig = object;
 
@@ -794,7 +783,7 @@ declare global {
          *
          * Don't forget to call stop recording or it will cause a memory leak.
          */
-        startRecording(): void;
+        startRecording(): boolean;
         /**
          * Stops the recording previously started with startRecording and returns the replay file contents as a Uint8Array.
          *
@@ -1027,10 +1016,7 @@ declare global {
          * Current simulation frame number exposed by node-haxball.
          */
         currentFrameNo: number;
-        state: {
-            teamsLocked: boolean;
-            copy(): NodeHaxballRoomState;
-        };
+        state: { teamsLocked: boolean };
         leave(): void;
         setProperties(properties: NodeHaxballSetRoomProperties): void;
         setHandicap(handicap: number): void;
@@ -1100,7 +1086,7 @@ declare global {
         moveLibrary(libraryIndex: number, newIndex: number): void;
         updateLibrary(libraryIndex: number, library: NodeHaxballLibrary): void;
         removeLibrary(library: NodeHaxballLibrary): void;
-        takeSnapshot(): NodeHaxballRoomState;
+        takeSnapshot(): object;
         fakePlayerJoin(
             id: number,
             name: string,
@@ -1174,6 +1160,5 @@ declare global {
              * Sends a recaptcha token to node-haxball room creation.
              */
             useRecaptchaToken?: (token: string) => void;
-            copyStateForReplay(): NodeHaxballRoomState;
         };
 }

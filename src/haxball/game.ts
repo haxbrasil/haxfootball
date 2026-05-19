@@ -34,10 +34,7 @@ type NativeRoom = NodeHaxballRoomObject & {
     isHost: boolean;
     currentPlayerId: number;
     currentPlayer: object;
-    state: {
-        teamsLocked: boolean;
-        copy(): NodeHaxballRoomState;
-    };
+    state: { teamsLocked: boolean };
     stateExt: object | null;
     gameState: {
         redScore: number;
@@ -369,28 +366,27 @@ function toRoomOperationKind(type: number): RoomOperationKind {
 function createRoomOperation(
     room: NativeRoom,
     type: number,
-    message: NodeHaxballHaxballEvent,
-    frameNo: number,
+    message: unknown,
 ): RoomOperationObject {
-    const replayEvent = Object.assign(message, { frameNo });
-    const byId = getOperationNumber(replayEvent, "byId");
+    const operationMessage =
+        typeof message === "object" && message !== null ? message : {};
+    const byId = getOperationNumber(operationMessage, "byId");
     const byPlayer =
         byId && byId !== 0 ? convertPlayer(room.getPlayer(byId)) : null;
     const targetIds = [
-        getOperationNumber(replayEvent, "id"),
-        getOperationNumber(replayEvent, "playerId"),
-        ...getOperationNumberList(replayEvent, "playerIdList"),
+        getOperationNumber(operationMessage, "id"),
+        getOperationNumber(operationMessage, "playerId"),
+        ...getOperationNumberList(operationMessage, "playerIdList"),
     ].filter((id): id is number => id !== null && id !== byId);
 
     return {
         kind: toRoomOperationKind(type),
         rawType: type,
-        frameNo,
         byPlayer,
         targetPlayers: targetIds
             .map((id) => convertPlayer(room.getPlayer(id)))
             .filter((player): player is PlayerObject => player !== null),
-        message: replayEvent,
+        message,
     };
 }
 
@@ -659,14 +655,10 @@ class HaxballCompatibilityRoom {
         room.onTeamsLockChange = (value: boolean, byId: number) =>
             this.onTeamsLockChange(value, convertPlayer(room.getPlayer(byId)));
 
-        room.onBeforeOperationReceived = (
-            type: number,
-            message: NodeHaxballHaxballEvent,
-            frameNo: number,
-        ) => {
+        room.onBeforeOperationReceived = (type: number, message: unknown) => {
             if (
                 this.onBeforeOperation(
-                    createRoomOperation(room, type, message, frameNo),
+                    createRoomOperation(room, type, message),
                 ) === false
             ) {
                 return false;
@@ -830,8 +822,8 @@ class HaxballCompatibilityRoom {
         return ball ? { x: ball.pos.x, y: ball.pos.y } : null;
     }
 
-    public startRecording(): void {
-        this.room.startRecording();
+    public startRecording(): boolean {
+        return this.room.startRecording();
     }
 
     public stopRecording(): Uint8Array | null {
@@ -1279,10 +1271,6 @@ class HaxballCompatibilityRoom {
 
     public takeSnapshot() {
         return this.room.takeSnapshot();
-    }
-
-    public copyStateForReplay(): NodeHaxballRoomState {
-        return this.room.state.copy();
     }
 
     public fakePlayerJoin(
