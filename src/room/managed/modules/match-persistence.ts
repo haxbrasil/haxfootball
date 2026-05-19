@@ -110,8 +110,8 @@ export function createManagedMatchPersistence({
                 );
             }
         })
-        .onBeforeOperation((room, operation) => {
-            session?.replay.recordOperation(room, operation);
+        .onBeforeOperation((_room, operation) => {
+            session?.replay.recordOperation(operation);
         })
         .onGameTick((room) => {
             if (session) {

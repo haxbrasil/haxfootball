@@ -931,6 +931,10 @@ export class Room {
         return this.room.takeSnapshot();
     }
 
+    public copyStateForReplay(): NodeHaxballRoomState {
+        return this.room.copyStateForReplay();
+    }
+
     public fakeSendPlayerInput(input: number, byId: number): void {
         this.room.fakeSendPlayerInput(input, byId);
     }

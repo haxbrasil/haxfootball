@@ -6,6 +6,7 @@ const haxball = createHaxballApi();
 export class StreamingReplayRecorder {
     private replay: InstanceType<typeof haxball.Replay.ReplayData> | null =
         null;
+    private events: NodeHaxballReplayEvent[] = [];
     private startFrameNo = 0;
     private streaming = false;
 
@@ -13,7 +14,9 @@ export class StreamingReplayRecorder {
         this.stopStreaming(room);
 
         this.replay = new haxball.Replay.ReplayData();
-        this.replay.roomData = room.takeSnapshot() as never;
+        this.replay.roomData = room.copyStateForReplay();
+        this.events = [];
+        this.replay.events = this.events;
         this.startFrameNo = room.getCurrentFrameNo();
 
         const stream = room.startStreaming({
@@ -26,13 +29,10 @@ export class StreamingReplayRecorder {
         stream?.onOpen();
     }
 
-    recordOperation(room: Room, operation: RoomOperationObject): void {
-        if (!this.replay || typeof operation.message !== "object") return;
-        if (operation.message === null) return;
+    recordOperation(operation: RoomOperationObject): void {
+        if (!this.replay) return;
 
-        const replayEvent = operation.message as { frameNo: number };
-        replayEvent.frameNo = room.getCurrentFrameNo();
-        this.replay.events.push(replayEvent);
+        this.events.push(operation.message);
     }
 
     stop(room: Room): Uint8Array | null {
@@ -45,9 +45,8 @@ export class StreamingReplayRecorder {
             0,
             room.getCurrentFrameNo() - this.startFrameNo,
         );
-        replay.events.forEach((event) => {
-            const replayEvent = event as { frameNo: number };
-            replayEvent.frameNo -= this.startFrameNo;
+        this.events.forEach((event) => {
+            event.frameNo -= this.startFrameNo;
         });
         try {
             return haxball.Replay.writeAll(replay);
