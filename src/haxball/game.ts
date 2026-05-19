@@ -507,10 +507,7 @@ class HaxballCompatibilityRoom {
                     this.nativeRoom = room;
                 },
                 onClose: (reason) => {
-                    if (this.nativeRoom === room) {
-                        this.nativeRoom = null;
-                    }
-
+                    this.nativeRoom = null;
                     if (reason) {
                         console.error("node-haxball room closed:", reason);
                     }
