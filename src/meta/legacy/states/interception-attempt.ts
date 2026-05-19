@@ -1,5 +1,5 @@
 import { GameState, GameStateBall, GameStatePlayer } from "@runtime/engine";
-import { $before, $dispose, $effect, $next } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import { DownState } from "@meta/legacy/shared/down";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
@@ -22,6 +22,7 @@ import { PointLike } from "@common/math/geometry";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 const TIME_TO_CHECK_INTERCEPTION = ticks({ milliseconds: 100 });
 
@@ -38,11 +39,13 @@ export function InterceptionAttempt({
     playerId,
     downState,
     kickBallState,
+    passerId,
 }: {
     kickTime: number;
     playerId: number;
     downState: DownState;
     kickBallState: GameStateBall;
+    passerId?: number;
 }) {
     $lockBall();
 
@@ -91,6 +94,31 @@ export function InterceptionAttempt({
         blocker: GameStatePlayer;
         intersectionPoint: PointLike;
     }) {
+        $stat({
+            type: Stat.Interception,
+            playerId: args.blocker.id,
+            value: {
+                team: args.blocker.team,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                ...(passerId ? { passer: passerId } : {}),
+            },
+        });
+        if (passerId) {
+            $stat({
+                type: Stat.InterceptionThrown,
+                playerId: passerId,
+                value: {
+                    team: downState.offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    interceptor: args.blocker.id,
+                },
+            });
+        }
+
         $effect(($) => {
             $.send({
                 message: t`🛡️ INTERCEPTION by ${args.blocker.name}!`,

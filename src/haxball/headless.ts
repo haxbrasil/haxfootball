@@ -783,7 +783,7 @@ declare global {
          *
          * Don't forget to call stop recording or it will cause a memory leak.
          */
-        startRecording(): void;
+        startRecording(): boolean;
         /**
          * Stops the recording previously started with startRecording and returns the replay file contents as a Uint8Array.
          *
@@ -1012,6 +1012,11 @@ declare global {
     };
 
     type NodeHaxballRoomObject = {
+        /**
+         * Current simulation frame number exposed by node-haxball.
+         */
+        currentFrameNo: number;
+        state: { teamsLocked: boolean };
         leave(): void;
         setProperties(properties: NodeHaxballSetRoomProperties): void;
         setHandicap(handicap: number): void;

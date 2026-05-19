@@ -1,6 +1,6 @@
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { ticks } from "@common/general/time";
-import { AVATARS, setPlayerAvatars } from "@common/game/game";
+import { AVATARS, opposite, setPlayerAvatars } from "@common/game/game";
 import { $setBallMoveable, $unlockBall } from "@meta/legacy/hooks/physics";
 import {
     $hideCrowdingBoxes,
@@ -21,7 +21,14 @@ import {
     processOffensivePenalty,
 } from "@meta/legacy/shared/penalty";
 import { SCORES } from "@meta/legacy/shared/scoring";
-import { $before, $dispose, $effect, $next, $tick } from "@runtime/runtime";
+import {
+    $before,
+    $dispose,
+    $effect,
+    $next,
+    $stat,
+    $tick,
+} from "@runtime/runtime";
 import {
     BALL_OFFSET_YARDS,
     calculateDirectionalGain,
@@ -53,6 +60,7 @@ import {
 } from "@meta/legacy/shared/pushing";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 type Frame = {
     state: GameState;
@@ -225,6 +233,20 @@ export function Snap({
         const offenderNames = formatNames(pushing.pushers);
         const pusherIds = pushing.pushers.map((player) => player.id);
 
+        pushing.pushers.forEach((player) => {
+            $stat({
+                type: Stat.Foul,
+                playerId: player.id,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                },
+            });
+        });
+
         $setBallInactive();
 
         $effect(($) => {
@@ -302,6 +324,29 @@ export function Snap({
             offsideDefenderId,
             "Offside defender must exist for defensive offside penalty",
         );
+
+        $stat({
+            type: Stat.Foul,
+            playerId: offsideDefenderId,
+            value: {
+                team: opposite(offensiveTeam),
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                yards: DEFENSIVE_OFFSIDE_PENALTY_YARDS,
+            },
+        });
+        $stat({
+            type: Stat.Invasion,
+            playerId: offsideDefenderId,
+            value: {
+                team: opposite(offensiveTeam),
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                yards: DEFENSIVE_OFFSIDE_PENALTY_YARDS,
+            },
+        });
 
         $setBallInactive();
 
@@ -430,6 +475,31 @@ export function Snap({
                 .map((entry) => entry.playerId),
         );
 
+        crowdingOffenderIds.forEach((playerId) => {
+            $stat({
+                type: Stat.Foul,
+                playerId,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    yards: Crowding.CROWDING_PENALTY_YARDS,
+                },
+            });
+            $stat({
+                type: Stat.Invasion,
+                playerId,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    yards: Crowding.CROWDING_PENALTY_YARDS,
+                },
+            });
+        });
+
         $showCrowdingBoxes(offensiveTeam, fieldPos);
 
         $dispose(() => {
@@ -548,6 +618,20 @@ export function Snap({
         const defensiveToucherIds = defensiveTouchers.map(
             (player) => player.id,
         );
+
+        defensiveTouchers.forEach((player) => {
+            $stat({
+                type: Stat.Foul,
+                playerId: player.id,
+                value: {
+                    team: opposite(offensiveTeam),
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    yards: DEFENSIVE_TOUCHING_PENALTY_YARDS,
+                },
+            });
+        });
 
         $setBallInactive();
 
@@ -688,6 +772,20 @@ export function Snap({
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
 
+        illegalTouchers.forEach((player) => {
+            $stat({
+                type: Stat.Foul,
+                playerId: player.id,
+                value: {
+                    team: offensiveTeam,
+                    down: downState.downAndDistance.down,
+                    distance: downState.downAndDistance.distance,
+                    startFieldPosition: downState.fieldPos,
+                    yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                },
+            });
+        });
+
         processOffensivePenalty({
             event: penaltyResult.event,
             onNextDown() {
@@ -754,6 +852,18 @@ export function Snap({
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
 
+        $stat({
+            type: Stat.Foul,
+            playerId: quarterbackId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+            },
+        });
+
         $setBallInactive();
 
         $dispose(() => {
@@ -806,6 +916,18 @@ export function Snap({
             downState,
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
+
+        $stat({
+            type: Stat.Foul,
+            playerId: quarterbackId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+            },
+        });
 
         $setBallInactive();
 
@@ -919,9 +1041,23 @@ export function Snap({
     function $handleSnapKick(frame: Frame) {
         if (!frame.quarterback.isKickingBall) return;
 
+        $stat({
+            type: Stat.PassAttempt,
+            playerId: quarterbackId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+            },
+        });
+
         $next({
             to: "SNAP_IN_FLIGHT",
-            params: { downState },
+            params: {
+                downState,
+                passerId: quarterbackId,
+            },
         });
     }
 

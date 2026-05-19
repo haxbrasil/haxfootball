@@ -5,6 +5,7 @@ import { createPlayerSessionStore } from "@room/shared/domain/player-sessions";
 import { createManagedAuthorization } from "./domain/authorization";
 import { createManagedAdminModule } from "./modules/admin";
 import { createAuthenticationModule } from "./modules/authentication";
+import { createManagedMatchPersistence } from "./modules/match-persistence";
 
 type ManagedRoomModulesOptions = {
     roomId?: string | undefined;
@@ -15,11 +16,14 @@ export { getConfig };
 export function createModules(options: ManagedRoomModulesOptions = {}) {
     const sessionStore = createPlayerSessionStore();
     const authorization = createManagedAuthorization({ sessionStore });
-    const downstreamModules = createSharedRoomModules({
+    const matchPersistence = createManagedMatchPersistence({ sessionStore });
+    const sharedModules = createSharedRoomModules({
         authorization,
         autoManageNativeAdmins: false,
         getPlayerSession: sessionStore.get,
+        statEvents: matchPersistence.statEvents,
     });
+    const downstreamModules = [matchPersistence.module, ...sharedModules];
 
     return [
         createRoomSetupModule(),

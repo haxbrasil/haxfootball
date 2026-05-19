@@ -1,11 +1,17 @@
-import { $dispose, $effect, $next } from "@runtime/hooks";
+import { $dispose, $effect, $next, $stat } from "@runtime/hooks";
 import type { FieldTeam } from "@runtime/models";
 import { ticks } from "@common/general/time";
-import { AVATARS, findCatchers, opposite } from "@common/game/game";
+import {
+    AVATARS,
+    type FieldPosition,
+    findCatchers,
+    opposite,
+} from "@common/game/game";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { t } from "@lingui/core/macro";
 import {
     getFieldPosition,
+    calculateYardsGained,
     isCompletelyInsideMainField,
     isInMainField,
     isOutOfBounds,
@@ -20,6 +26,7 @@ import { $global } from "@meta/legacy/hooks/global";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 type EndzoneState = "TOUCHBACK" | "Safety";
 type Frame = {
@@ -30,10 +37,12 @@ type Frame = {
 export function PuntReturn({
     playerId,
     receivingTeam,
+    startFieldPosition,
     endzoneState = "TOUCHBACK",
 }: {
     playerId: number;
     receivingTeam: FieldTeam;
+    startFieldPosition: FieldPosition;
     endzoneState?: EndzoneState;
 }) {
     $effect(($) => {
@@ -74,6 +83,7 @@ export function PuntReturn({
             params: {
                 playerId,
                 receivingTeam,
+                startFieldPosition,
                 endzoneState: "Safety",
             },
         });
@@ -92,6 +102,29 @@ export function PuntReturn({
         $global((state) =>
             state.incrementScore(receivingTeam, SCORES.TOUCHDOWN),
         );
+        $stat({
+            type: Stat.Return,
+            playerId,
+            value: {
+                team: receivingTeam,
+                startFieldPosition,
+                yards: calculateYardsGained(
+                    receivingTeam,
+                    startFieldPosition,
+                    getFieldPosition(frame.player.x),
+                ),
+                touchdown: true,
+            },
+        });
+        $stat({
+            type: Stat.ReturnTouchdown,
+            playerId,
+            value: {
+                team: receivingTeam,
+                startFieldPosition,
+                touchdown: true,
+            },
+        });
 
         const { scores } = $global();
 
@@ -131,6 +164,21 @@ export function PuntReturn({
         const fieldPos = getFieldPosition(frame.player.x);
 
         if (isCompletelyInsideMainField(frame.player)) {
+            $stat({
+                type: Stat.Return,
+                playerId,
+                value: {
+                    team: receivingTeam,
+                    startFieldPosition,
+                    endFieldPosition: fieldPos,
+                    yards: calculateYardsGained(
+                        receivingTeam,
+                        startFieldPosition,
+                        fieldPos,
+                    ),
+                },
+            });
+
             $effect(($) => {
                 $.send({
                     message: t`🚪 ${frame.player.name} stepped out on the punt return.`,
@@ -277,6 +325,32 @@ export function PuntReturn({
         } else {
             const catcherNames = formatNames(catchers);
             const fieldPos = getFieldPosition(frame.player.x);
+            $stat({
+                type: Stat.Return,
+                playerId,
+                value: {
+                    team: receivingTeam,
+                    startFieldPosition,
+                    endFieldPosition: fieldPos,
+                    yards: calculateYardsGained(
+                        receivingTeam,
+                        startFieldPosition,
+                        fieldPos,
+                    ),
+                    tacklers: catchers.map((player) => player.id),
+                },
+            });
+            catchers.forEach((player) => {
+                $stat({
+                    type: Stat.Tackle,
+                    playerId: player.id,
+                    value: {
+                        team: opposite(receivingTeam),
+                        endFieldPosition: fieldPos,
+                        tackled: playerId,
+                    },
+                });
+            });
 
             $effect(($) => {
                 $.send({

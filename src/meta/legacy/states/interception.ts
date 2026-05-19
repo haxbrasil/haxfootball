@@ -4,7 +4,7 @@ import type {
     GameStatePlayer,
 } from "@runtime/engine";
 import { FieldTeam } from "@runtime/models";
-import { $before, $dispose, $effect, $next } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import { PointLike } from "@common/math/geometry";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
@@ -29,6 +29,7 @@ import { t } from "@lingui/core/macro";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 const MAX_PATH_DURATION = ticks({ seconds: 2 });
 
@@ -126,6 +127,15 @@ export function Interception({
         }
 
         $global((state) => state.incrementScore(playerTeam, SCORES.TOUCHDOWN));
+
+        $stat({
+            type: Stat.PickSix,
+            playerId,
+            value: {
+                team: playerTeam,
+                touchdown: true,
+            },
+        });
 
         const { scores } = $global();
 
@@ -307,6 +317,18 @@ export function Interception({
         } else {
             const catcherNames = formatNames(catchers);
             const fieldPos = getFieldPosition(frame.player.x);
+
+            catchers.forEach((player) => {
+                $stat({
+                    type: Stat.Tackle,
+                    playerId: player.id,
+                    value: {
+                        team: opposite(playerTeam),
+                        endFieldPosition: fieldPos,
+                        tackled: playerId,
+                    },
+                });
+            });
 
             $effect(($) => {
                 $.send({

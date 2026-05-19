@@ -1,6 +1,7 @@
 import { createModule, type Module } from "@core/module";
 import { COMMAND_PREFIX } from "@core/commands";
 import { createEngine, type Engine } from "@runtime/engine";
+import type { RuntimeStatEventSink } from "@runtime/runtime";
 import { registry, stadium } from "@meta/legacy/meta";
 import {
     createConfig,
@@ -182,9 +183,11 @@ const getFinalScoreAnnouncement = (score: ScoreState): string => {
 export function createGameModule({
     authorization,
     getPlayerSession,
+    statEvents,
 }: {
     authorization: RoomAuthorization;
     getPlayerSession: PlayerSessionReader;
+    statEvents?: RuntimeStatEventSink;
 }): Module {
     const gameConfig = createConfig(defaultConfig);
     let engine: Engine<Config> | null = null;
@@ -264,6 +267,7 @@ export function createGameModule({
             engine = createEngine(room, registry, {
                 config: gameConfig,
                 globalSchema: legacyGlobalSchema,
+                ...(statEvents ? { statEvents } : {}),
             });
 
             engine.start("KICKOFF", { forTeam: Team.RED });

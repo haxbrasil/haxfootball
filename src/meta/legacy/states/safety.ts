@@ -131,7 +131,9 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
 
         $next({
             to: "SAFETY_KICK_IN_FLIGHT",
-            params: { kickingTeam },
+            params: {
+                kickingTeam,
+            },
         });
     }
 

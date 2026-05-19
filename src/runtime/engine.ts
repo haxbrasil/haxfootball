@@ -7,6 +7,7 @@ import {
     type MutationBuffer,
     type CheckpointDraft,
     type CheckpointRestoreArgs,
+    type RuntimeStatEventSink,
     type Transition,
 } from "@runtime/runtime";
 import { Room } from "@core/room";
@@ -39,6 +40,7 @@ export type StateRegistry = Record<string, StateFactory<any>>;
 export interface EngineOptions<Cfg> {
     config: Cfg;
     globalSchema?: GlobalSchema<any, any>;
+    statEvents?: RuntimeStatEventSink;
 }
 
 /**
@@ -124,6 +126,16 @@ type CommittedCheckpoint = Checkpoint & {
 type PendingCheckpointDrafts = {
     sourceState: string;
     drafts: Array<CheckpointDraft>;
+};
+
+type CollectedDisposers = {
+    sourceState: string | null;
+    disposals: Array<() => void>;
+};
+
+type DeferredDisposer = {
+    sourceState: string | null;
+    dispose: () => void;
 };
 
 const CHECKPOINT_LIMIT = 50;
@@ -258,7 +270,7 @@ export function createEngine<Cfg>(
     let isPaused = false;
     let resumePending = false;
     let isResumeTick = false;
-    let afterResumeDisposers: Array<() => void> = [];
+    let afterResumeDisposers: DeferredDisposer[] = [];
     let afterResumeTransition: Transition | null = null;
     let checkpoints: Array<CommittedCheckpoint> = [];
     let pendingCheckpointDrafts: PendingCheckpointDrafts | null = null;
@@ -399,6 +411,7 @@ export function createEngine<Cfg>(
             mutations?: MutationBuffer;
             stateStartedTick?: number;
             selfStartedTick?: number;
+            sourceState?: string | null;
         },
     ): T {
         room.invalidateCaches();
@@ -410,12 +423,17 @@ export function createEngine<Cfg>(
             typeof optsRun?.selfStartedTick === "number"
                 ? optsRun.selfStartedTick
                 : (current?.selfStartedTick ?? stateStartedTick);
+        const sourceState =
+            optsRun && "sourceState" in optsRun
+                ? optsRun.sourceState
+                : (current?.name ?? null);
         const uninstall = installRuntime({
             room,
             config: opts.config,
             tickNumber,
             mutations: optsRun?.mutations ?? sharedTickMutations ?? undefined,
             globalStore,
+            statEvents: opts.statEvents ?? null,
             isPaused,
             ...(optsRun?.disposals ? { disposals: optsRun.disposals } : {}),
             ...(optsRun?.checkpointDrafts
@@ -432,6 +450,7 @@ export function createEngine<Cfg>(
             listCheckpoints,
             stateStartedTick,
             selfStartedTick,
+            sourceState,
         });
 
         setRuntimeRoom(room);
@@ -508,6 +527,7 @@ export function createEngine<Cfg>(
             beforeGameState: lastGameState,
             stateStartedTick,
             selfStartedTick,
+            sourceState: name,
             ...(options?.muteEffects !== undefined
                 ? { muteEffects: options.muteEffects }
                 : {}),
@@ -523,28 +543,30 @@ export function createEngine<Cfg>(
         };
     }
 
-    function collectDisposers(target: StateInstance | null): Array<() => void> {
-        if (!target) return [];
+    function collectDisposers(
+        target: StateInstance | null,
+    ): CollectedDisposers {
+        if (!target) return { sourceState: null, disposals: [] };
 
         const disposeFns: Array<() => void> = [];
 
         disposeFns.push(...target.disposals);
         target.disposals.length = 0;
 
-        return disposeFns;
+        return { sourceState: target.name, disposals: disposeFns };
     }
 
     function runDisposers(
-        disposeFns: Array<() => void>,
+        collected: CollectedDisposers,
         mutations?: MutationBuffer,
     ) {
-        if (disposeFns.length === 0) return;
+        if (collected.disposals.length === 0) return;
 
         const runtimeDisposals: Array<() => void> = [];
 
         runOutsideTick(
             () => {
-                for (const fn of disposeFns) {
+                for (const fn of collected.disposals) {
                     fn();
                 }
                 runtimeDisposals.length = 0;
@@ -553,6 +575,7 @@ export function createEngine<Cfg>(
                 disposals: runtimeDisposals,
                 beforeGameState: lastGameState,
                 ...(mutations ? { mutations } : {}),
+                sourceState: collected.sourceState,
             },
         );
     }
@@ -561,25 +584,34 @@ export function createEngine<Cfg>(
         if (afterResumeDisposers.length === 0) return;
         const disposers = afterResumeDisposers;
         afterResumeDisposers = [];
-        runDisposers(disposers);
+
+        for (const disposer of disposers) {
+            runDisposers({
+                sourceState: disposer.sourceState,
+                disposals: [disposer.dispose],
+            });
+        }
     }
 
-    function queueAfterResumeDisposers(disposeFns: Array<() => void>) {
-        if (disposeFns.length === 0) return;
-        afterResumeDisposers.push(...disposeFns);
+    function queueAfterResumeDisposers(collected: CollectedDisposers) {
+        if (collected.disposals.length === 0) return;
+        afterResumeDisposers.push(
+            ...collected.disposals.map((dispose) => ({
+                sourceState: collected.sourceState,
+                dispose,
+            })),
+        );
     }
 
     function disposeState(
         target: StateInstance | null,
         mutations?: MutationBuffer,
     ) {
-        const disposeFns = collectDisposers(target);
-        runDisposers(disposeFns, mutations);
+        runDisposers(collectDisposers(target), mutations);
     }
 
     function deferDisposeState(target: StateInstance | null) {
-        const disposeFns = collectDisposers(target);
-        queueAfterResumeDisposers(disposeFns);
+        queueAfterResumeDisposers(collectDisposers(target));
     }
 
     function applyTransition() {
@@ -861,6 +893,7 @@ export function createEngine<Cfg>(
                 tickNumber: currentTickNumber,
                 mutations: sharedTickMutations ?? undefined,
                 globalStore,
+                statEvents: opts.statEvents ?? null,
                 disposals: current.disposals,
                 checkpointDrafts: current.checkpointDrafts,
                 beforeGameState: lastGameState,
@@ -869,6 +902,7 @@ export function createEngine<Cfg>(
                 isPaused,
                 stateStartedTick: current.stateStartedTick,
                 selfStartedTick: current.selfStartedTick,
+                sourceState: current.name,
             });
 
             setRuntimeRoom(room);

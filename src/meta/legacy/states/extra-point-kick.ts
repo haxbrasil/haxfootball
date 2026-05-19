@@ -2,7 +2,7 @@ import type { GameState } from "@runtime/engine";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
 import { t } from "@lingui/core/macro";
-import { $dispose, $effect, $next, $tick } from "@runtime/runtime";
+import { $dispose, $effect, $next, $stat, $tick } from "@runtime/runtime";
 import { $global } from "@meta/legacy/hooks/global";
 import { $setBallActive } from "@meta/legacy/hooks/game";
 import { $lockBall, $unlockBall } from "@meta/legacy/hooks/physics";
@@ -18,6 +18,7 @@ import {
 } from "@meta/legacy/shared/stadium";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { Stat } from "@meta/legacy/stats";
 
 const EXTRA_POINT_RESULT_DELAY = ticks({ seconds: 2 });
 const EXTRA_POINT_SUCCESS_DELAY = ticks({ seconds: 2 });
@@ -27,8 +28,10 @@ const BALL_STOPPED_SPEED_SQUARED = BALL_STOPPED_SPEED * BALL_STOPPED_SPEED;
 
 export function ExtraPointKick({
     offensiveTeam,
+    kickerId,
 }: {
     offensiveTeam: FieldTeam;
+    kickerId?: number;
 }) {
     const defensiveTeam = opposite(offensiveTeam);
     const goalLine = getGoalLine(defensiveTeam);
@@ -62,6 +65,15 @@ export function ExtraPointKick({
                 $global((state) =>
                     state.incrementScore(offensiveTeam, SCORES.EXTRA_POINT),
                 );
+                if (kickerId) {
+                    $stat({
+                        type: Stat.ExtraPointMade,
+                        playerId: kickerId,
+                        value: {
+                            team: offensiveTeam,
+                        },
+                    });
+                }
 
                 const { scores } = $global();
 
@@ -90,6 +102,15 @@ export function ExtraPointKick({
                     color: COLOR.WARNING,
                 });
             });
+            if (kickerId) {
+                $stat({
+                    type: Stat.ExtraPointMissed,
+                    playerId: kickerId,
+                    value: {
+                        team: offensiveTeam,
+                    },
+                });
+            }
 
             $next({
                 to: "KICKOFF",
@@ -107,6 +128,15 @@ export function ExtraPointKick({
                     color: COLOR.WARNING,
                 });
             });
+            if (kickerId) {
+                $stat({
+                    type: Stat.ExtraPointMissed,
+                    playerId: kickerId,
+                    value: {
+                        team: offensiveTeam,
+                    },
+                });
+            }
 
             $next({
                 to: "KICKOFF",
@@ -131,6 +161,15 @@ export function ExtraPointKick({
                     color: COLOR.WARNING,
                 });
             });
+            if (kickerId) {
+                $stat({
+                    type: Stat.ExtraPointMissed,
+                    playerId: kickerId,
+                    value: {
+                        team: offensiveTeam,
+                    },
+                });
+            }
 
             $next({
                 to: "KICKOFF",

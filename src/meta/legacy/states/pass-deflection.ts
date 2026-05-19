@@ -20,11 +20,13 @@ export function PassDeflection({
     blockerId,
     downState,
     isKickingBall: isInitialKickingBall,
+    passerId,
 }: {
     blockTime: number;
     blockerId: number;
     downState: DownState;
     isKickingBall: boolean;
+    passerId?: number;
 }) {
     const { offensiveTeam, fieldPos, downAndDistance } = downState;
 
@@ -63,6 +65,7 @@ export function PassDeflection({
                     kickTime: state.tickNumber,
                     downState,
                     kickBallState: state.ball,
+                    passerId,
                 },
             });
         }
@@ -73,6 +76,7 @@ export function PassDeflection({
                 params: {
                     blockerId: blockerId,
                     downState,
+                    passerId,
                 },
             });
         }

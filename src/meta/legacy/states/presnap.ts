@@ -94,12 +94,9 @@ function $setInitialPlayerPositions(
                 : {}),
         });
 
-        const playerPositions =
-            typeof targetPlayerId === "number"
-                ? initialPlayerPositions.filter(
-                      ({ id }) => id === targetPlayerId,
-                  )
-                : initialPlayerPositions;
+        const playerPositions = targetPlayerId
+            ? initialPlayerPositions.filter(({ id }) => id === targetPlayerId)
+            : initialPlayerPositions;
 
         playerPositions.forEach(({ id, x, y }) => {
             $.setPlayerDiscProperties(id, {
@@ -544,7 +541,10 @@ export function Presnap({ downState }: { downState: DownState }) {
 
                 $next({
                     to: "FIELD_GOAL",
-                    params: { downState, kickerId: player.id },
+                    params: {
+                        downState,
+                        kickerId: player.id,
+                    },
                 });
             }
             case "punt": {
@@ -608,7 +608,9 @@ export function Presnap({ downState }: { downState: DownState }) {
 
                 $next({
                     to: "PUNT",
-                    params: { downState },
+                    params: {
+                        downState,
+                    },
                 });
             }
             case "reposition": {

@@ -482,6 +482,10 @@ export class Room {
         return this.room.getScores();
     }
 
+    public getCurrentFrameNo(): number {
+        return this.room.currentFrameNo;
+    }
+
     public setScoreLimit(limit: number): void {
         this.room.setScoreLimit(limit);
     }
@@ -667,8 +671,8 @@ export class Room {
         this.invalidatePlayerDiscCache(playerId);
     }
 
-    public startRecording(): void {
-        this.room.startRecording();
+    public startRecording(): boolean {
+        return this.room.startRecording();
     }
 
     public stopRecording(): Uint8Array | null {

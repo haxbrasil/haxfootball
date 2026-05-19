@@ -6,6 +6,7 @@ import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { t } from "@lingui/core/macro";
 import { cn } from "@meta/legacy/shared/message";
 import {
+    getFieldPosition,
     isBallOutOfBounds,
     KICKOFF_OUT_OF_BOUNDS_YARD_LINE,
 } from "@meta/legacy/shared/stadium";
@@ -123,6 +124,7 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
             params: {
                 playerId: catcher.id,
                 receivingTeam,
+                startFieldPosition: getFieldPosition(catcher.x),
             },
         });
     }

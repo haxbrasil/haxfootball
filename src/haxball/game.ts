@@ -73,6 +73,15 @@ type NativeRoom = NodeHaxballRoomObject & {
     token: string;
     requireRecaptcha: boolean;
     debugDesync: unknown;
+    modifyPlayerData?: (
+        playerId: number,
+        name: string,
+        flag: string,
+        avatar: string,
+        conn: string,
+        auth: string,
+        customData?: unknown,
+    ) => NativeModifyPlayerDataResult | Promise<NativeModifyPlayerDataResult>;
     getPlayer(playerId: number): NativePlayer | null;
     getBall(extrapolated?: boolean): NativeDisc;
     getDiscs(extrapolated?: boolean): NativeDisc[];
@@ -152,18 +161,6 @@ type NativeDisc = {
 
 type NativeModifyPlayerDataResult = null | [string, string, string];
 
-type NativeModifyPlayerDataRoom = NativeRoom & {
-    modifyPlayerData?: (
-        playerId: number,
-        name: string,
-        flag: string,
-        avatar: string,
-        conn: string,
-        auth: string,
-        customData?: unknown,
-    ) => NativeModifyPlayerDataResult | Promise<NativeModifyPlayerDataResult>;
-};
-
 type NativePlayerDisc = NativeDisc & {
     playerId: number | null;
     ext: NativePlayerDisc | null;
@@ -179,13 +176,6 @@ type KickBanOperation = {
     byId: number;
     reason: string | null;
     ban: boolean;
-};
-
-type OperationMessage = {
-    byId?: unknown;
-    id?: unknown;
-    playerId?: unknown;
-    playerIdList?: unknown;
 };
 
 const haxball = createHaxballApi();
@@ -315,19 +305,13 @@ function isKickBanOperation(message: unknown): message is KickBanOperation {
     );
 }
 
-function getOperationNumber(
-    message: OperationMessage,
-    key: keyof OperationMessage,
-): number | null {
-    const value = message[key];
+function getOperationNumber(message: object, key: string): number | null {
+    const value = Reflect.get(message, key);
     return typeof value === "number" ? value : null;
 }
 
-function getOperationNumberList(
-    message: OperationMessage,
-    key: keyof OperationMessage,
-): number[] {
-    const value = message[key];
+function getOperationNumberList(message: object, key: string): number[] {
+    const value = Reflect.get(message, key);
 
     if (!Array.isArray(value)) {
         return [];
@@ -385,9 +369,7 @@ function createRoomOperation(
     message: unknown,
 ): RoomOperationObject {
     const operationMessage =
-        typeof message === "object" && message !== null
-            ? (message as OperationMessage)
-            : {};
+        typeof message === "object" && message !== null ? message : {};
     const byId = getOperationNumber(operationMessage, "byId");
     const byPlayer =
         byId && byId !== 0 ? convertPlayer(room.getPlayer(byId)) : null;
@@ -538,14 +520,7 @@ class HaxballCompatibilityRoom {
     }
 
     private installCallbacks(room: NativeRoom): void {
-        (room as NativeModifyPlayerDataRoom).modifyPlayerData = async (
-            id,
-            name,
-            flag,
-            avatar,
-            conn,
-            auth,
-        ) => {
+        room.modifyPlayerData = async (id, name, flag, avatar, conn, auth) => {
             const response = await this.onBeforePlayerJoin({
                 id,
                 name,
@@ -662,7 +637,11 @@ class HaxballCompatibilityRoom {
                 convertPlayer(room.getPlayer(byId)),
             );
 
-        room.onRoomLink = (link: string) => this.onRoomLink(link);
+        room.onRoomLink = (link: string) => {
+            if (this.nativeRoom !== room) return;
+
+            this.onRoomLink(link);
+        };
 
         room.onKickRateLimitChange = (
             min: number,
@@ -847,8 +826,8 @@ class HaxballCompatibilityRoom {
         return ball ? { x: ball.pos.x, y: ball.pos.y } : null;
     }
 
-    public startRecording(): void {
-        this.room.startRecording();
+    public startRecording(): boolean {
+        return this.room.startRecording();
     }
 
     public stopRecording(): Uint8Array | null {

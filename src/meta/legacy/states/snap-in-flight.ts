@@ -3,7 +3,10 @@ import { ticks } from "@common/general/time";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { t } from "@lingui/core/macro";
 import { cn } from "@meta/legacy/shared/message";
-import { isBallOutOfBounds } from "@meta/legacy/shared/stadium";
+import {
+    getFieldPosition,
+    isBallOutOfBounds,
+} from "@meta/legacy/shared/stadium";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
 import {
     findEligibleBallCatcher,
@@ -35,7 +38,13 @@ type Frame = {
     defensiveOutOfBoundsCatcher: GameStatePlayer | null;
 };
 
-export function SnapInFlight({ downState }: { downState: DownState }) {
+export function SnapInFlight({
+    downState,
+    passerId,
+}: {
+    downState: DownState;
+    passerId?: number;
+}) {
     const { offensiveTeam, fieldPos, downAndDistance } = downState;
 
     $setLineOfScrimmage(fieldPos);
@@ -212,7 +221,12 @@ export function SnapInFlight({ downState }: { downState: DownState }) {
 
         $next({
             to: "LIVE_BALL",
-            params: { playerId: catcher.id, downState },
+            params: {
+                playerId: catcher.id,
+                downState,
+                passerId,
+                catchFieldPos: getFieldPosition(catcher.x),
+            },
         });
     }
 
@@ -226,6 +240,7 @@ export function SnapInFlight({ downState }: { downState: DownState }) {
                 blockerId: frame.defensiveCatcher.id,
                 isKickingBall: frame.defensiveCatcher.isKickingBall,
                 downState,
+                passerId,
             },
         });
     }
@@ -240,6 +255,7 @@ export function SnapInFlight({ downState }: { downState: DownState }) {
                 blockerId: frame.defensiveOutOfBoundsCatcher.id,
                 isKickingBall: frame.defensiveOutOfBoundsCatcher.isKickingBall,
                 downState,
+                passerId,
             },
         });
     }
