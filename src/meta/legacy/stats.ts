@@ -160,7 +160,18 @@ const add = (...args: JsonExpression[]): JsonExpression => ({
     args,
 });
 
+const statMetric = (key: string) => ({
+    key,
+    label: `metric.${key}`,
+    valueType: "number",
+    format: "integer",
+});
+
 export const statEventSchemaDefinition = {
+    presentation: {
+        label: "schema.haxfootball",
+        description: "schema.haxfootball.description",
+    },
     events: [
         event(Stat.PassAttempt, [count("pass-attempts")]),
         event(Stat.PassCompletion, [
@@ -245,4 +256,150 @@ export const statEventSchemaDefinition = {
             ),
         },
     ],
+    metrics: [
+        statMetric("pass-attempts"),
+        statMetric("pass-completions"),
+        statMetric("passing-yards"),
+        statMetric("passing-touchdowns"),
+        statMetric("interceptions-thrown"),
+        statMetric("receptions"),
+        statMetric("receiving-yards"),
+        statMetric("yards-after-catch"),
+        statMetric("receiving-touchdowns"),
+        statMetric("carries"),
+        statMetric("quarterback-carries"),
+        statMetric("rushing-yards"),
+        statMetric("rushing-touchdowns"),
+        statMetric("fumbles-lost"),
+        statMetric("returns"),
+        statMetric("return-yards"),
+        statMetric("return-touchdowns"),
+        statMetric("field-goals-made"),
+        statMetric("field-goal-yards"),
+        statMetric("field-goals-missed"),
+        statMetric("extra-points-made"),
+        statMetric("extra-points-missed"),
+        statMetric("passes-blocked"),
+        statMetric("tackles"),
+        statMetric("sacks"),
+        statMetric("interceptions"),
+        statMetric("pick-sixes"),
+        statMetric("forced-fumbles"),
+        statMetric("sacks-taken"),
+        statMetric("sack-yards-lost"),
+        statMetric("strip-sacks-taken"),
+        statMetric("thrown-fumbles"),
+        statMetric("fouls"),
+        statMetric("invasions"),
+        statMetric("accumulated-invasions"),
+        statMetric("fantasy-points"),
+    ],
 } as const;
+
+export const statEventSchemaValues = [
+    label("schema.haxfootball", "HaxFootball", "HaxFootball"),
+    label(
+        "schema.haxfootball.description",
+        "Default HaxFootball room stat events.",
+        "Eventos estatísticos padrão da sala HaxFootball.",
+    ),
+    label("metric.pass-attempts", "Pass attempts", "Tentativas de passe"),
+    label("metric.pass-completions", "Pass completions", "Passes completos"),
+    label("metric.passing-yards", "Passing yards", "Jardas passadas"),
+    label(
+        "metric.passing-touchdowns",
+        "Passing touchdowns",
+        "Touchdowns passados",
+    ),
+    label(
+        "metric.interceptions-thrown",
+        "Interceptions thrown",
+        "Interceptações lançadas",
+    ),
+    label("metric.receptions", "Receptions", "Recepções"),
+    label("metric.receiving-yards", "Receiving yards", "Jardas recebidas"),
+    label(
+        "metric.yards-after-catch",
+        "Yards after catch",
+        "Jardas após recepção",
+    ),
+    label(
+        "metric.receiving-touchdowns",
+        "Receiving touchdowns",
+        "Touchdowns recebidos",
+    ),
+    label("metric.carries", "Carries", "Corridas"),
+    label(
+        "metric.quarterback-carries",
+        "Quarterback carries",
+        "Corridas do quarterback",
+    ),
+    label("metric.rushing-yards", "Rushing yards", "Jardas corridas"),
+    label(
+        "metric.rushing-touchdowns",
+        "Rushing touchdowns",
+        "Touchdowns corridos",
+    ),
+    label("metric.fumbles-lost", "Fumbles lost", "Fumbles perdidos"),
+    label("metric.returns", "Returns", "Retornos"),
+    label("metric.return-yards", "Return yards", "Jardas de retorno"),
+    label(
+        "metric.return-touchdowns",
+        "Return touchdowns",
+        "Touchdowns de retorno",
+    ),
+    label("metric.field-goals-made", "Field goals made", "Field goals feitos"),
+    label(
+        "metric.field-goal-yards",
+        "Field goal yards",
+        "Jardas de field goal",
+    ),
+    label(
+        "metric.field-goals-missed",
+        "Field goals missed",
+        "Field goals errados",
+    ),
+    label(
+        "metric.extra-points-made",
+        "Extra points made",
+        "Extra points feitos",
+    ),
+    label(
+        "metric.extra-points-missed",
+        "Extra points missed",
+        "Extra points errados",
+    ),
+    label("metric.passes-blocked", "Passes blocked", "Passes bloqueados"),
+    label("metric.tackles", "Tackles", "Tackles"),
+    label("metric.sacks", "Sacks", "Sacks"),
+    label("metric.interceptions", "Interceptions", "Interceptações"),
+    label("metric.pick-sixes", "Pick-sixes", "Pick-sixes"),
+    label("metric.forced-fumbles", "Forced fumbles", "Fumbles forçados"),
+    label("metric.sacks-taken", "Sacks taken", "Sacks sofridos"),
+    label(
+        "metric.sack-yards-lost",
+        "Sack yards lost",
+        "Jardas perdidas em sack",
+    ),
+    label(
+        "metric.strip-sacks-taken",
+        "Strip sacks taken",
+        "Strip sacks sofridos",
+    ),
+    label("metric.thrown-fumbles", "Thrown fumbles", "Fumbles lançados"),
+    label("metric.fouls", "Fouls", "Faltas"),
+    label("metric.invasions", "Invasions", "Invasões"),
+    label(
+        "metric.accumulated-invasions",
+        "Accumulated invasions",
+        "Invasões acumuladas",
+    ),
+    label("metric.fantasy-points", "Fantasy points", "Pontos fantasy"),
+].flat();
+
+function label(value: string, en: string, pt: string) {
+    return [
+        { value, language: "en", label: en },
+        { value, language: "pt", label: pt },
+    ];
+}
