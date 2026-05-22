@@ -273,6 +273,9 @@ export const statEventSchemaDefinition = {
             ),
         },
     ],
+    featuredMetrics: {
+        points: "fantasy-points",
+    },
     categories: [
         statCategory(StatCategory.Fantasy, "fantasy-points"),
         statCategory(StatCategory.Passing, "passing-yards"),
