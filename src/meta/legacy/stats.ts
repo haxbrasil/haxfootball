@@ -178,6 +178,12 @@ const statMetric = (key: string, category: string) => ({
     format: "integer",
 });
 
+const statCategory = (key: string, primaryMetric: string) => ({
+    key,
+    label: key,
+    primaryMetric,
+});
+
 export const statEventSchemaDefinition = {
     presentation: {
         label: "schema.haxfootball",
@@ -266,6 +272,15 @@ export const statEventSchemaDefinition = {
                 weighted("fouls", -3),
             ),
         },
+    ],
+    categories: [
+        statCategory(StatCategory.Fantasy, "fantasy-points"),
+        statCategory(StatCategory.Passing, "passing-yards"),
+        statCategory(StatCategory.Receiving, "receiving-yards"),
+        statCategory(StatCategory.Rushing, "rushing-yards"),
+        statCategory(StatCategory.SpecialTeams, "return-yards"),
+        statCategory(StatCategory.Defense, "tackles"),
+        statCategory(StatCategory.Misc, "accumulated-invasions"),
     ],
     metrics: [
         statMetric("fantasy-points", StatCategory.Fantasy),
