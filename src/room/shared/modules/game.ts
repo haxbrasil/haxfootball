@@ -25,6 +25,7 @@ import { type GlobalSchemaState } from "@runtime/global";
 import type { RoomAuthorization } from "../domain/authorization";
 import { CommandCategory } from "../domain/command-categories";
 import type { PlayerSessionReader } from "../domain/player-sessions";
+import type { GameScoreStore } from "../domain/game-score";
 
 type LegacyGlobalSnapshot = GlobalSchemaState<typeof legacyGlobalSchema>;
 
@@ -182,15 +183,27 @@ const getFinalScoreAnnouncement = (score: ScoreState): string => {
 
 export function createGameModule({
     authorization,
+    gameScoreStore,
     getPlayerSession,
     statEvents,
 }: {
     authorization: RoomAuthorization;
+    gameScoreStore?: GameScoreStore;
     getPlayerSession: PlayerSessionReader;
     statEvents?: RuntimeStatEventSink;
 }): Module {
     const gameConfig = createConfig(defaultConfig);
+
     let engine: Engine<Config> | null = null;
+
+    const syncGameScore = () => {
+        const snapshot =
+            engine?.getGlobalStateSnapshot<LegacyGlobalSnapshot>() ?? null;
+
+        gameScoreStore?.set(snapshot?.scores);
+
+        return snapshot;
+    };
 
     return createModule()
         .setCommands({
@@ -271,9 +284,11 @@ export function createGameModule({
             });
 
             engine.start("KICKOFF", { forTeam: Team.RED });
+            syncGameScore();
         })
         .onGameTick(() => {
             engine?.tick();
+            syncGameScore();
         })
         .onPlayerBallKick((_room, player) => {
             engine?.trackPlayerBallKick(player.id);
@@ -289,6 +304,7 @@ export function createGameModule({
                 : { handled: false };
 
             if (handledByEngine) {
+                syncGameScore();
                 return { hideMessage: true };
             }
 
@@ -512,6 +528,7 @@ export function createGameModule({
                 rawMessage,
                 broadcast,
             );
+            syncGameScore();
 
             if (chatResult.allowBroadcast && !chatResult.sentBeforeHooks) {
                 broadcast();
@@ -521,13 +538,14 @@ export function createGameModule({
         })
         .onPlayerTeamChange((_room, changedPlayer, byPlayer) => {
             engine?.handlePlayerTeamChange(changedPlayer, byPlayer);
+            syncGameScore();
         })
         .onPlayerLeave((_room, player) => {
             engine?.handlePlayerLeave(player);
+            syncGameScore();
         })
         .onGameStop((room) => {
-            const snapshot =
-                engine?.getGlobalStateSnapshot<LegacyGlobalSnapshot>();
+            const snapshot = syncGameScore();
             const score = snapshot?.scores ?? null;
 
             const shouldShowScore =
@@ -550,6 +568,7 @@ export function createGameModule({
 
             engine?.stop();
             engine = null;
+            gameScoreStore?.reset();
         })
         .onGamePause((_room, byPlayer) => {
             engine?.handleGamePause(byPlayer);

@@ -38,6 +38,7 @@ const roomServerEnvSchema = {
         .min(1)
         .default("youtube.com/watch?v=Z09dlI3MR28"),
     DISCORD_LINK: z.string().trim().min(1).default("discord.gg/q8ay8PmEkp"),
+    PUBLIC_WEB_BASE_URL: z.string().trim().min(1).optional(),
     __ROOM_ID: z.string().trim().min(1).optional(),
     ROOM_API_ROOM_ID: z.string().trim().min(1).optional(),
     __ROOM_COMM_ID: z.string().trim().min(1).optional(),
@@ -59,6 +60,9 @@ export const env = createEnv(
             roomToken: rawEnv.ROOM_TOKEN,
             ...(rawEnv.PROXY ? { proxy: rawEnv.PROXY } : {}),
             ...(rawEnv.LANGUAGE ? { language: rawEnv.LANGUAGE } : {}),
+            ...(rawEnv.PUBLIC_WEB_BASE_URL
+                ? { publicWebBaseUrl: rawEnv.PUBLIC_WEB_BASE_URL }
+                : {}),
             ...(roomId && commId ? { apiReadiness: { roomId, commId } } : {}),
         };
     },

@@ -14,6 +14,8 @@ import type {
     PlayerSessionReader,
     PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
+import type { GameScoreReader } from "@room/shared/domain/game-score";
+import { createPublicWebUrl } from "@room/shared/domain/public-web-url";
 import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
 import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
 import { t } from "@lingui/core/macro";
@@ -40,10 +42,14 @@ type MatchSession = {
 };
 
 type CreateManagedMatchPersistenceOptions = {
+    gameScoreReader: GameScoreReader;
+    publicWebBaseUrl?: string | undefined;
     sessionStore: PlayerSessionStore;
 };
 
 export function createManagedMatchPersistence({
+    gameScoreReader,
+    publicWebBaseUrl,
     sessionStore,
 }: CreateManagedMatchPersistenceOptions): {
     module: Module;
@@ -91,7 +97,7 @@ export function createManagedMatchPersistence({
                 startedAt: new Date(),
                 endedAt: null,
                 matchId: null,
-                lastScore: readScore(room),
+                lastScore: readScore(room, gameScoreReader),
                 matchCreationStarted: false,
                 ended: false,
                 events: [],
@@ -113,14 +119,16 @@ export function createManagedMatchPersistence({
         })
         .onGameTick((room) => {
             if (session) {
-                session.lastScore = readScore(room) ?? session.lastScore;
+                session.lastScore =
+                    readScore(room, gameScoreReader) ?? session.lastScore;
                 persistIfEligible(session);
             }
         })
         .onPlayerJoin((room, player) => {
             if (!session || session.ended) return;
             appendPlayerEvent(session, "player_join", player, sessionStore.get);
-            session.lastScore = readScore(room) ?? session.lastScore;
+            session.lastScore =
+                readScore(room, gameScoreReader) ?? session.lastScore;
             persistIfEligible(session);
         })
         .onPlayerLeave((room, player) => {
@@ -131,7 +139,8 @@ export function createManagedMatchPersistence({
                 player,
                 sessionStore.get,
             );
-            session.lastScore = readScore(room) ?? session.lastScore;
+            session.lastScore =
+                readScore(room, gameScoreReader) ?? session.lastScore;
             persistIfEligible(session);
         })
         .onPlayerTeamChange((room, player) => {
@@ -142,7 +151,8 @@ export function createManagedMatchPersistence({
                 player,
                 sessionStore.get,
             );
-            session.lastScore = readScore(room) ?? session.lastScore;
+            session.lastScore =
+                readScore(room, gameScoreReader) ?? session.lastScore;
             persistIfEligible(session);
         })
         .onGameStop((room) => {
@@ -153,7 +163,7 @@ export function createManagedMatchPersistence({
             currentSession.ended = true;
             currentSession.endedAt = new Date();
             currentSession.lastScore =
-                readScore(room) ?? currentSession.lastScore;
+                readScore(room, gameScoreReader) ?? currentSession.lastScore;
             const elapsedSeconds = getElapsedSeconds(currentSession);
             const replayBytes = currentSession.replay.stop(room);
 
@@ -165,7 +175,12 @@ export function createManagedMatchPersistence({
             enqueue(async () => {
                 await createMatch(currentSession);
                 await flushBufferedData(currentSession, sessionStore.get);
-                await completeMatch(room, currentSession, replayBytes);
+                await completeMatch(
+                    room,
+                    currentSession,
+                    replayBytes,
+                    publicWebBaseUrl,
+                );
             });
         });
 
@@ -258,6 +273,7 @@ async function completeMatch(
     room: Room,
     session: MatchSession,
     replayBytes: Uint8Array | null,
+    publicWebBaseUrl: string | undefined,
 ): Promise<void> {
     if (!session.matchId) return;
     if (!session.endedAt) return;
@@ -277,8 +293,14 @@ async function completeMatch(
         if (!association.ok) {
             console.error("Failed to associate recording:", association.error);
         } else {
+            const matchUrl =
+                createPublicWebUrl(publicWebBaseUrl, [
+                    "matches",
+                    session.matchId,
+                ]) ?? recording.url;
+
             room.send({
-                message: t`🎥 Match recorded: ${recording.url}`,
+                message: t`🎥 Match recorded: ${matchUrl}`,
                 color: COLOR.SYSTEM,
                 sound: "notification",
             });
@@ -390,13 +412,18 @@ function elapsedSinceStart(session: MatchSession): number {
     return Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
 }
 
-function readScore(room: Room): MatchScore | null {
-    const scores = room.getScores();
-    if (!scores) return null;
+function readScore(
+    room: Room,
+    gameScoreReader: GameScoreReader,
+): MatchScore | null {
+    const gameScore = gameScoreReader();
+    const nativeScores = room.getScores();
+
+    if (!gameScore && !nativeScores) return null;
 
     return {
-        red: scores.red,
-        blue: scores.blue,
-        time: scores.time,
+        red: gameScore?.red ?? 0,
+        blue: gameScore?.blue ?? 0,
+        time: nativeScores?.time ?? 0,
     };
 }

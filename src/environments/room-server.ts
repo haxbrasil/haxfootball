@@ -8,7 +8,9 @@ async function bootstrap() {
     initI18n(env.language);
 
     const { getConfig, createModules } = await import("@room/managed");
+
     const modules = createModules({
+        publicWebBaseUrl: env.publicWebBaseUrl,
         roomId: env.apiReadiness?.roomId,
     });
 

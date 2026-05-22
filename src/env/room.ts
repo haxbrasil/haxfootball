@@ -12,6 +12,7 @@ export const env = createEnv({
             .min(1)
             .default("youtube.com/watch?v=Z09dlI3MR28"),
         DISCORD_LINK: z.string().trim().min(1).default("discord.gg/q8ay8PmEkp"),
+        PUBLIC_WEB_BASE_URL: z.string().trim().min(1).optional(),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
