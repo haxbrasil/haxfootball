@@ -17,6 +17,7 @@ import type {
 import type { GameScoreReader } from "@room/shared/domain/game-score";
 import { createPublicWebUrl } from "@room/shared/domain/public-web-url";
 import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
+import { GAME_MODE_NAME } from "@meta/legacy/stats";
 import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
 import { t } from "@lingui/core/macro";
 
@@ -195,6 +196,9 @@ async function createMatch(session: MatchSession): Promise<void> {
     const events = session.events.slice(0, eventCount);
     const body: CreateMatchInput = {
         status: session.ended ? "completed" : "ongoing",
+        gameMode: {
+            name: GAME_MODE_NAME,
+        },
         initiatedAt: session.startedAt.toISOString(),
         events,
         ...(session.lastScore

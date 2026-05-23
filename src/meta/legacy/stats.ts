@@ -2,6 +2,7 @@ import type { FieldTeam } from "@runtime/models";
 import type { FieldPosition } from "@common/game/game";
 
 export const STAT_SCHEMA_NAME = "haxfootball";
+export const GAME_MODE_NAME = "haxfootball";
 
 export const Stat = {
     PassAttempt: "pass-attempt",
