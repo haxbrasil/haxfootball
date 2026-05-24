@@ -308,6 +308,7 @@ room.getScores();
 ```
 
 Returns current score information when a game is running, or `null` when there is no active game.
+Inside `onGameStop`, scores may already be cleared. Code that needs final score/time should preserve values cached during `onGameTick` or earlier callbacks instead of overwriting them from `getScores()`.
 
 ```ts
 room.getBallPosition();

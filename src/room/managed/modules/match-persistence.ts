@@ -87,8 +87,11 @@ export function createManagedMatchPersistence({
 
         currentSession.ended = true;
         currentSession.endedAt ??= new Date();
-        currentSession.lastScore =
-            readScore(room, gameScoreReader) ?? currentSession.lastScore;
+        currentSession.lastScore = readScore(
+            room,
+            gameScoreReader,
+            currentSession.lastScore,
+        );
         const elapsedSeconds = getElapsedSeconds(currentSession);
         const replayBytes = currentSession.replay.stop(room);
 
@@ -196,16 +199,6 @@ export function createManagedMatchPersistence({
             persistIfEligible(session);
         })
         .onGameStop((room) => {
-            const currentSession = session;
-            if (!currentSession) return;
-
-            finishSession(room, currentSession);
-        })
-        .onBeforeOperation((room, operation) => {
-            if (operation.kind !== "stop-game") {
-                return;
-            }
-
             const currentSession = session;
             if (!currentSession) return;
 
@@ -459,15 +452,16 @@ function elapsedSinceStart(session: MatchSession): number {
 function readScore(
     room: Room,
     gameScoreReader: GameScoreReader,
+    previousScore: MatchScore | null = null,
 ): MatchScore | null {
     const gameScore = gameScoreReader();
     const nativeScores = room.getScores();
 
-    if (!gameScore && !nativeScores) return null;
+    if (!gameScore && !nativeScores) return previousScore;
 
     return {
-        red: gameScore?.red ?? 0,
-        blue: gameScore?.blue ?? 0,
-        time: nativeScores?.time ?? 0,
+        red: gameScore?.red ?? previousScore?.red ?? 0,
+        blue: gameScore?.blue ?? previousScore?.blue ?? 0,
+        time: nativeScores?.time ?? previousScore?.time ?? 0,
     };
 }
