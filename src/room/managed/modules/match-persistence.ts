@@ -263,9 +263,6 @@ export function createManagedMatchPersistence({
                     ? describeSession(currentSession)
                     : null,
             });
-            if (!currentSession) return;
-
-            finishSession(room, currentSession, "before-stop-game-operation");
         });
 
     return { module, statEvents };
