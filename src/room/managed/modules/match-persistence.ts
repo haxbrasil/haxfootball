@@ -200,6 +200,16 @@ export function createManagedMatchPersistence({
             if (!currentSession) return;
 
             finishSession(room, currentSession);
+        })
+        .onBeforeOperation((room, operation) => {
+            if (operation.kind !== "stop-game") {
+                return;
+            }
+
+            const currentSession = session;
+            if (!currentSession) return;
+
+            finishSession(room, currentSession);
         });
 
     return { module, statEvents };
