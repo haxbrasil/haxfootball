@@ -244,7 +244,7 @@ export function createManagedMatchPersistence({
 
             finishSession(room, currentSession, "onGameStop");
         })
-        .onBeforeOperation((room, operation) => {
+        .onBeforeOperation((_room, operation) => {
             if (operation.kind !== "stop-game") {
                 return;
             }
