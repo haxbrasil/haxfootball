@@ -80,6 +80,39 @@ export function createManagedMatchPersistence({
         });
     };
 
+    const finishSession = (room: Room, currentSession: MatchSession): void => {
+        if (session === currentSession) {
+            session = null;
+        }
+
+        currentSession.ended = true;
+        currentSession.endedAt ??= new Date();
+        currentSession.lastScore =
+            readScore(room, gameScoreReader) ?? currentSession.lastScore;
+        const elapsedSeconds = getElapsedSeconds(currentSession);
+        const replayBytes = currentSession.replay.stop(room);
+
+        if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {
+            return;
+        }
+
+        currentSession.matchCreationStarted = true;
+        enqueue(async () => {
+            await createMatch(currentSession);
+
+            try {
+                await flushBufferedData(currentSession, sessionStore.get);
+            } finally {
+                await completeMatch(
+                    room,
+                    currentSession,
+                    replayBytes,
+                    publicWebBaseUrl,
+                );
+            }
+        });
+    };
+
     const statEvents: RuntimeStatEventSink = (event) => {
         if (!session || session.ended) return;
 
@@ -142,7 +175,13 @@ export function createManagedMatchPersistence({
             );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
-            persistIfEligible(session);
+
+            if (hasActivePlayers(room)) {
+                persistIfEligible(session);
+                return;
+            }
+
+            finishSession(room, session);
         })
         .onPlayerTeamChange((room, player) => {
             if (!session || session.ended) return;
@@ -160,29 +199,7 @@ export function createManagedMatchPersistence({
             const currentSession = session;
             if (!currentSession) return;
 
-            session = null;
-            currentSession.ended = true;
-            currentSession.endedAt = new Date();
-            currentSession.lastScore =
-                readScore(room, gameScoreReader) ?? currentSession.lastScore;
-            const elapsedSeconds = getElapsedSeconds(currentSession);
-            const replayBytes = currentSession.replay.stop(room);
-
-            if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {
-                return;
-            }
-
-            currentSession.matchCreationStarted = true;
-            enqueue(async () => {
-                await createMatch(currentSession);
-                await flushBufferedData(currentSession, sessionStore.get);
-                await completeMatch(
-                    room,
-                    currentSession,
-                    replayBytes,
-                    publicWebBaseUrl,
-                );
-            });
+            finishSession(room, currentSession);
         });
 
     return { module, statEvents };
@@ -195,7 +212,7 @@ async function createMatch(session: MatchSession): Promise<void> {
     const eventCount = session.events.length;
     const events = session.events.slice(0, eventCount);
     const body: CreateMatchInput = {
-        status: session.ended ? "completed" : "ongoing",
+        status: "ongoing",
         gameMode: {
             name: GAME_MODE_NAME,
         },
@@ -209,7 +226,6 @@ async function createMatch(session: MatchSession): Promise<void> {
                   },
               }
             : {}),
-        ...(session.endedAt ? { endedAt: session.endedAt.toISOString() } : {}),
         ...(statEventSchema
             ? {
                   statEventSchema,
@@ -282,6 +298,24 @@ async function completeMatch(
     if (!session.matchId) return;
     if (!session.endedAt) return;
 
+    const result = await api.matches.update(session.matchId, {
+        status: "completed",
+        endedAt: session.endedAt.toISOString(),
+        ...(session.lastScore
+            ? {
+                  score: {
+                      red: session.lastScore.red,
+                      blue: session.lastScore.blue,
+                  },
+              }
+            : {}),
+    });
+
+    if (!result.ok) {
+        console.error("Failed to complete match:", result.error);
+        return;
+    }
+
     const recording = replayBytes
         ? await uploadRecording(session.matchId, replayBytes)
         : null;
@@ -309,23 +343,6 @@ async function completeMatch(
                 sound: "notification",
             });
         }
-    }
-
-    const result = await api.matches.update(session.matchId, {
-        status: "completed",
-        endedAt: session.endedAt.toISOString(),
-        ...(session.lastScore
-            ? {
-                  score: {
-                      red: session.lastScore.red,
-                      blue: session.lastScore.blue,
-                  },
-              }
-            : {}),
-    });
-
-    if (!result.ok) {
-        console.error("Failed to complete match:", result.error);
     }
 }
 
@@ -361,14 +378,19 @@ function appendPlayerEvent(
         session.playerIds.set(player.id, backendPlayerId);
     }
 
-    session.events.push({
+    const event: MatchEventInput = {
         type,
         playerId: backendPlayerId,
         roomPlayerId: player.id,
-        team: toApiTeam(player.team),
         occurredAt: new Date().toISOString(),
         elapsedSeconds: elapsedSinceStart(session),
-    });
+    };
+
+    if (type !== "player_leave") {
+        event.team = toApiTeam(player.team);
+    }
+
+    session.events.push(event);
 }
 
 function toStatEventInput(
@@ -406,6 +428,14 @@ function toApiTeam(team: number): NonNullable<MatchEventInput["team"]> {
     if (team === Team.RED) return "red";
     if (team === Team.BLUE) return "blue";
     return "spectators";
+}
+
+function hasActivePlayers(room: Room): boolean {
+    return room
+        .getPlayerList()
+        .some(
+            (player) => player.team === Team.RED || player.team === Team.BLUE,
+        );
 }
 
 function getElapsedSeconds(session: MatchSession): number {
