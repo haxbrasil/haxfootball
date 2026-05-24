@@ -22,6 +22,7 @@ import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
 import { t } from "@lingui/core/macro";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
+const DIAGNOSTIC_PREFIX = "[stop-game-diagnostic]";
 
 type MatchScore = {
     red: number;
@@ -59,10 +60,25 @@ export function createManagedMatchPersistence({
     let session: MatchSession | null = null;
     let queue = Promise.resolve();
 
-    const enqueue = (task: () => Promise<void>): void => {
-        queue = queue.then(task).catch((error) => {
-            console.error("Failed to persist match data:", error);
-        });
+    const enqueue = (label: string, task: () => Promise<void>): void => {
+        console.log(`${DIAGNOSTIC_PREFIX} queue task queued`, { label });
+        queue = queue
+            .then(async () => {
+                console.log(`${DIAGNOSTIC_PREFIX} queue task started`, {
+                    label,
+                });
+                await task();
+                console.log(`${DIAGNOSTIC_PREFIX} queue task completed`, {
+                    label,
+                });
+            })
+            .catch((error) => {
+                console.error("Failed to persist match data:", error);
+                console.error(`${DIAGNOSTIC_PREFIX} queue task failed`, {
+                    label,
+                    error,
+                });
+            });
     };
 
     const persistIfEligible = (currentSession: MatchSession): void => {
@@ -74,13 +90,22 @@ export function createManagedMatchPersistence({
         }
 
         currentSession.matchCreationStarted = true;
-        enqueue(async () => {
+        enqueue("persist-if-eligible", async () => {
             await createMatch(currentSession);
             await flushBufferedData(currentSession, sessionStore.get);
         });
     };
 
-    const finishSession = (room: Room, currentSession: MatchSession): void => {
+    const finishSession = (
+        room: Room,
+        currentSession: MatchSession,
+        reason: string,
+    ): void => {
+        console.log(`${DIAGNOSTIC_PREFIX} finish requested`, {
+            reason,
+            session: describeSession(currentSession),
+        });
+
         if (session === currentSession) {
             session = null;
         }
@@ -93,11 +118,16 @@ export function createManagedMatchPersistence({
         const replayBytes = currentSession.replay.stop(room);
 
         if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {
+            console.log(`${DIAGNOSTIC_PREFIX} finish ignored as too short`, {
+                reason,
+                elapsedSeconds,
+                minimumSeconds: MIN_PERSISTED_MATCH_SECONDS,
+            });
             return;
         }
 
         currentSession.matchCreationStarted = true;
-        enqueue(async () => {
+        enqueue(`finish-session:${reason}`, async () => {
             await createMatch(currentSession);
 
             try {
@@ -120,13 +150,17 @@ export function createManagedMatchPersistence({
         if (!session.matchId) return;
 
         const currentSession = session;
-        enqueue(async () => {
+        enqueue("stat-event-flush", async () => {
             await flushBufferedData(currentSession, sessionStore.get);
         });
     };
 
     const module = createModule()
         .onGameStart((room) => {
+            console.log(`${DIAGNOSTIC_PREFIX} onGameStart received`, {
+                playerCount: room.getPlayerList().length,
+            });
+
             session = {
                 startedAt: new Date(),
                 endedAt: null,
@@ -141,6 +175,9 @@ export function createManagedMatchPersistence({
             };
 
             session.replay.start(room);
+            console.log(`${DIAGNOSTIC_PREFIX} session started`, {
+                session: describeSession(session),
+            });
 
             for (const player of room.getPlayerList()) {
                 appendPlayerEvent(
@@ -181,7 +218,7 @@ export function createManagedMatchPersistence({
                 return;
             }
 
-            finishSession(room, session);
+            finishSession(room, session, "last-active-player-left");
         })
         .onPlayerTeamChange((room, player) => {
             if (!session || session.ended) return;
@@ -197,9 +234,15 @@ export function createManagedMatchPersistence({
         })
         .onGameStop((room) => {
             const currentSession = session;
+            console.log(`${DIAGNOSTIC_PREFIX} onGameStop received`, {
+                hasSession: currentSession !== null,
+                session: currentSession
+                    ? describeSession(currentSession)
+                    : null,
+            });
             if (!currentSession) return;
 
-            finishSession(room, currentSession);
+            finishSession(room, currentSession, "onGameStop");
         })
         .onBeforeOperation((room, operation) => {
             if (operation.kind !== "stop-game") {
@@ -207,9 +250,22 @@ export function createManagedMatchPersistence({
             }
 
             const currentSession = session;
+            console.log(`${DIAGNOSTIC_PREFIX} stop-game operation received`, {
+                hasSession: currentSession !== null,
+                byPlayer: operation.byPlayer
+                    ? {
+                          id: operation.byPlayer.id,
+                          name: operation.byPlayer.name,
+                          admin: operation.byPlayer.admin,
+                      }
+                    : null,
+                session: currentSession
+                    ? describeSession(currentSession)
+                    : null,
+            });
             if (!currentSession) return;
 
-            finishSession(room, currentSession);
+            finishSession(room, currentSession, "before-stop-game-operation");
         });
 
     return { module, statEvents };
@@ -217,6 +273,10 @@ export function createManagedMatchPersistence({
 
 async function createMatch(session: MatchSession): Promise<void> {
     if (session.matchId) return;
+
+    console.log(`${DIAGNOSTIC_PREFIX} create match requested`, {
+        session: describeSession(session),
+    });
 
     const statEventSchema = await ensureStatEventSchema();
     const eventCount = session.events.length;
@@ -246,11 +306,19 @@ async function createMatch(session: MatchSession): Promise<void> {
     const result = await api.matches.create(body);
     if (!result.ok) {
         console.error("Failed to create match:", result.error);
+        console.error(`${DIAGNOSTIC_PREFIX} create match failed`, {
+            error: result.error,
+            session: describeSession(session),
+        });
         return;
     }
 
     session.matchId = result.data.id;
     session.events.splice(0, eventCount);
+    console.log(`${DIAGNOSTIC_PREFIX} create match succeeded`, {
+        matchId: session.matchId,
+        session: describeSession(session),
+    });
 }
 
 async function flushBufferedData(
@@ -308,6 +376,12 @@ async function completeMatch(
     if (!session.matchId) return;
     if (!session.endedAt) return;
 
+    console.log(`${DIAGNOSTIC_PREFIX} complete match requested`, {
+        matchId: session.matchId,
+        hasReplayBytes: replayBytes !== null,
+        session: describeSession(session),
+    });
+
     const result = await api.matches.update(session.matchId, {
         status: "completed",
         endedAt: session.endedAt.toISOString(),
@@ -323,8 +397,16 @@ async function completeMatch(
 
     if (!result.ok) {
         console.error("Failed to complete match:", result.error);
+        console.error(`${DIAGNOSTIC_PREFIX} complete match failed`, {
+            matchId: session.matchId,
+            error: result.error,
+        });
         return;
     }
+
+    console.log(`${DIAGNOSTIC_PREFIX} complete match succeeded`, {
+        matchId: session.matchId,
+    });
 
     const recording = replayBytes
         ? await uploadRecording(session.matchId, replayBytes)
@@ -401,6 +483,20 @@ function appendPlayerEvent(
     }
 
     session.events.push(event);
+}
+
+function describeSession(session: MatchSession) {
+    return {
+        matchId: session.matchId,
+        startedAt: session.startedAt.toISOString(),
+        endedAt: session.endedAt?.toISOString() ?? null,
+        ended: session.ended,
+        matchCreationStarted: session.matchCreationStarted,
+        bufferedEvents: session.events.length,
+        bufferedStats: session.stats.length,
+        playerIds: session.playerIds.size,
+        lastScore: session.lastScore,
+    };
 }
 
 function toStatEventInput(

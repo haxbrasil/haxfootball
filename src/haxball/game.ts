@@ -30,6 +30,8 @@ type NativePlayer = {
     identity: object | null;
 };
 
+const DIAGNOSTIC_PREFIX = "[stop-game-diagnostic]";
+
 type NativeRoom = NodeHaxballRoomObject & {
     isHost: boolean;
     currentPlayerId: number;
@@ -390,6 +392,25 @@ function createRoomOperation(
     };
 }
 
+function describeOperationForDiagnostics(operation: RoomOperationObject) {
+    return {
+        kind: operation.kind,
+        rawType: operation.rawType,
+        byPlayer: operation.byPlayer
+            ? {
+                  id: operation.byPlayer.id,
+                  name: operation.byPlayer.name,
+                  admin: operation.byPlayer.admin,
+              }
+            : null,
+        targetPlayers: operation.targetPlayers.map((player) => ({
+            id: player.id,
+            name: player.name,
+            admin: player.admin,
+        })),
+    };
+}
+
 class HaxballCompatibilityRoom {
     public readonly CollisionFlags: CollisionFlagsObject = {
         all: 63,
@@ -582,8 +603,21 @@ class HaxballCompatibilityRoom {
         room.onGameStart = (byId: number) =>
             this.onGameStart(convertPlayer(room.getPlayer(byId)));
 
-        room.onGameStop = (byId: number) =>
-            this.onGameStop(convertPlayer(room.getPlayer(byId)));
+        room.onGameStop = (byId: number) => {
+            const byPlayer = convertPlayer(room.getPlayer(byId));
+            console.log(`${DIAGNOSTIC_PREFIX} node-haxball onGameStop`, {
+                byId,
+                byPlayer: byPlayer
+                    ? {
+                          id: byPlayer.id,
+                          name: byPlayer.name,
+                          admin: byPlayer.admin,
+                      }
+                    : null,
+            });
+
+            this.onGameStop(byPlayer);
+        };
 
         room.onPlayerAdminChange = (
             id: number,
@@ -660,11 +694,27 @@ class HaxballCompatibilityRoom {
             this.onTeamsLockChange(value, convertPlayer(room.getPlayer(byId)));
 
         room.onBeforeOperationReceived = (type: number, message: unknown) => {
-            if (
-                this.onBeforeOperation(
-                    createRoomOperation(room, type, message),
-                ) === false
-            ) {
+            const operation = createRoomOperation(room, type, message);
+
+            if (operation.kind === "stop-game") {
+                console.log(
+                    `${DIAGNOSTIC_PREFIX} node-haxball before operation`,
+                    {
+                        operation: describeOperationForDiagnostics(operation),
+                    },
+                );
+            }
+
+            if (this.onBeforeOperation(operation) === false) {
+                if (operation.kind === "stop-game") {
+                    console.log(
+                        `${DIAGNOSTIC_PREFIX} stop-game operation blocked by adapter`,
+                        {
+                            operation:
+                                describeOperationForDiagnostics(operation),
+                        },
+                    );
+                }
                 return false;
             }
 
