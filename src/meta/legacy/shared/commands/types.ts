@@ -1,6 +1,10 @@
 import { CommandHandleResult, type CommandSpec } from "@core/commands";
 import type { DownState } from "@meta/legacy/shared/down";
 import type { FieldTeam } from "@runtime/models";
+import {
+    SHARED_COMMAND_NAMES,
+    type SharedCommandName,
+} from "@meta/legacy/shared/commands/names";
 
 export type SharedInfoCommandOptions =
     | true
@@ -20,10 +24,6 @@ export type SharedCommandOptions = {
     qb?: SharedQuarterbackCommandOptions;
 };
 
-export const SHARED_COMMAND_NAMES = ["undo", "info", "score", "qb"] as const;
-
-export type SharedCommandName = (typeof SHARED_COMMAND_NAMES)[number];
-
 export type SharedCommandInvocation = {
     player: PlayerObject;
     spec: CommandSpec;
@@ -34,3 +34,6 @@ export type SharedCommandInvocation = {
 export type SharedCommandImplementation = (
     invocation: SharedCommandInvocation,
 ) => CommandHandleResult | void;
+
+export { SHARED_COMMAND_NAMES };
+export type { SharedCommandName };

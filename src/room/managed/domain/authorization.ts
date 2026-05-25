@@ -28,6 +28,7 @@ export function createManagedAuthorization({
     return {
         hasRoomAdminPermission,
         canUseManagementCommand,
+        canChangeGameMode: canUseManagementCommand,
         canUseGameCorrectionCommand: (player) =>
             player.admin || hasRoomAdminPermission(player.id),
         canKickOrBan: canUseManagementCommand,

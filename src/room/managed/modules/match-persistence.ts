@@ -15,6 +15,8 @@ import type {
     PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
 import type { GameScoreReader } from "@room/shared/domain/game-score";
+import type { GameModeReader } from "@room/shared/domain/game-mode";
+import { shouldPersistGameMode } from "@meta/registry";
 import { createPublicWebUrl } from "@room/shared/domain/public-web-url";
 import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
 import { GAME_MODE_NAME } from "@meta/legacy/stats";
@@ -43,12 +45,14 @@ type MatchSession = {
 };
 
 type CreateManagedMatchPersistenceOptions = {
+    gameModeReader: GameModeReader;
     gameScoreReader: GameScoreReader;
     publicWebBaseUrl?: string | undefined;
     sessionStore: PlayerSessionStore;
 };
 
 export function createManagedMatchPersistence({
+    gameModeReader,
     gameScoreReader,
     publicWebBaseUrl,
     sessionStore,
@@ -130,6 +134,11 @@ export function createManagedMatchPersistence({
 
     const module = createModule()
         .onGameStart((room) => {
+            if (!shouldPersistGameMode(gameModeReader())) {
+                session = null;
+                return;
+            }
+
             session = {
                 startedAt: new Date(),
                 endedAt: null,

@@ -41,6 +41,7 @@ export interface EngineOptions<Cfg> {
     config: Cfg;
     globalSchema?: GlobalSchema<any, any>;
     statEvents?: RuntimeStatEventSink;
+    trackedDiscs?: Readonly<Record<string, number>>;
 }
 
 /**
@@ -64,9 +65,14 @@ export interface GameStateBall {
     yspeed: number;
 }
 
+export interface GameStateDisc extends GameStateBall {
+    id: number;
+}
+
 export interface GameState {
     players: GameStatePlayer[];
     ball: GameStateBall;
+    discs: Record<string, GameStateDisc | undefined>;
     tickNumber: number;
 }
 
@@ -192,6 +198,24 @@ function getBallSnapshot(room: Room): GameStateBall {
     };
 }
 
+function getExtraDiscSnapshot(
+    discId: number,
+    disc: DiscPropertiesObject | null,
+): GameStateDisc | null {
+    if (!disc || typeof disc.x !== "number" || typeof disc.y !== "number") {
+        return null;
+    }
+
+    return {
+        id: discId,
+        x: disc.x,
+        y: disc.y,
+        radius: typeof disc.radius === "number" ? disc.radius : 0,
+        xspeed: typeof disc.xspeed === "number" ? disc.xspeed : 0,
+        yspeed: typeof disc.yspeed === "number" ? disc.yspeed : 0,
+    };
+}
+
 function createGameStatePlayerSnapshot(
     room: Room,
     player: PlayerObject,
@@ -238,15 +262,26 @@ function buildGameState(
     room: Room,
     kickerIds: Set<number>,
     tickNumber: number,
+    trackedDiscs: Readonly<Record<string, number>>,
 ): GameState {
     const list = room.getPlayerList();
     const ball = getBallSnapshot(room);
+    const discs = Object.fromEntries(
+        Object.entries(trackedDiscs).flatMap(([name, discId]) => {
+            const disc = getExtraDiscSnapshot(
+                discId,
+                room.getDiscProperties(discId),
+            );
+
+            return disc ? [[name, disc] as const] : [];
+        }),
+    );
 
     const players = list
         .map((p) => createGameStatePlayerSnapshot(room, p, kickerIds))
         .filter((p): p is GameStatePlayer => p !== null);
 
-    return { players, ball, tickNumber };
+    return { players, ball, discs, tickNumber };
 }
 
 /**
@@ -908,7 +943,12 @@ export function createEngine<Cfg>(
             setRuntimeRoom(room);
 
             // Build state, consume the "kicker" one-tick flag.
-            const gs = buildGameState(room, kicksThisTick, currentTickNumber);
+            const gs = buildGameState(
+                room,
+                kicksThisTick,
+                currentTickNumber,
+                opts.trackedDiscs ?? {},
+            );
 
             let flushed: {
                 transition: Transition | null;

@@ -19,6 +19,7 @@ import {
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@meta/legacy/stats";
+import { getSpeedSquared } from "@common/math/geometry";
 
 const EXTRA_POINT_RESULT_DELAY = ticks({ seconds: 2 });
 const EXTRA_POINT_SUCCESS_DELAY = ticks({ seconds: 2 });
@@ -147,10 +148,8 @@ export function ExtraPointKick({
             });
         }
 
-        const speedSquared =
-            state.ball.xspeed * state.ball.xspeed +
-            state.ball.yspeed * state.ball.yspeed;
-        const isStopped = speedSquared <= BALL_STOPPED_SPEED_SQUARED;
+        const isStopped =
+            getSpeedSquared(state.ball) <= BALL_STOPPED_SPEED_SQUARED;
         const { self: elapsedTicks } = $tick();
 
         if (elapsedTicks < TOO_WEAK_CHECK_DELAY) return;

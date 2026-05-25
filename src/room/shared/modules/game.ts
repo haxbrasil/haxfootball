@@ -2,288 +2,100 @@ import { createModule, type Module } from "@core/module";
 import { COMMAND_PREFIX } from "@core/commands";
 import { createEngine, type Engine } from "@runtime/engine";
 import type { RuntimeStatEventSink } from "@runtime/runtime";
-import { registry, stadium } from "@meta/legacy/meta";
-import {
-    createConfig,
-    defaultConfig,
-    getConfigFlagDescription,
-    getConfigFlagNames,
-    getConfigFlagValue,
-    hasConfigFlag,
-    setConfigFlagValue,
-    type Config,
-    type ConfigFlagName,
-} from "@meta/legacy/config";
-import { Team } from "@runtime/models";
-import { legacyGlobalSchema } from "@meta/legacy/global";
 import { t } from "@lingui/core/macro";
 import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
-import { cn, formatTeamName } from "@meta/legacy/shared/message";
-import { type ScoreState } from "@common/game/game";
-import { type GlobalSchemaState } from "@runtime/global";
 import type { RoomAuthorization } from "../domain/authorization";
-import { CommandCategory } from "../domain/command-categories";
+import { type GameModeName, type GameModeStore } from "../domain/game-mode";
 import type { PlayerSessionReader } from "../domain/player-sessions";
 import type { GameScoreStore } from "../domain/game-score";
-
-type LegacyGlobalSnapshot = GlobalSchemaState<typeof legacyGlobalSchema>;
-
-const TRUE_FLAG_VALUES = new Set([
-    "1",
-    "true",
-    "on",
-    "yes",
-    "enabled",
-    "enable",
-]);
-const FALSE_FLAG_VALUES = new Set([
-    "0",
-    "false",
-    "off",
-    "no",
-    "disabled",
-    "disable",
-]);
-
-const getPlayerTeamPrefix = (team: number): string => {
-    switch (team) {
-        case Team.RED:
-            return "🟥";
-        case Team.BLUE:
-            return "🟦";
-        default:
-            return "⬜";
-    }
-};
-
-const getChatDisplayName = (
-    getPlayerSession: PlayerSessionReader,
-    player: PlayerObject,
-): string => {
-    const session = getPlayerSession(player.id);
-
-    if (session?.kind === "signed-in") {
-        return `${getPlayerTeamPrefix(player.team)} ${player.name}`;
-    }
-
-    if (session?.kind === "guest") {
-        return `✖️ ${player.name}`;
-    }
-
-    return player.name;
-};
-
-const formatChatMessage = (
-    getPlayerSession: PlayerSessionReader,
-    player: PlayerObject,
-    rawMessage: string,
-): string => `${getChatDisplayName(getPlayerSession, player)}: ${rawMessage}`;
-
-const getMentionedPlayerIds = (
-    message: string,
-    players: PlayerObject[],
-): Set<number> => {
-    const mentions = message.match(/@\S+/g);
-
-    if (!mentions) return new Set();
-
-    const mentionedIds = new Set<number>();
-
-    for (const mention of mentions) {
-        const mentionName = mention.slice(1).replace(/_/g, " ").toLowerCase();
-
-        for (const player of players) {
-            if (player.name.toLowerCase() === mentionName) {
-                mentionedIds.add(player.id);
-            }
-        }
-    }
-
-    return mentionedIds;
-};
-
-const broadcastChat = (
-    room: Room,
-    rawMessage: string,
-    formatMessage: (rawMessage: string) => string,
-): void => {
-    const message = formatMessage(rawMessage);
-    const players = room.getPlayerList();
-    const mentionedIds = getMentionedPlayerIds(rawMessage, players);
-
-    if (mentionedIds.size === 0) {
-        room.send({ message });
-        return;
-    }
-
-    for (const p of players) {
-        if (mentionedIds.has(p.id)) {
-            room.send({
-                message,
-                to: p.id,
-                style: "bold",
-                sound: "notification",
-            });
-        } else {
-            room.send({ message, to: p.id });
-        }
-    }
-};
-
-const parseFlagName = (name: string | undefined): ConfigFlagName | null => {
-    if (!name) return null;
-
-    const normalizedName = name
-        .trim()
-        .toUpperCase()
-        .replace(/[\s-]+/g, "_");
-
-    if (!hasConfigFlag(normalizedName)) {
-        return null;
-    }
-
-    return normalizedName;
-};
-
-const parseFlagValue = (value: string | undefined): boolean | null => {
-    if (!value) return null;
-
-    const normalizedValue = value.trim().toLowerCase();
-
-    if (TRUE_FLAG_VALUES.has(normalizedValue)) {
-        return true;
-    }
-
-    if (FALSE_FLAG_VALUES.has(normalizedValue)) {
-        return false;
-    }
-
-    return null;
-};
-
-const toFlagState = (value: boolean): "ON" | "OFF" => {
-    return value ? "ON" : "OFF";
-};
-
-const getFinalScoreAnnouncement = (score: ScoreState): string => {
-    if (score[Team.RED] === score[Team.BLUE]) {
-        return cn("🏁", score, t`Game ended in a tie!`);
-    }
-
-    const winnerTeam =
-        score[Team.RED] > score[Team.BLUE] ? Team.RED : Team.BLUE;
-
-    return cn(
-        "🏁",
-        score,
-        t`Victory for the ${formatTeamName(winnerTeam)} team!`,
-    );
-};
+import {
+    GAME_META_LIST,
+    getGameMeta,
+    type GameMetaRuntime,
+} from "@meta/registry";
+import { registerGameChatHandlers } from "./game-chat";
+import {
+    GAME_MODULE_COMMAND_DEFINITIONS,
+    handleGameModuleCommand,
+} from "./game-commands";
 
 export function createGameModule({
     authorization,
+    gameModeStore,
     gameScoreStore,
     getPlayerSession,
     statEvents,
 }: {
     authorization: RoomAuthorization;
+    gameModeStore: GameModeStore;
     gameScoreStore?: GameScoreStore;
     getPlayerSession: PlayerSessionReader;
     statEvents?: RuntimeStatEventSink;
 }): Module {
-    const gameConfig = createConfig(defaultConfig);
+    const metaRuntimes = Object.fromEntries(
+        GAME_META_LIST.map((meta) => [meta.name, meta.createRuntime()]),
+    ) as Record<GameModeName, GameMetaRuntime>;
+    const metaCommandDefinitions = GAME_META_LIST.flatMap(
+        (meta) => metaRuntimes[meta.name].commands,
+    );
+    const commandOwners = new Map<string, GameModeName>();
 
-    let engine: Engine<Config> | null = null;
+    GAME_META_LIST.forEach((meta) => {
+        metaRuntimes[meta.name].commands.forEach((command) => {
+            commandOwners.set(command.name, meta.name);
+            command.aliases?.forEach((alias) => {
+                commandOwners.set(alias, meta.name);
+            });
+        });
+    });
+
+    let engine: Engine<unknown> | null = null;
+    let activeMode: GameModeName | null = null;
 
     const syncGameScore = () => {
-        const snapshot =
-            engine?.getGlobalStateSnapshot<LegacyGlobalSnapshot>() ?? null;
+        if (!activeMode) return;
 
-        gameScoreStore?.set(snapshot?.scores);
-
-        return snapshot;
+        metaRuntimes[activeMode].syncGameScore(engine, gameScoreStore);
     };
 
-    return createModule()
+    const getSelectedMeta = () => getGameMeta(gameModeStore.get());
+
+    const getSelectedRuntime = () => metaRuntimes[getSelectedMeta().name];
+
+    const getActiveRuntime = () =>
+        activeMode ? metaRuntimes[activeMode] : getSelectedRuntime();
+
+    const applySelectedMetaRoomSettings = (room: Room): void => {
+        const meta = getSelectedMeta();
+
+        room.setScoreLimit(meta.room.scoreLimit);
+        room.setTimeLimit(meta.room.timeLimit);
+        room.setStadium(meta.stadium);
+    };
+
+    const module = createModule()
         .setCommands({
             spec: { prefix: COMMAND_PREFIX },
             commands: [
-                {
-                    name: "punt",
-                    category: CommandCategory.Game,
-                    description: t`Punt the ball`,
-                },
-                {
-                    name: "fg",
-                    category: CommandCategory.Game,
-                    description: t`Attempt a field goal`,
-                },
-                {
-                    name: "distance",
-                    category: CommandCategory.Game,
-                    description: t`Set the distance to first down`,
-                },
-                {
-                    name: "down",
-                    category: CommandCategory.Game,
-                    description: t`Set the current down`,
-                },
-                {
-                    name: "los",
-                    category: CommandCategory.Game,
-                    description: t`Set the line of scrimmage`,
-                },
-                {
-                    name: "version",
-                    category: CommandCategory.Game,
-                    description: t`Show the game version`,
-                },
-                {
-                    name: "undo",
-                    category: CommandCategory.Game,
-                    description: t`Undo the last play`,
-                },
-                {
-                    name: "info",
-                    category: CommandCategory.Game,
-                    description: t`Show game info`,
-                },
-                {
-                    name: "reposition",
-                    category: CommandCategory.Game,
-                    description: t`Reposition players`,
-                },
-                {
-                    name: "score",
-                    category: CommandCategory.Game,
-                    description: t`Show the score`,
-                },
-                {
-                    name: "qb",
-                    category: CommandCategory.Game,
-                    description: t`Set or clear the current quarterback`,
-                },
-                {
-                    name: "flag",
-                    category: CommandCategory.Game,
-                    description: t`View or set a config flag`,
-                },
-                {
-                    name: "flags",
-                    category: CommandCategory.Game,
-                    description: t`List all config flags`,
-                },
+                ...metaCommandDefinitions,
+                ...GAME_MODULE_COMMAND_DEFINITIONS,
             ],
         })
         .onGameStart((room) => {
-            engine = createEngine(room, registry, {
-                config: gameConfig,
-                globalSchema: legacyGlobalSchema,
-                ...(statEvents ? { statEvents } : {}),
-            });
+            const meta = getSelectedMeta();
+            const metaRuntime = getSelectedRuntime();
 
-            engine.start("KICKOFF", { forTeam: Team.RED });
+            activeMode = meta.name;
+            engine = createEngine(
+                room,
+                meta.registry,
+                metaRuntime.createEngineOptions({
+                    ...(statEvents ? { statEvents } : {}),
+                }),
+            );
+
+            engine.start(meta.start.state, meta.start.params);
             syncGameScore();
         })
         .onGameTick(() => {
@@ -294,6 +106,23 @@ export function createGameModule({
             engine?.trackPlayerBallKick(player.id);
         })
         .onPlayerSendCommand((room, player, command) => {
+            const gameCommandResponse = handleGameModuleCommand({
+                applySelectedMetaRoomSettings,
+                authorization,
+                commandName: command.name,
+                commandArgs: command.args,
+                gameModeStore,
+                getSelectedMeta,
+                isGameRunning: engine?.isRunning() ?? false,
+                player,
+                room,
+                selectedMeta: getSelectedMeta(),
+            });
+
+            if (gameCommandResponse) {
+                return gameCommandResponse;
+            }
+
             const commandPlayer = authorization.canUseGameCorrectionCommand(
                 player,
             )
@@ -308,234 +137,54 @@ export function createGameModule({
                 return { hideMessage: true };
             }
 
-            switch (command.name) {
-                case "flags": {
-                    const flagNames = getConfigFlagNames();
+            const selectedMeta = activeMode
+                ? getGameMeta(activeMode)
+                : getSelectedMeta();
+            const commandOwner = commandOwners.get(command.name);
 
-                    const [enabledFlags, disabledFlags] = flagNames.reduce<
-                        [ConfigFlagName[], ConfigFlagName[]]
-                    >(
-                        (acc, flagName) => {
-                            if (getConfigFlagValue(gameConfig, flagName)) {
-                                acc[0].push(flagName);
-                            } else {
-                                acc[1].push(flagName);
-                            }
+            if (commandOwner && commandOwner !== selectedMeta.name) {
+                const ownerMeta = getGameMeta(commandOwner);
 
-                            return acc;
-                        },
-                        [[], []],
-                    );
+                room.send({
+                    message: t`⚠️ That ${ownerMeta.label} command is unavailable in ${selectedMeta.label} mode.`,
+                    color: COLOR.WARNING,
+                    to: player.id,
+                    sound: "notification",
+                });
 
-                    if (enabledFlags.length === 0) {
-                        room.send({
-                            message: t`⚙️ Available flags: ${flagNames.join(", ") || t`none`}.`,
-                            color: COLOR.SYSTEM,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    room.send({
-                        message: t`⚙️ Available flags:`,
-                        color: COLOR.SYSTEM,
-                        to: player.id,
-                    });
-
-                    room.send({
-                        message: t`• Enabled: ${enabledFlags.join(", ") || t`none`}`,
-                        color: COLOR.SYSTEM,
-                        to: player.id,
-                    });
-
-                    room.send({
-                        message: t`• Disabled: ${disabledFlags.join(", ") || t`none`}`,
-                        color: COLOR.SYSTEM,
-                        to: player.id,
-                    });
-
-                    return { hideMessage: true };
-                }
-                case "flag": {
-                    if (!command.args[0]) {
-                        room.send({
-                            message: t`⚠️ Usage: !flag <FLAG_NAME> [VALUE].`,
-                            color: COLOR.WARNING,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    const requestedFlagName = parseFlagName(command.args[0]);
-
-                    if (!requestedFlagName) {
-                        room.send({
-                            message: t`⚠️ Unknown flag. Use !flags to list available flags.`,
-                            color: COLOR.WARNING,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    const requestedFlagValue = command.args[1];
-
-                    const flagDescription =
-                        getConfigFlagDescription(requestedFlagName);
-
-                    const flagState = toFlagState(
-                        getConfigFlagValue(gameConfig, requestedFlagName),
-                    );
-
-                    if (requestedFlagValue === undefined) {
-                        room.send({
-                            message: t`⚙️ ${requestedFlagName}: ${flagState}.`,
-                            color: COLOR.SYSTEM,
-                            to: player.id,
-                        });
-
-                        room.send({
-                            message: `ℹ️ ${flagDescription}`,
-                            color: COLOR.SYSTEM,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    if (!authorization.canUseManagementCommand(player)) {
-                        room.send({
-                            message: t`⚠️ Only admins can modify flags.`,
-                            color: COLOR.WARNING,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    if (engine?.isRunning()) {
-                        room.send({
-                            message: t`⚠️ Flags cannot be changed while a game is in progress.`,
-                            color: COLOR.WARNING,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    const parsedFlagValue = parseFlagValue(requestedFlagValue);
-
-                    if (parsedFlagValue === null) {
-                        room.send({
-                            message: t`⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no.`,
-                            color: COLOR.WARNING,
-                            to: player.id,
-                        });
-
-                        return { hideMessage: true };
-                    }
-
-                    setConfigFlagValue(
-                        gameConfig,
-                        requestedFlagName,
-                        parsedFlagValue,
-                    );
-
-                    const newFlagState = toFlagState(parsedFlagValue);
-
-                    room.send({
-                        message: t`⚙️ ${player.name} set ${requestedFlagName} to ${newFlagState}.`,
-                        color: COLOR.ALERT,
-                    });
-
-                    room.send({
-                        message: `ℹ️ ${requestedFlagName}: ${flagDescription}`,
-                        color: COLOR.SYSTEM,
-                    });
-
-                    return { hideMessage: true };
-                }
-                case "version":
-                    room.send({
-                        message: t`🏈 HaxFootball 2026`,
-                        color: COLOR.SYSTEM,
-                        to: player.id,
-                    });
-
-                    return { hideMessage: true };
-                default:
-                    room.send({
-                        message: engine
-                            ? t`⚠️ You cannot use that command right now.`
-                            : t`⚠️ The game has not been started yet.`,
-                        color: COLOR.WARNING,
-                        to: player.id,
-                    });
-
-                    return { hideMessage: true };
-            }
-        })
-        .onPlayerChat((room, player, rawMessage) => {
-            const isTeamPlayer =
-                player.team === Team.RED || player.team === Team.BLUE;
-            const isTeamChat =
-                isTeamPlayer &&
-                (rawMessage.startsWith(";") || rawMessage.startsWith("t "));
-
-            if (!isTeamChat) {
-                return;
+                return { hideMessage: true };
             }
 
-            const teamMessage = rawMessage.startsWith(";")
-                ? rawMessage.slice(1)
-                : rawMessage.slice(2);
-            const teamTarget = player.team === Team.RED ? "red" : "blue";
-
-            room.send({
-                message: `☎️ ${getChatDisplayName(getPlayerSession, player)}: ${teamMessage}`,
-                color: COLOR.ALERT,
-                to: teamTarget,
-                sound: "notification",
+            const metaResponse = getActiveRuntime().handleCommand({
+                authorization,
+                command,
+                engine,
+                player,
+                room,
             });
 
-            return false;
-        })
-
-        .onPlayerChat((room, player, rawMessage) => {
-            if (engine) {
-                return;
+            if (metaResponse) {
+                return metaResponse;
             }
 
-            const format = (raw: string) =>
-                formatChatMessage(getPlayerSession, player, raw);
-            broadcastChat(room, rawMessage, format);
+            room.send({
+                message: engine
+                    ? t`⚠️ You cannot use that command right now.`
+                    : t`⚠️ The game has not been started yet.`,
+                color: COLOR.WARNING,
+                to: player.id,
+            });
 
-            return false;
-        })
-        .onPlayerChat((room, player, rawMessage) => {
-            const format = (raw: string) =>
-                formatChatMessage(getPlayerSession, player, raw);
-            const broadcast = () => broadcastChat(room, rawMessage, format);
+            return { hideMessage: true };
+        });
 
-            if (!engine) {
-                return;
-            }
+    registerGameChatHandlers(module, {
+        getEngine: () => engine,
+        getPlayerSession,
+        syncGameScore,
+    });
 
-            const chatResult = engine.handlePlayerChat(
-                player,
-                rawMessage,
-                broadcast,
-            );
-            syncGameScore();
-
-            if (chatResult.allowBroadcast && !chatResult.sentBeforeHooks) {
-                broadcast();
-            }
-
-            return false;
-        })
+    return module
         .onPlayerTeamChange((_room, changedPlayer, byPlayer) => {
             engine?.handlePlayerTeamChange(changedPlayer, byPlayer);
             syncGameScore();
@@ -545,29 +194,15 @@ export function createGameModule({
             syncGameScore();
         })
         .onGameStop((room) => {
-            const snapshot = syncGameScore();
-            const score = snapshot?.scores ?? null;
-
-            const shouldShowScore =
-                score && score[Team.RED] + score[Team.BLUE] > 0;
-
-            if (shouldShowScore) {
-                const announcement = getFinalScoreAnnouncement(score);
-
-                room.send({
-                    message: announcement,
-                    color:
-                        score[Team.RED] === score[Team.BLUE]
-                            ? COLOR.SYSTEM
-                            : COLOR.SUCCESS,
-                    to: "mixed",
-                    sound: "notification",
-                    style: "bold",
-                });
-            }
+            getActiveRuntime().handleGameStop({
+                engine,
+                ...(gameScoreStore ? { gameScoreStore } : {}),
+                room,
+            });
 
             engine?.stop();
             engine = null;
+            activeMode = null;
             gameScoreStore?.reset();
         })
         .onGamePause((_room, byPlayer) => {
@@ -577,7 +212,7 @@ export function createGameModule({
             engine?.handleGameUnpause(byPlayer);
         })
         .onRoomLink((room) => {
-            room.setStadium(stadium);
+            applySelectedMetaRoomSettings(room);
         })
         .onStadiumChange((_room, _newStadiumName, byPlayer) => {
             if (byPlayer) {

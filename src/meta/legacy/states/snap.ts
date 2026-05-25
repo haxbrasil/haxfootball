@@ -61,6 +61,7 @@ import {
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@meta/legacy/stats";
+import { getPointDistance } from "@common/math/geometry";
 
 type Frame = {
     state: GameState;
@@ -106,7 +107,7 @@ export function Snap({
     );
 
     const isBallBeyondMoveThreshold = (ball: { x: number; y: number }) =>
-        Math.hypot(ball.x - ballSpawnPosition.x, ball.y - ballSpawnPosition.y) >
+        getPointDistance(ball, ballSpawnPosition) >
         BLITZ_EARLY_MOVE_THRESHOLD_PX;
 
     $setBallMoveable();

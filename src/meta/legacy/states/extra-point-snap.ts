@@ -58,6 +58,7 @@ import {
 } from "@meta/legacy/shared/pushing";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { getPointDistance } from "@common/math/geometry";
 
 const DEFENSIVE_FOUL_PENALTY_YARDS = 5;
 
@@ -104,7 +105,7 @@ export function ExtraPointSnap({
     const lineOfScrimmageX = getPositionFromFieldPosition(fieldPos);
 
     const isBallBeyondMoveThreshold = (ball: { x: number; y: number }) =>
-        Math.hypot(ball.x - ballSpawnPosition.x, ball.y - ballSpawnPosition.y) >
+        getPointDistance(ball, ballSpawnPosition) >
         BLITZ_EARLY_MOVE_THRESHOLD_PX;
 
     $setBallMoveable();

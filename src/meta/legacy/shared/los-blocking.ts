@@ -1,4 +1,5 @@
 import { clamp } from "@common/general/helpers";
+import { getPointDistanceSquared } from "@common/math/geometry";
 
 export type BlockingVec2 = {
     x: number;
@@ -46,13 +47,6 @@ const POSITION_EPSILON_SQ = 1;
 type Interval = { start: number; end: number };
 type SlotImportance = { index: number; importance: number };
 
-function distanceSq(a: BlockingVec2, b: BlockingVec2): number {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-
-    return dx * dx + dy * dy;
-}
-
 function computeRestPosition(
     blockerIndex: number,
     lineX: number,
@@ -78,7 +72,9 @@ function enqueueMoveIfNeeded(
     blocker: BlockingPointState,
     target: BlockingVec2,
 ) {
-    if (distanceSq(blocker.position, target) <= POSITION_EPSILON_SQ) {
+    if (
+        getPointDistanceSquared(blocker.position, target) <= POSITION_EPSILON_SQ
+    ) {
         return;
     }
 
@@ -263,7 +259,7 @@ export function computeBlockingPlan(params: BlockingPlanParams): BlockingPlan {
             const blocker = blockers[blockerIndex];
             if (!blocker) return best;
 
-            const distance = distanceSq(blocker.position, target);
+            const distance = getPointDistanceSquared(blocker.position, target);
             if (!best || distance < best.distance) {
                 return { blockerIndex, distance };
             }

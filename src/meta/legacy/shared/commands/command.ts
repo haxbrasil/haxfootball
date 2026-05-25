@@ -4,6 +4,7 @@ import { infoCommandHandler } from "@meta/legacy/shared/commands/handlers/info";
 import { qbCommandHandler } from "@meta/legacy/shared/commands/handlers/qb";
 import { scoreCommandHandler } from "@meta/legacy/shared/commands/handlers/score";
 import { undoCommandHandler } from "@meta/legacy/shared/commands/handlers/undo";
+import { LEGACY_COMMAND } from "@meta/legacy/shared/commands/names";
 import {
     SHARED_COMMAND_NAMES,
     type SharedCommandImplementation,
@@ -17,10 +18,10 @@ type SharedCommandHandlers = Partial<
 >;
 
 const sharedCommandHandlers: SharedCommandHandlers = {
-    undo: undoCommandHandler,
-    info: infoCommandHandler,
-    score: scoreCommandHandler,
-    qb: qbCommandHandler,
+    [LEGACY_COMMAND.UNDO]: undoCommandHandler,
+    [LEGACY_COMMAND.INFO]: infoCommandHandler,
+    [LEGACY_COMMAND.SCORE]: scoreCommandHandler,
+    [LEGACY_COMMAND.QUARTERBACK]: qbCommandHandler,
 };
 
 const isSharedCommandName = (
@@ -33,13 +34,13 @@ const isSharedCommandEnabled = (
     commandName: SharedCommandName,
 ): boolean => {
     switch (commandName) {
-        case "undo":
+        case LEGACY_COMMAND.UNDO:
             return options.undo === true;
-        case "info":
+        case LEGACY_COMMAND.INFO:
             return options.info !== false && options.info !== undefined;
-        case "score":
+        case LEGACY_COMMAND.SCORE:
             return options.score !== false;
-        case "qb":
+        case LEGACY_COMMAND.QUARTERBACK:
             return options.qb !== undefined;
         default:
             return false;

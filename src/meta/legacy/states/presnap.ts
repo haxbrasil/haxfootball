@@ -43,6 +43,7 @@ import {
     DEFAULT_INITIAL_POSITIONING_RELATIVE_LINES,
 } from "@meta/legacy/shared/initial-positioning";
 import { $createSharedCommandHandler } from "@meta/legacy/shared/commands";
+import { LEGACY_COMMAND } from "@meta/legacy/shared/commands/names";
 import { COLOR } from "@common/general/color";
 import { type Config } from "@meta/legacy/config";
 import { $syncLineOfScrimmageBlocking } from "@meta/legacy/hooks/los";
@@ -336,7 +337,7 @@ export function Presnap({ downState }: { downState: DownState }) {
         spec: CommandSpec,
     ): CommandHandleResult {
         switch (spec.name) {
-            case "distance": {
+            case LEGACY_COMMAND.DISTANCE: {
                 if (!player.admin) {
                     $effect(($) => {
                         $.send({
@@ -388,7 +389,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                     disposal: "IMMEDIATE",
                 });
             }
-            case "down": {
+            case LEGACY_COMMAND.DOWN: {
                 if (!player.admin) {
                     $effect(($) => {
                         $.send({
@@ -440,7 +441,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                     disposal: "IMMEDIATE",
                 });
             }
-            case "los": {
+            case LEGACY_COMMAND.LINE_OF_SCRIMMAGE: {
                 if (!player.admin) {
                     $effect(($) => {
                         $.send({
@@ -495,7 +496,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                     disposal: "IMMEDIATE",
                 });
             }
-            case "fg": {
+            case LEGACY_COMMAND.FIELD_GOAL: {
                 if (player.team !== offensiveTeam) {
                     $effect(($) => {
                         $.send({
@@ -547,7 +548,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                     },
                 });
             }
-            case "punt": {
+            case LEGACY_COMMAND.PUNT: {
                 if (player.team !== offensiveTeam) {
                     $effect(($) => {
                         $.send({
@@ -613,7 +614,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                     },
                 });
             }
-            case "reposition": {
+            case LEGACY_COMMAND.REPOSITION: {
                 if (!player.admin) {
                     $effect(($) => {
                         $.send({

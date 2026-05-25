@@ -4,6 +4,15 @@ export type Point = { x: number; y: number };
 
 export type PointLike = Point & { radius?: number | null };
 
+export type VelocityLike = { xspeed: number; yspeed: number };
+
+export type Bounds = {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+};
+
 export interface Line {
     start: Point;
     end: Point;
@@ -27,10 +36,7 @@ export interface DistributePointLikesOptions {
 }
 
 export function getDistance(a: PointLike, b: PointLike): number {
-    const dx = a.x - b.x;
-    const dy = a.y - b.y;
-
-    const center = Math.hypot(dx, dy);
+    const center = getPointDistance(a, b);
 
     const ar = typeof a.radius === "number" ? a.radius : 0;
     const br = typeof b.radius === "number" ? b.radius : 0;
@@ -38,6 +44,66 @@ export function getDistance(a: PointLike, b: PointLike): number {
     const surfaceDistance = center - ar - br;
 
     return surfaceDistance > 0 ? surfaceDistance : 0;
+}
+
+export function getPointDistance(a: Point, b: Point): number {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+export function getPointDistanceSquared(a: Point, b: Point): number {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+
+    return dx * dx + dy * dy;
+}
+
+export function getSpeed(velocity: VelocityLike): number {
+    return Math.hypot(velocity.xspeed, velocity.yspeed);
+}
+
+export function getSpeedSquared(velocity: VelocityLike): number {
+    return (
+        velocity.xspeed * velocity.xspeed + velocity.yspeed * velocity.yspeed
+    );
+}
+
+export function getPointSegmentDistance(
+    point: Point,
+    start: Point,
+    end: Point,
+): number {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const lengthSq = dx * dx + dy * dy;
+
+    if (lengthSq === 0) {
+        return getPointDistance(point, start);
+    }
+
+    const projection =
+        ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSq;
+    const factor = Math.max(0, Math.min(1, projection));
+    const closest = {
+        x: start.x + dx * factor,
+        y: start.y + dy * factor,
+    };
+
+    return getPointDistance(point, closest);
+}
+
+export function isContainedInBounds(point: PointLike, bounds: Bounds): boolean {
+    const minX = Math.min(bounds.left, bounds.right);
+    const maxX = Math.max(bounds.left, bounds.right);
+    const minY = Math.min(bounds.top, bounds.bottom);
+    const maxY = Math.max(bounds.top, bounds.bottom);
+    const radius = Math.max(0, point.radius ?? 0);
+
+    return (
+        point.x - radius >= minX &&
+        point.x + radius <= maxX &&
+        point.y - radius >= minY &&
+        point.y + radius <= maxY
+    );
 }
 
 export function getMidpoint(a: PointLike, b: PointLike): PointLike {

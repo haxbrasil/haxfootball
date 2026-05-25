@@ -20,6 +20,7 @@ import {
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@meta/legacy/stats";
+import { getSpeedSquared } from "@common/math/geometry";
 
 const FIELD_GOAL_RESULT_DELAY = ticks({ seconds: 2 });
 const FIELD_GOAL_SUCCESS_DELAY = ticks({ seconds: 3 });
@@ -170,10 +171,8 @@ export function FieldGoalInFlight({
             });
         }
 
-        const speedSquared =
-            state.ball.xspeed * state.ball.xspeed +
-            state.ball.yspeed * state.ball.yspeed;
-        const isStopped = speedSquared <= BALL_STOPPED_SPEED_SQUARED;
+        const isStopped =
+            getSpeedSquared(state.ball) <= BALL_STOPPED_SPEED_SQUARED;
 
         if (isStopped) {
             $effect(($) => {
