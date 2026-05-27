@@ -20,7 +20,7 @@ import {
 } from "@runtime/global";
 
 /**
- * Metas register state factories by string key.
+ * Modes register state factories by string key.
  */
 export interface StateApi {
     run: (state: GameState) => void;

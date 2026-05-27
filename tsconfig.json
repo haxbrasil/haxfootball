@@ -23,7 +23,7 @@
             "@core/*": ["./src/core/*"],
             "@haxball/*": ["./src/haxball/*"],
             "@environment/*": ["./src/environments/*"],
-            "@meta/*": ["./src/meta/*"],
+            "@modes/*": ["./src/modes/*"],
             "@room/*": ["./src/room/*"],
             "@types/*": ["./src/types/*"],
             "@dev/*": ["./src/dev/*"],

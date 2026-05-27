@@ -8,7 +8,7 @@ A state is a self-contained phase of gameplay (presnap, live ball, interception,
 
 ## Where State Code Lives
 
-Check the meta registry for the authoritative list of states and their file paths. In this repo, states are currently under `src/meta/legacy/states/` and registered in `src/meta/legacy/meta.ts`, but future metas can use different directories.
+Check the mode registry for the authoritative list of states and their file paths. In this repo, states are currently under `src/modes/classic/states/` and registered in `src/modes/classic/registry.ts`, but future modes can use different directories.
 
 ## State API at a Glance
 
@@ -66,7 +66,7 @@ Hooks are runtime primitives you call inside state handlers; they schedule effec
 - `$dispose(fn)`: register cleanup to run when the state ends (can be called during setup or in handlers).
 - `$config<T>()`: access the engine configuration object.
 
-Metas can expose additional hooks (for example, game/physics hooks that set LOS lines, ball active state, or traps); use those instead of rewriting low-level disc logic.
+Modes can expose additional hooks (for example, game/physics hooks that set LOS lines, ball active state, or traps); use those instead of rewriting low-level disc logic.
 
 Tick counter semantics:
 
@@ -120,7 +120,7 @@ $effect(($) => {
 
 ## Common Helpers You Should Use
 
-Use project helpers rather than re-implementing rules or geometry. In this repo they live under `src/meta/legacy/utils/` and `src/meta/legacy/hooks/`, but future metas may organize them differently. Also use `@common` helpers like `ticks`, `findCatchers`, `findBallCatchers`, and `distributeOnLine`.
+Use project helpers rather than re-implementing rules or geometry. In this repo they live under `src/modes/classic/shared/` and `src/modes/classic/hooks/`, but future modes may organize them differently. Also use `@common` helpers like `ticks`, `findCatchers`, `findBallCatchers`, and `distributeOnLine`.
 
 ## Cleanup Discipline
 
@@ -128,9 +128,9 @@ If you lock the ball, trap players, or set special lines, undo those changes whe
 
 ## Adding a New State
 
-1. Create the state file in the meta state directory.
+1. Create the state file in the mode state directory.
 2. Export a function that returns the State API.
-3. Register it in the meta registry.
+3. Register it in the mode registry.
 4. Transition to it using `$next` from another state.
 
 ## Commands vs Chat

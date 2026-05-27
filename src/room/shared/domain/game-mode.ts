@@ -3,7 +3,7 @@ import {
     GAME_MODE_NAMES,
     parseGameModeName,
     type GameModeName,
-} from "@meta/game-mode";
+} from "@modes/game-mode";
 
 export type GameModeReader = () => GameModeName;
 

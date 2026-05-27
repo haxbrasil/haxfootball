@@ -3,7 +3,7 @@ import { api } from "@api/client";
 import {
     STAT_SCHEMA_NAME,
     statEventSchemaDefinition,
-} from "@meta/legacy/stats";
+} from "@modes/classic/stats";
 import { sameStatEventSchemaDefinition } from "./stat-event-schema-definition";
 
 type StatEventSchemaReference = {

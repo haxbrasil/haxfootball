@@ -1,7 +1,7 @@
 import { COLOR } from "@common/general/color";
 import type { CommandDefinition, CommandResponse } from "@core/commands";
 import type { Room } from "@core/room";
-import type { GameMetaDefinition } from "@meta/types";
+import type { GameModeDefinition } from "@modes/types";
 import { t } from "@lingui/core/macro";
 import type { RoomAuthorization } from "../domain/authorization";
 import { CommandCategory } from "../domain/command-categories";
@@ -30,34 +30,34 @@ export const GAME_MODULE_COMMAND_DEFINITIONS: CommandDefinition[] = [
 ];
 
 export function handleGameModuleCommand({
-    applySelectedMetaRoomSettings,
+    applySelectedModeRoomSettings,
     authorization,
     commandName,
     commandArgs,
     gameModeStore,
-    getSelectedMeta,
+    getSelectedModeDefinition,
     isGameRunning,
     player,
     room,
-    selectedMeta,
+    selectedModeDefinition,
 }: {
-    applySelectedMetaRoomSettings(room: Room): void;
+    applySelectedModeRoomSettings(room: Room): void;
     authorization: RoomAuthorization;
     commandName: string;
     commandArgs: readonly string[];
     gameModeStore: GameModeStore;
-    getSelectedMeta(): GameMetaDefinition;
+    getSelectedModeDefinition(): GameModeDefinition;
     isGameRunning: boolean;
     player: PlayerObject;
     room: Room;
-    selectedMeta: GameMetaDefinition;
+    selectedModeDefinition: GameModeDefinition;
 }): CommandResponse | null {
     if (commandName === GAME_MODULE_COMMAND.MODE) {
         const requestedMode = commandArgs[0];
 
         if (requestedMode === undefined) {
             room.send({
-                message: t`🎛️ Current game mode: ${selectedMeta.label}.`,
+                message: t`🎛️ Current game mode: ${selectedModeDefinition.label}.`,
                 color: COLOR.SYSTEM,
                 to: player.id,
                 sound: "notification",
@@ -102,11 +102,11 @@ export function handleGameModuleCommand({
         }
 
         gameModeStore.set(parsedMode);
-        applySelectedMetaRoomSettings(room);
-        const updatedMeta = getSelectedMeta();
+        applySelectedModeRoomSettings(room);
+        const updatedModeDefinition = getSelectedModeDefinition();
 
         room.send({
-            message: t`🎛️ ${player.name} changed the game mode to ${updatedMeta.label}.`,
+            message: t`🎛️ ${player.name} changed the game mode to ${updatedModeDefinition.label}.`,
             color: COLOR.ADMIN,
             sound: "notification",
         });

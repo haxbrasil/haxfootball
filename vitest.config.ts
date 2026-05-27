@@ -10,7 +10,7 @@ export default defineConfig({
             "@core": resolvePath("src/core"),
             "@haxball": resolvePath("src/haxball"),
             "@environment": resolvePath("src/environments"),
-            "@meta": resolvePath("src/meta"),
+            "@modes": resolvePath("src/modes"),
             "@room": resolvePath("src/room"),
             "@runtime": resolvePath("src/runtime"),
             "@types": resolvePath("src/types"),

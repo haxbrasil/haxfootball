@@ -45,7 +45,7 @@ LANGUAGE=pt-BR DEBUG=true TOKEN="<haxball-token>" pnpm run dev:node
 
 `src/runtime/*` implements the state engine and hooks. State code should interact through runtime hooks and `Room` effects rather than direct room mutation.
 
-`src/meta/legacy/*` contains the current football game mode: config, hooks, shared rules, state registry, states, and stadium. The authoritative state list is `src/meta/legacy/meta.ts`.
+`src/modes/classic/*` contains the current football game mode: config, hooks, shared rules, state registry, states, and stadium. The authoritative state list is `src/modes/classic/registry.ts`.
 
 `src/common/*` contains reusable game, geometry, stadium-builder, stadium-generator, and general helpers. Prefer these over duplicating geometry or physics logic in states.
 
@@ -63,7 +63,7 @@ LANGUAGE=pt-BR DEBUG=true TOKEN="<haxball-token>" pnpm run dev:node
 
 Before doing any game-rules work, read the `docs/` folder for the current project guidance. This includes at least `docs/ENGINE-GUIDE.md`, `docs/STYLE-GUIDE.md`, and the relevant `docs/headless/*` files when the change touches stadiums, collision flags, physics, room APIs, or headless behavior.
 
-Do this before editing gameplay states, shared rule helpers, runtime hooks used by states, stadium generation, commands that affect gameplay, or anything under `src/meta/legacy`.
+Do this before editing gameplay states, shared rule helpers, runtime hooks used by states, stadium generation, commands that affect gameplay, or anything under `src/modes/classic`.
 
 ## Modules and Commands
 
@@ -97,7 +97,7 @@ Chat and command handlers run outside the tick loop and see the last snapshot. D
 
 ## Gameplay Helpers and Physics
 
-Prefer shared helpers from `@common`, `@meta/legacy/shared`, and `@meta/legacy/hooks`. Do not re-implement field geometry, LOS math, down-state updates, penalties, scoring, reception, interception, pushing, crowding, or stadium positioning when helpers exist.
+Prefer shared helpers from `@common`, `@modes/classic/shared`, and `@modes/classic/hooks`. Do not re-implement field geometry, LOS math, down-state updates, penalties, scoring, reception, interception, pushing, crowding, or stadium positioning when helpers exist.
 
 Use hooks such as `$lockBall`, `$unlockBall`, `$setBallActive`, `$setBallInactive`, `$setLineOfScrimmage`, `$unsetLineOfScrimmage`, `$setFirstDownLine`, `$unsetFirstDownLine`, and crowding helpers instead of raw disc mutation in states.
 
@@ -127,7 +127,7 @@ For player lists and football-context messages, prefer helpers such as `formatNa
 
 ## TypeScript and Style
 
-The project is strict TypeScript with `moduleResolution: "bundler"` and path aliases in `tsconfig.json`. Use aliases like `@runtime/*`, `@core/*`, `@haxball/*`, `@meta/*`, `@room/*`, `@common/*`, `@api/*`, `@i18n`, and `@env/*`.
+The project is strict TypeScript with `moduleResolution: "bundler"` and path aliases in `tsconfig.json`. Use aliases like `@runtime/*`, `@core/*`, `@haxball/*`, `@modes/*`, `@room/*`, `@common/*`, `@api/*`, `@i18n`, and `@env/*`.
 
 Prefer explicit domain types and small pure helpers. Avoid hidden side effects, exception-based control flow for normal gameplay rules, unnecessary `let`, IIFEs for simple derivations, and mutation of arrays/objects unless it is clearly contained and simpler.
 

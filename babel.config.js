@@ -25,7 +25,7 @@ module.exports = {
                     "@core": "./src/core",
                     "@haxball": "./src/haxball",
                     "@environment": "./src/environments",
-                    "@meta": "./src/meta",
+                    "@modes": "./src/modes",
                     "@room": "./src/room",
                     "@runtime": "./src/runtime",
                     "@types": "./src/types",

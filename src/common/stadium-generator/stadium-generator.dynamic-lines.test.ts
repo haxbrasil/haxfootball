@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defineStadium } from "@common/stadium-generator/stadium-generator";
 import type { StadiumSchema } from "@common/stadium-generator/stadium-generator";
-import { legacyStadium, legacyStadiumIndex } from "@meta/legacy/stadium";
+import { classicStadium, classicStadiumIndex } from "@modes/classic/stadium";
 import type { Joint, StadiumObject } from "@haxball/stadium";
 
 const findJoint = (joints: Joint[] | undefined, d0: number, d1: number) =>
@@ -100,24 +100,26 @@ describe("defineStadium dynamic lines", () => {
     });
 });
 
-describe("legacy stadium dynamic line wiring", () => {
+describe("classic stadium dynamic line wiring", () => {
     it("keeps dynamic line discs contiguous and in-range", () => {
-        const discs = legacyStadium.discs ?? [];
+        const discs = classicStadium.discs ?? [];
 
-        Object.values(legacyStadiumIndex.dynamicLines.names).forEach((pair) => {
-            expect(pair[1]).toBe(pair[0] + 1);
-            expect(pair[0]).toBeGreaterThanOrEqual(0);
-            expect(pair[1]).toBeLessThan(discs.length);
-        });
+        Object.values(classicStadiumIndex.dynamicLines.names).forEach(
+            (pair) => {
+                expect(pair[1]).toBe(pair[0] + 1);
+                expect(pair[0]).toBeGreaterThanOrEqual(0);
+                expect(pair[1]).toBeLessThan(discs.length);
+            },
+        );
     });
 
-    it("matches every legacy dynamic line to a joint", () => {
-        const offset = getBallOffset(legacyStadium);
+    it("matches every classic dynamic line to a joint", () => {
+        const offset = getBallOffset(classicStadium);
 
-        Object.entries(legacyStadiumIndex.dynamicLines.names).forEach(
+        Object.entries(classicStadiumIndex.dynamicLines.names).forEach(
             ([name, pair]) => {
                 const joint = findJoint(
-                    legacyStadium.joints,
+                    classicStadium.joints,
                     pair[0] + offset,
                     pair[1] + offset,
                 );

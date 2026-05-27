@@ -10,10 +10,10 @@ import { type GameModeName, type GameModeStore } from "../domain/game-mode";
 import type { PlayerSessionReader } from "../domain/player-sessions";
 import type { GameScoreStore } from "../domain/game-score";
 import {
-    GAME_META_LIST,
-    getGameMeta,
-    type GameMetaRuntime,
-} from "@meta/registry";
+    GAME_MODE_LIST,
+    getGameModeDefinition,
+    type GameModeRuntime,
+} from "@modes/registry";
 import { registerGameChatHandlers } from "./game-chat";
 import {
     GAME_MODULE_COMMAND_DEFINITIONS,
@@ -33,19 +33,19 @@ export function createGameModule({
     getPlayerSession: PlayerSessionReader;
     statEvents?: RuntimeStatEventSink;
 }): Module {
-    const metaRuntimes = Object.fromEntries(
-        GAME_META_LIST.map((meta) => [meta.name, meta.createRuntime()]),
-    ) as Record<GameModeName, GameMetaRuntime>;
-    const metaCommandDefinitions = GAME_META_LIST.flatMap(
-        (meta) => metaRuntimes[meta.name].commands,
+    const modeRuntimes = Object.fromEntries(
+        GAME_MODE_LIST.map((mode) => [mode.name, mode.createRuntime()]),
+    ) as Record<GameModeName, GameModeRuntime>;
+    const modeCommandDefinitions = GAME_MODE_LIST.flatMap(
+        (mode) => modeRuntimes[mode.name].commands,
     );
     const commandOwners = new Map<string, GameModeName>();
 
-    GAME_META_LIST.forEach((meta) => {
-        metaRuntimes[meta.name].commands.forEach((command) => {
-            commandOwners.set(command.name, meta.name);
+    GAME_MODE_LIST.forEach((mode) => {
+        modeRuntimes[mode.name].commands.forEach((command) => {
+            commandOwners.set(command.name, mode.name);
             command.aliases?.forEach((alias) => {
-                commandOwners.set(alias, meta.name);
+                commandOwners.set(alias, mode.name);
             });
         });
     });
@@ -56,46 +56,48 @@ export function createGameModule({
     const syncGameScore = () => {
         if (!activeMode) return;
 
-        metaRuntimes[activeMode].syncGameScore(engine, gameScoreStore);
+        modeRuntimes[activeMode].syncGameScore(engine, gameScoreStore);
     };
 
-    const getSelectedMeta = () => getGameMeta(gameModeStore.get());
+    const getSelectedModeDefinition = () =>
+        getGameModeDefinition(gameModeStore.get());
 
-    const getSelectedRuntime = () => metaRuntimes[getSelectedMeta().name];
+    const getSelectedRuntime = () =>
+        modeRuntimes[getSelectedModeDefinition().name];
 
     const getActiveRuntime = () =>
-        activeMode ? metaRuntimes[activeMode] : getSelectedRuntime();
+        activeMode ? modeRuntimes[activeMode] : getSelectedRuntime();
 
-    const applySelectedMetaRoomSettings = (room: Room): void => {
-        const meta = getSelectedMeta();
+    const applySelectedModeRoomSettings = (room: Room): void => {
+        const mode = getSelectedModeDefinition();
 
-        room.setScoreLimit(meta.room.scoreLimit);
-        room.setTimeLimit(meta.room.timeLimit);
-        room.setStadium(meta.stadium);
+        room.setScoreLimit(mode.room.scoreLimit);
+        room.setTimeLimit(mode.room.timeLimit);
+        room.setStadium(mode.stadium);
     };
 
     const module = createModule()
         .setCommands({
             spec: { prefix: COMMAND_PREFIX },
             commands: [
-                ...metaCommandDefinitions,
+                ...modeCommandDefinitions,
                 ...GAME_MODULE_COMMAND_DEFINITIONS,
             ],
         })
         .onGameStart((room) => {
-            const meta = getSelectedMeta();
-            const metaRuntime = getSelectedRuntime();
+            const mode = getSelectedModeDefinition();
+            const modeRuntime = getSelectedRuntime();
 
-            activeMode = meta.name;
+            activeMode = mode.name;
             engine = createEngine(
                 room,
-                meta.registry,
-                metaRuntime.createEngineOptions({
+                mode.registry,
+                modeRuntime.createEngineOptions({
                     ...(statEvents ? { statEvents } : {}),
                 }),
             );
 
-            engine.start(meta.start.state, meta.start.params);
+            engine.start(mode.start.state, mode.start.params);
             syncGameScore();
         })
         .onGameTick(() => {
@@ -107,16 +109,16 @@ export function createGameModule({
         })
         .onPlayerSendCommand((room, player, command) => {
             const gameCommandResponse = handleGameModuleCommand({
-                applySelectedMetaRoomSettings,
+                applySelectedModeRoomSettings,
                 authorization,
                 commandName: command.name,
                 commandArgs: command.args,
                 gameModeStore,
-                getSelectedMeta,
+                getSelectedModeDefinition,
                 isGameRunning: engine?.isRunning() ?? false,
                 player,
                 room,
-                selectedMeta: getSelectedMeta(),
+                selectedModeDefinition: getSelectedModeDefinition(),
             });
 
             if (gameCommandResponse) {
@@ -137,16 +139,16 @@ export function createGameModule({
                 return { hideMessage: true };
             }
 
-            const selectedMeta = activeMode
-                ? getGameMeta(activeMode)
-                : getSelectedMeta();
+            const selectedModeDefinition = activeMode
+                ? getGameModeDefinition(activeMode)
+                : getSelectedModeDefinition();
             const commandOwner = commandOwners.get(command.name);
 
-            if (commandOwner && commandOwner !== selectedMeta.name) {
-                const ownerMeta = getGameMeta(commandOwner);
+            if (commandOwner && commandOwner !== selectedModeDefinition.name) {
+                const ownerModeDefinition = getGameModeDefinition(commandOwner);
 
                 room.send({
-                    message: t`⚠️ That ${ownerMeta.label} command is unavailable in ${selectedMeta.label} mode.`,
+                    message: t`⚠️ That ${ownerModeDefinition.label} command is unavailable in ${selectedModeDefinition.label} mode.`,
                     color: COLOR.WARNING,
                     to: player.id,
                     sound: "notification",
@@ -155,7 +157,7 @@ export function createGameModule({
                 return { hideMessage: true };
             }
 
-            const metaResponse = getActiveRuntime().handleCommand({
+            const modeResponse = getActiveRuntime().handleCommand({
                 authorization,
                 command,
                 engine,
@@ -163,8 +165,8 @@ export function createGameModule({
                 room,
             });
 
-            if (metaResponse) {
-                return metaResponse;
+            if (modeResponse) {
+                return modeResponse;
             }
 
             room.send({
@@ -212,7 +214,7 @@ export function createGameModule({
             engine?.handleGameUnpause(byPlayer);
         })
         .onRoomLink((room) => {
-            applySelectedMetaRoomSettings(room);
+            applySelectedModeRoomSettings(room);
         })
         .onStadiumChange((_room, _newStadiumName, byPlayer) => {
             if (byPlayer) {

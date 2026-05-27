@@ -7,7 +7,7 @@ This guide captures the local conventions and "dos and don'ts" used across this 
 - Prefer readability over cleverness; make state flows easy to scan.
 - Favor pure helpers and immutable updates; avoid hidden side effects.
 - Be explicit in naming and intent; the next reader should not need to infer behavior.
-- Reuse shared helpers from `@common` and `@meta/legacy/utils` instead of duplicating logic.
+- Reuse shared helpers from `@common` and `@modes/classic/shared` instead of duplicating logic.
 - Keep rule ordering deterministic; penalties and hard-stops should run before lower-priority rules.
 
 ## State Organization (Handlers Style)

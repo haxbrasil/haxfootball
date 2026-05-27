@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-    legacyStadiumObjectOutput,
-    legacyStadiumSchema,
-} from "./__fixtures__/legacy-stadium";
+    classicStadiumObjectOutput,
+    classicStadiumSchema,
+} from "./__fixtures__/classic-stadium";
 import { defineStadium } from "./stadium-generator";
 
 describe("defineStadium", () => {
-    it("reproduces the legacy stadium from the new schema API", () => {
-        const { stadium } = defineStadium(legacyStadiumSchema);
+    it("reproduces the classic stadium from the new schema API", () => {
+        const { stadium } = defineStadium(classicStadiumSchema);
 
-        expect(stadium).toEqual(legacyStadiumObjectOutput);
+        expect(stadium).toEqual(classicStadiumObjectOutput);
     });
 });
