@@ -803,7 +803,7 @@ class HaxballCompatibilityRoom {
 
     public pauseGame(pauseState: boolean): void {
         this.afterTick(() => {
-            if (this.room.isGamePaused() !== pauseState) this.room.pauseGame();
+            this.room.fakeSetGamePaused(pauseState, 0);
         });
     }
 

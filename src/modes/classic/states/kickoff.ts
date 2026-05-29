@@ -1,7 +1,8 @@
-import { $checkpoint, $dispose, $effect, $next } from "@runtime/hooks";
+import { $checkpoint, $config, $dispose, $effect, $next } from "@runtime/hooks";
 import { Team, type FieldTeam } from "@runtime/models";
 import { distributeOnLine, getMidpoint } from "@common/math/geometry";
 import { opposite } from "@common/game/game";
+import { ticks } from "@common/general/time";
 import { t } from "@lingui/core/macro";
 import {
     $trapTeamInMidField,
@@ -22,6 +23,19 @@ import {
     $global,
     $syncPossessionQuarterbackSelection,
 } from "@modes/classic/hooks/global";
+import { $tick } from "@runtime/runtime";
+import type { Config } from "@modes/classic/config";
+import { getInitialDownState } from "@modes/classic/shared/down";
+import { KICKOFF_OUT_OF_BOUNDS_YARD_LINE } from "@modes/classic/shared/stadium";
+import { COLOR } from "@common/general/color";
+import { cn, formatTeamName } from "@modes/classic/shared/message";
+import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
+import {
+    KICKOFF_KICK_TIMEOUT_SECONDS,
+    KICKOFF_KICK_TIMEOUT_TICKS,
+    KICKOFF_WARNING_SECONDS_REMAINING,
+    KICKOFF_WARNING_TICKS,
+} from "@modes/classic/shared/timeouts";
 
 const KICKOFF_START_LINE = {
     [Team.RED]: {
@@ -36,6 +50,8 @@ const KICKOFF_START_LINE = {
 
 export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     const receivingTeam = opposite(forTeam);
+    const config = $config<Config>();
+    const kickingTeamName = formatTeamName(forTeam);
 
     $global((state) => state.clearPossessionQuarterback());
 
@@ -58,6 +74,35 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
                 });
             },
         );
+    });
+
+    $effect(($) => {
+        if (config.flags.timeouts) {
+            const players = $.getPlayerList();
+            const kickingTeamPlayers = players.filter(
+                (player) => player.team === forTeam,
+            );
+            const otherPlayers = players.filter(
+                (player) => player.team !== forTeam,
+            );
+
+            $.send({
+                message: t`🏈 Kickoff for ${kickingTeamName}. Kick within ${KICKOFF_KICK_TIMEOUT_SECONDS}s.`,
+                to: kickingTeamPlayers,
+                color: COLOR.ACTION,
+            });
+            $.send({
+                message: t`🏈 Kickoff for ${kickingTeamName}.`,
+                to: otherPlayers,
+                color: COLOR.ACTION,
+            });
+            return;
+        }
+
+        $.send({
+            message: t`🏈 Kickoff for ${kickingTeamName}.`,
+            color: COLOR.ACTION,
+        });
     });
 
     $dispose(() => {
@@ -105,13 +150,71 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         });
     }
 
+    function $handleKickoffTimeout() {
+        if (!config.flags.timeouts) return;
+
+        const { current: elapsedTicks } = $tick();
+
+        if (elapsedTicks === KICKOFF_WARNING_TICKS) {
+            $effect(($) => {
+                $.pauseGame(true);
+                $.pauseGame(false);
+                $.send({
+                    message: t`⏱️ ${KICKOFF_WARNING_SECONDS_REMAINING}s left to kick off.`,
+                    to: $.getPlayerList().filter(
+                        (player) => player.team === forTeam,
+                    ),
+                    color: COLOR.ALERT,
+                    sound: "notification",
+                });
+            });
+        }
+
+        if (elapsedTicks < KICKOFF_KICK_TIMEOUT_TICKS) return;
+
+        const nextDownState = getInitialDownState(receivingTeam, {
+            side: receivingTeam,
+            yards: KICKOFF_OUT_OF_BOUNDS_YARD_LINE,
+        });
+
+        $setBallInactive();
+
+        $dispose(() => {
+            $setBallActive();
+        });
+
+        $effect(($) => {
+            $.send({
+                message: cn(
+                    "⏱️",
+                    nextDownState,
+                    t`kickoff clock expired`,
+                    t`receiving team gets the ball at the ${KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line.`,
+                ),
+                color: COLOR.ALERT,
+            });
+        });
+
+        $next({
+            to: "PRESNAP",
+            params: {
+                downState: nextDownState,
+            },
+            wait: ticks({ seconds: 1 }),
+        });
+    }
+
     function run(state: GameState) {
+        $handleKickoffTimeout();
+
         $syncPossessionQuarterbackSelection({
             team: receivingTeam,
             players: state.players,
         });
 
-        const kicker = state.players.find((p) => p.isKickingBall);
+        const kicker = state.players.find(
+            (p) => p.team === forTeam && p.isKickingBall,
+        );
 
         if (kicker) {
             $next({

@@ -1,5 +1,12 @@
 import type { GameState, GameStatePlayer } from "@runtime/engine";
-import { $dispose, $effect, $global, $next, $stat } from "@runtime/runtime";
+import {
+    $config,
+    $dispose,
+    $effect,
+    $global,
+    $next,
+    $stat,
+} from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
@@ -9,6 +16,7 @@ import {
     withLastBallY,
 } from "@modes/classic/shared/down";
 import { cn, formatNames } from "@modes/classic/shared/message";
+import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import {
     applyOffensivePenalty,
     processOffensivePenalty,
@@ -36,6 +44,7 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { SCORES } from "@modes/classic/shared/scoring";
 import { Stat } from "@modes/classic/stats";
+import type { Config } from "@modes/classic/config";
 
 const OFFENSIVE_FOUL_PENALTY_YARDS = 5;
 
@@ -56,6 +65,7 @@ export function Blitz({
     ballIsDead?: boolean;
 }) {
     const { offensiveTeam, fieldPos, downAndDistance } = downState;
+    const config = $config<Config>();
     const lineOfScrimmageX = getPositionFromFieldPosition(fieldPos);
 
     $setLineOfScrimmage(fieldPos);
@@ -371,7 +381,7 @@ export function Blitz({
                         "🚪",
                         scores,
                         t`Quarterback ${frame.quarterback.name} went out in the end zone`,
-                        t`SAFETY!`,
+                        formatSafetyScoreMessage(config.flags.timeouts),
                     ),
                     color: COLOR.ALERT,
                     to: "mixed",

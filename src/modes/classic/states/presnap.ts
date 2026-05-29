@@ -3,6 +3,7 @@ import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { CommandHandleResult, CommandSpec } from "@core/commands";
 import { opposite } from "@common/game/game";
 import { parseIntegerInRange, parseTeamSide } from "@common/game/parsing";
+import { ticks } from "@common/general/time";
 import {
     BALL_OFFSET_YARDS,
     calculateDirectionalGain,
@@ -27,12 +28,20 @@ import {
 import { t } from "@lingui/core/macro";
 import { cn } from "@modes/classic/shared/message";
 import {
+    $setBallActive,
+    $setBallInactive,
     $setFirstDownLine,
     $setLineOfScrimmage,
     $unsetFirstDownLine,
     $unsetLineOfScrimmage,
 } from "@modes/classic/hooks/game";
-import { DownState, MAX_DOWNS } from "@modes/classic/shared/down";
+import {
+    DownState,
+    incrementDownState,
+    MAX_DOWNS,
+    processDownEventIncrement,
+    withLastBallYAtCenter,
+} from "@modes/classic/shared/down";
 import assert from "node:assert";
 import {
     $global,
@@ -52,18 +61,30 @@ import {
     isTooFarFromBall,
     MIN_SNAP_DELAY_TICKS,
 } from "@modes/classic/shared/snap";
+import {
+    HIKE_TIMEOUT_SECONDS,
+    HIKE_TIMEOUT_TICKS,
+    HIKE_WARNING_SECONDS_REMAINING,
+    HIKE_WARNING_TICKS,
+    PUNT_KICK_TIMEOUT_SECONDS,
+} from "@modes/classic/shared/timeouts";
 
 const MIN_DISTANCE = 1;
 const MAX_DISTANCE_CMD = 20;
 const MIN_DOWN = 1;
 const MAX_LOS_YARDS = 50;
 
-function $setInitialPlayerPositions(
-    offensiveTeam: FieldTeam,
-    ballPos: Position,
-    targetPlayerId?: number,
-    quarterbackId?: number,
-) {
+function $setInitialPlayerPositions({
+    offensiveTeam,
+    ballPos,
+    targetPlayerId,
+    quarterbackId,
+}: {
+    offensiveTeam: FieldTeam;
+    ballPos: Position;
+    targetPlayerId?: number;
+    quarterbackId?: number;
+}) {
     const snapProfile = $global().snapProfile;
 
     $effect(($) => {
@@ -135,6 +156,7 @@ export function Presnap({ downState }: { downState: DownState }) {
 
     $setBallUnmoveable();
     $lockBall();
+    $setBallActive();
     $setLineOfScrimmage(fieldPos);
     $setFirstDownLine(offensiveTeam, fieldPos, downAndDistance.distance);
 
@@ -152,7 +174,9 @@ export function Presnap({ downState }: { downState: DownState }) {
     if (requireQb && initialQuarterbackId === null) {
         $effect(($) => {
             $.send({
-                message: t`⚠️ Quarterback position is vacant. Use !qb to become the quarterback.`,
+                message: config.flags.timeouts
+                    ? t`⚠️ No quarterback selected. Use !qb to become QB before the ${HIKE_TIMEOUT_SECONDS}s hike clock expires.`
+                    : t`⚠️ Quarterback position is vacant. Use !qb to become the quarterback.`,
                 to: initialPlayersSnapshot.filter(
                     (player) => player.team === offensiveTeam,
                 ),
@@ -161,12 +185,23 @@ export function Presnap({ downState }: { downState: DownState }) {
         });
     }
 
-    $setInitialPlayerPositions(
+    if (requireQb && initialQuarterbackId !== null && config.flags.timeouts) {
+        $effect(($) => {
+            $.send({
+                message: t`⏱️ Hike within ${HIKE_TIMEOUT_SECONDS}s.`,
+                to: initialQuarterbackId,
+                color: COLOR.WARNING,
+            });
+        });
+    }
+
+    $setInitialPlayerPositions({
         offensiveTeam,
         ballPos,
-        undefined,
-        initialQuarterbackId ?? undefined,
-    );
+        ...(initialQuarterbackId !== null
+            ? { quarterbackId: initialQuarterbackId }
+            : {}),
+    });
 
     $dispose(() => {
         $setBallMoveable();
@@ -206,12 +241,14 @@ export function Presnap({ downState }: { downState: DownState }) {
               })
             : null;
 
-        $setInitialPlayerPositions(
+        $setInitialPlayerPositions({
             offensiveTeam,
             ballPos,
-            player.id,
-            selectedQuarterbackId ?? undefined,
-        );
+            targetPlayerId: player.id,
+            ...(selectedQuarterbackId !== null
+                ? { quarterbackId: selectedQuarterbackId }
+                : {}),
+        });
     }
 
     function chat(player: PlayerObject, message: string): false | void {
@@ -602,7 +639,9 @@ export function Presnap({ downState }: { downState: DownState }) {
 
                 $effect(($) => {
                     $.send({
-                        message: t`🦵 ${player.name} punts it away!`,
+                        message: config.flags.timeouts
+                            ? t`🦵 ${player.name} sets up to punt. Kick within ${PUNT_KICK_TIMEOUT_SECONDS}s.`
+                            : t`🦵 ${player.name} sets up to punt.`,
                         color: COLOR.ACTION,
                     });
                 });
@@ -649,12 +688,13 @@ export function Presnap({ downState }: { downState: DownState }) {
                         ? possessionQuarterback.playerId
                         : null;
 
-                $setInitialPlayerPositions(
+                $setInitialPlayerPositions({
                     offensiveTeam,
                     ballPos,
-                    undefined,
-                    selectedQuarterbackId ?? undefined,
-                );
+                    ...(selectedQuarterbackId !== null
+                        ? { quarterbackId: selectedQuarterbackId }
+                        : {}),
+                });
 
                 return { handled: true };
             }
@@ -671,13 +711,86 @@ export function Presnap({ downState }: { downState: DownState }) {
         }
     }
 
-    function run(state: GameState) {
-        if (requireQb) {
-            $syncPossessionQuarterbackSelection({
-                team: offensiveTeam,
-                players: state.players,
+    function $handleHikeTimeout() {
+        if (!config.flags.timeouts) return;
+
+        const { current: elapsedTicks } = $tick();
+        if (elapsedTicks < HIKE_TIMEOUT_TICKS) return;
+
+        const { event, downState: baseDownState } =
+            incrementDownState(downState);
+        const nextDownState = withLastBallYAtCenter(baseDownState);
+
+        $dispose(() => {
+            $setBallUnmoveable();
+            $lockBall();
+            $setBallInactive();
+        });
+
+        processDownEventIncrement({
+            event,
+            onNextDown() {
+                $effect(($) => {
+                    $.send({
+                        message: cn(
+                            "⏱️",
+                            nextDownState,
+                            t`hike clock expired`,
+                            t`offense loses a down.`,
+                        ),
+                        color: COLOR.ALERT,
+                    });
+                });
+            },
+            onTurnoverOnDowns() {
+                $effect(($) => {
+                    $.send({
+                        message: cn(
+                            "⏱️",
+                            nextDownState,
+                            t`hike clock expired`,
+                            t`TURNOVER ON DOWNS!`,
+                        ),
+                        color: COLOR.ALERT,
+                    });
+                });
+            },
+        });
+
+        $next({
+            to: "PRESNAP",
+            params: { downState: nextDownState },
+            wait: ticks({ seconds: 1 }),
+            disposal: "IMMEDIATE",
+        });
+    }
+
+    function $handleHikeTimeoutWarning(quarterbackId: number | null) {
+        if (!config.flags.timeouts || quarterbackId === null) return;
+
+        const { current: elapsedTicks } = $tick();
+        if (elapsedTicks !== HIKE_WARNING_TICKS) return;
+
+        $effect(($) => {
+            $.send({
+                message: t`⏱️ ${HIKE_WARNING_SECONDS_REMAINING}s left to hike.`,
+                to: quarterbackId,
+                color: COLOR.CRITICAL,
+                sound: "notification",
             });
-        }
+        });
+    }
+
+    function run(state: GameState) {
+        const selectedQuarterbackId = requireQb
+            ? $syncPossessionQuarterbackSelection({
+                  team: offensiveTeam,
+                  players: state.players,
+              })
+            : null;
+
+        $handleHikeTimeoutWarning(selectedQuarterbackId);
+        $handleHikeTimeout();
 
         if (config.flags.losBlocking) {
             $syncLineOfScrimmageBlocking();

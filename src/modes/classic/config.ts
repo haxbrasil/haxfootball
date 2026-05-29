@@ -14,6 +14,7 @@ export const {
         flags: {
             losBlocking: false,
             requireQb: true,
+            timeouts: true,
         },
     },
     flags: {
@@ -34,6 +35,16 @@ export const {
                 config.flags = {
                     ...config.flags,
                     requireQb: value,
+                };
+            },
+        },
+        TIMEOUTS: {
+            description: t`Enables action timeouts for hike, punt, safety kick, and kickoff.`,
+            getValue: (config) => config.flags.timeouts,
+            setValue: (config, value) => {
+                config.flags = {
+                    ...config.flags,
+                    timeouts: value,
                 };
             },
         },

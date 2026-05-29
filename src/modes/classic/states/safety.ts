@@ -2,6 +2,7 @@ import { Team, type FieldTeam } from "@runtime/models";
 import type { GameState } from "@runtime/engine";
 import { distributeOnLine } from "@common/math/geometry";
 import { FieldPosition, opposite } from "@common/game/game";
+import { ticks } from "@common/general/time";
 import {
     $setBallKickForce,
     $setBallMoveable,
@@ -16,11 +17,16 @@ import {
     calculateDirectionalGain,
     getPositionFromFieldPosition,
 } from "@modes/classic/shared/stadium";
-import { $next } from "@runtime/runtime";
+import { $config, $next, $tick } from "@runtime/runtime";
 import { t } from "@lingui/core/macro";
 import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import type { Config } from "@modes/classic/config";
+import { getInitialDownState } from "@modes/classic/shared/down";
+import { cn } from "@modes/classic/shared/message";
+import { SAFETY_KICK_TIMEOUT_TICKS } from "@modes/classic/shared/timeouts";
+import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
 
 const KICKING_TEAM_POSITIONS_OFFSET = {
     start: { x: -50, y: -150 },
@@ -30,6 +36,8 @@ const KICKING_TEAM_POSITIONS_OFFSET = {
 const YARD_LINE_FOR_SAFETY = 25;
 
 export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
+    const config = $config<Config>();
+
     $trapTeamInEndZone(opposite(kickingTeam));
     $setBallKickForce("strong");
     $setBallUnmoveable();
@@ -100,7 +108,48 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
         });
     }
 
+    function $handleSafetyKickTimeout() {
+        if (!config.flags.timeouts) return;
+
+        const { current: elapsedTicks } = $tick();
+        if (elapsedTicks < SAFETY_KICK_TIMEOUT_TICKS) return;
+
+        const receivingTeam = opposite(kickingTeam);
+        const nextDownState = getInitialDownState(
+            receivingTeam,
+            safetyFieldPos,
+        );
+
+        $setBallInactive();
+
+        $dispose(() => {
+            $setBallActive();
+        });
+
+        $effect(($) => {
+            $.send({
+                message: cn(
+                    "⏱️",
+                    nextDownState,
+                    t`safety-kick clock expired`,
+                    t`kicking team loses possession.`,
+                ),
+                color: COLOR.ALERT,
+            });
+        });
+
+        $next({
+            to: "PRESNAP",
+            params: {
+                downState: nextDownState,
+            },
+            wait: ticks({ seconds: 1 }),
+        });
+    }
+
     function run(state: GameState) {
+        $handleSafetyKickTimeout();
+
         const playersPastBall = getPlayersBeyondBallLine(state);
         const hasPlayersPastBall = playersPastBall.length > 0;
 

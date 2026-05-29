@@ -1,4 +1,4 @@
-import { $dispose, $effect, $next, $stat } from "@runtime/hooks";
+import { $config, $dispose, $effect, $next, $stat } from "@runtime/hooks";
 import type { FieldTeam } from "@runtime/models";
 import { ticks } from "@common/general/time";
 import {
@@ -21,6 +21,7 @@ import {
 import { getInitialDownState } from "@modes/classic/shared/down";
 import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
 import { cn, formatNames } from "@modes/classic/shared/message";
+import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
 import {
     $global,
@@ -30,6 +31,7 @@ import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
+import type { Config } from "@modes/classic/config";
 
 type EndzoneState = "TOUCHBACK" | "Safety";
 type Frame = {
@@ -48,6 +50,8 @@ export function KickoffReturn({
     startFieldPosition: FieldPosition;
     endzoneState?: EndzoneState;
 }) {
+    const config = $config<Config>();
+
     $effect(($) => {
         $.setAvatar(playerId, AVATARS.BALL);
     });
@@ -124,7 +128,9 @@ export function KickoffReturn({
                                     "🚪",
                                     scores,
                                     t`${player.name} left from the end zone`,
-                                    t`SAFETY!`,
+                                    formatSafetyScoreMessage(
+                                        config.flags.timeouts,
+                                    ),
                                 ),
                                 color: COLOR.ALERT,
                                 to: "mixed",
@@ -310,7 +316,7 @@ export function KickoffReturn({
                         "🚪",
                         scores,
                         t`${frame.player.name} went out in the end zone`,
-                        t`SAFETY!`,
+                        formatSafetyScoreMessage(config.flags.timeouts),
                     ),
                     color: COLOR.ALERT,
                     to: "mixed",
@@ -389,7 +395,7 @@ export function KickoffReturn({
                                 "🛑",
                                 scores,
                                 t`${frame.player.name} is down in the end zone`,
-                                t`SAFETY!`,
+                                formatSafetyScoreMessage(config.flags.timeouts),
                             ),
                             color: COLOR.ALERT,
                             to: "mixed",

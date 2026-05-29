@@ -7,8 +7,16 @@ import {
     withLastBallY,
 } from "@modes/classic/shared/down";
 import { cn, formatNames } from "@modes/classic/shared/message";
+import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
-import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import {
+    $before,
+    $config,
+    $dispose,
+    $effect,
+    $next,
+    $stat,
+} from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
@@ -32,6 +40,7 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import type { FieldPosition } from "@common/game/game";
 import { Stat } from "@modes/classic/stats";
+import type { Config } from "@modes/classic/config";
 
 const FUMBLE_CATCHER_DISTANCE = 1.0;
 
@@ -53,6 +62,7 @@ export function LiveBall({
     catchFieldPos?: FieldPosition;
 }) {
     const { offensiveTeam, fieldPos, downAndDistance } = downState;
+    const config = $config<Config>();
 
     $setLineOfScrimmage(fieldPos);
     $setFirstDownLine(offensiveTeam, fieldPos, downAndDistance.distance);
@@ -509,7 +519,7 @@ export function LiveBall({
                         "🚪",
                         scores,
                         t`${frame.player.name} went out in the end zone`,
-                        t`SAFETY!`,
+                        formatSafetyScoreMessage(config.flags.timeouts),
                     ),
                     color: COLOR.ALERT,
                     to: "mixed",

@@ -4,7 +4,14 @@ import type {
     GameStatePlayer,
 } from "@runtime/engine";
 import { FieldTeam } from "@runtime/models";
-import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import {
+    $before,
+    $config,
+    $dispose,
+    $effect,
+    $next,
+    $stat,
+} from "@runtime/runtime";
 import { PointLike } from "@common/math/geometry";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
@@ -24,12 +31,14 @@ import {
 import { getInitialDownState } from "@modes/classic/shared/down";
 import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
 import { cn, formatNames } from "@modes/classic/shared/message";
+import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import { $global } from "@modes/classic/hooks/global";
 import { t } from "@lingui/core/macro";
 import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
+import type { Config } from "@modes/classic/config";
 
 const MAX_PATH_DURATION = ticks({ seconds: 2 });
 
@@ -53,6 +62,8 @@ export function Interception({
     playerTeam: FieldTeam;
     endzoneState?: EndzoneState;
 }) {
+    const config = $config<Config>();
+
     $setBallInactive();
 
     const { tickNumber: initialTickNumber } = $before();
@@ -210,7 +221,7 @@ export function Interception({
                         "🚪",
                         scores,
                         t`${frame.player.name} went out in the end zone`,
-                        t`SAFETY!`,
+                        formatSafetyScoreMessage(config.flags.timeouts),
                     ),
                     color: COLOR.ALERT,
                     to: "mixed",
@@ -289,7 +300,7 @@ export function Interception({
                                 "🛑",
                                 scores,
                                 t`${frame.player.name} is down in the end zone`,
-                                t`SAFETY!`,
+                                formatSafetyScoreMessage(config.flags.timeouts),
                             ),
                             color: COLOR.ALERT,
                             to: "mixed",
