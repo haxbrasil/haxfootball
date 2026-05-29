@@ -145,7 +145,7 @@ export function SafetyKickInFlight({
             $.send({
                 message: cn(
                     t`❌ Illegal touch`,
-                    t`safety kick caught first by the kicking team (${catcher.name}).`,
+                    t`safety kick touched first by ${catcher.name} from the kicking team.`,
                 ),
                 color: COLOR.WARNING,
             });

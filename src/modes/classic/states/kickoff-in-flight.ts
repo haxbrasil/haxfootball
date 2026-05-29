@@ -1,7 +1,7 @@
 import { $dispose, $effect, $next } from "@runtime/hooks";
 import { type FieldTeam } from "@runtime/models";
 import { ticks } from "@common/general/time";
-import { opposite } from "@common/game/game";
+import { AVATARS, opposite } from "@common/game/game";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { t } from "@lingui/core/macro";
 import { cn } from "@modes/classic/shared/message";
@@ -26,6 +26,7 @@ type Frame = {
     state: GameState;
     outOfBoundsCatcher: GameStatePlayer | null;
     receivingCatcher: GameStatePlayer | null;
+    kickingTeamCatcher: GameStatePlayer | null;
 };
 
 export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
@@ -41,6 +42,10 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
             receivingCatcher: findEligibleBallCatcher(
                 state.ball,
                 state.players.filter((player) => player.team === receivingTeam),
+            ),
+            kickingTeamCatcher: findEligibleBallCatcher(
+                state.ball,
+                state.players.filter((player) => player.team === kickingTeam),
             ),
         };
     }
@@ -129,6 +134,40 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
         });
     }
 
+    function $handleIllegalTouch(frame: Frame) {
+        if (!frame.kickingTeamCatcher) return;
+        const catcher = frame.kickingTeamCatcher;
+
+        $effect(($) => {
+            $.send({
+                message: cn(
+                    t`❌ Illegal touch`,
+                    t`kickoff touched first by ${catcher.name} from the kicking team.`,
+                ),
+                color: COLOR.WARNING,
+            });
+            $.setAvatar(catcher.id, AVATARS.CANCEL);
+        });
+
+        $dispose(() => {
+            $effect(($) => {
+                $.setAvatar(catcher.id, null);
+            });
+        });
+
+        $next({
+            to: "PRESNAP",
+            params: {
+                downState: getInitialDownState(
+                    receivingTeam,
+                    getFieldPosition(catcher.x),
+                    catcher.y,
+                ),
+            },
+            wait: ticks({ seconds: 2 }),
+        });
+    }
+
     function join(player: GameStatePlayer) {
         $setBallMoveableByPlayer(player.id);
     }
@@ -156,6 +195,7 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
         $handleBallOutOfBounds(frame);
         $handleOutOfBoundsReception(frame);
         $handleKickoffReturn(frame);
+        $handleIllegalTouch(frame);
     }
 
     return { run, join, command };

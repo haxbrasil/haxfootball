@@ -183,7 +183,7 @@ export function PuntInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
             $.send({
                 message: cn(
                     t`❌ Illegal touch`,
-                    t`punt caught first by the kicking team (${catcher.name}).`,
+                    t`punt touched first by ${catcher.name} from the kicking team.`,
                 ),
                 color: COLOR.WARNING,
             });
