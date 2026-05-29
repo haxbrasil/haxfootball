@@ -912,7 +912,7 @@ export function Snap({
         });
     }
 
-    function $penalizeIllegalQuarterbackAdvance() {
+    function $penalizeIllegalQuarterbackAdvance(): never {
         const penaltyResult = applyOffensivePenalty(
             downState,
             -OFFENSIVE_FOUL_PENALTY_YARDS,
@@ -989,27 +989,9 @@ export function Snap({
         if (frame.quarterback.isKickingBall) return;
         if (!frame.ballBeyondLineOfScrimmage) return;
 
-        if (!frame.isBlitzAllowed) {
+        if (!frame.quarterbackCrossedLineOfScrimmage) {
             $penalizeIllegalQuarterbackAdvance();
         }
-
-        $effect(($) => {
-            $.send({
-                message: cn(
-                    t`🏃 Ball crossed the LOS`,
-                    t`quarterback run is live.`,
-                ),
-                color: COLOR.ACTION,
-            });
-        });
-
-        $next({
-            to: "QUARTERBACK_RUN",
-            params: {
-                playerId: quarterbackId,
-                downState,
-            },
-        });
     }
 
     function $handleQuarterbackBeyondLineOfScrimmage(frame: Frame) {

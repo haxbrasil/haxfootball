@@ -29,6 +29,7 @@ type Frame = {
     quarterback: GameStatePlayer;
     defenders: GameStatePlayer[];
     quarterbackCrossedLineOfScrimmage: boolean;
+    ballBeyondLineOfScrimmage: boolean;
 };
 
 export function ExtraPointBlitz({
@@ -80,12 +81,18 @@ export function ExtraPointBlitz({
                 offensiveTeam,
                 quarterback.x - lineOfScrimmageX,
             ) > 0;
+        const ballBeyondLineOfScrimmage =
+            calculateDirectionalGain(
+                offensiveTeam,
+                state.ball.x - lineOfScrimmageX,
+            ) > 0;
 
         return {
             state,
             quarterback,
             defenders,
             quarterbackCrossedLineOfScrimmage,
+            ballBeyondLineOfScrimmage,
         };
     }
 
@@ -167,6 +174,29 @@ export function ExtraPointBlitz({
                 originalOffensiveTeam: offensiveTeam,
                 fieldPos,
             },
+        });
+    }
+
+    function $handleIllegalQuarterbackAdvance(frame: Frame) {
+        if (ballIsDead || frame.quarterback.isKickingBall) return;
+        if (!frame.ballBeyondLineOfScrimmage) return;
+        if (frame.quarterbackCrossedLineOfScrimmage) return;
+
+        $effect(($) => {
+            $.send({
+                message: cn(
+                    t`❌ Offensive foul`,
+                    t`illegal advance beyond the LOS`,
+                    t`two-point try failed.`,
+                ),
+                color: COLOR.WARNING,
+            });
+        });
+
+        $next({
+            to: "KICKOFF",
+            params: { forTeam: offensiveTeam },
+            wait: ticks({ seconds: 2 }),
         });
     }
 
@@ -269,6 +299,7 @@ export function ExtraPointBlitz({
         $handleQuarterbackKick(frame);
         $handleOffensiveIllegalTouching(frame);
         $handleDefensiveTouching(frame);
+        $handleIllegalQuarterbackAdvance(frame);
         $handleQuarterbackCrossedLine(frame);
         $handleOutsideExtraPointZone(frame);
         $handleQuarterbackOutOfBounds(frame);

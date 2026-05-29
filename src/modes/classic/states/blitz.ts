@@ -53,6 +53,7 @@ type Frame = {
     quarterback: GameStatePlayer;
     defenders: GameStatePlayer[];
     quarterbackCrossedLineOfScrimmage: boolean;
+    ballBeyondLineOfScrimmage: boolean;
 };
 
 export function Blitz({
@@ -104,12 +105,18 @@ export function Blitz({
                 offensiveTeam,
                 quarterback.x - lineOfScrimmageX,
             ) > 0;
+        const ballBeyondLineOfScrimmage =
+            calculateDirectionalGain(
+                offensiveTeam,
+                state.ball.x - lineOfScrimmageX,
+            ) > 0;
 
         return {
             state,
             quarterback,
             defenders,
             quarterbackCrossedLineOfScrimmage,
+            ballBeyondLineOfScrimmage,
         };
     }
 
@@ -228,6 +235,87 @@ export function Blitz({
                 ballIsDead: true,
             },
         });
+    }
+
+    function $penalizeIllegalQuarterbackAdvance(): never {
+        const penaltyResult = applyOffensivePenalty(
+            downState,
+            -OFFENSIVE_FOUL_PENALTY_YARDS,
+        );
+
+        $stat({
+            type: Stat.Foul,
+            playerId: quarterbackId,
+            value: {
+                team: offensiveTeam,
+                down: downState.downAndDistance.down,
+                distance: downState.downAndDistance.distance,
+                startFieldPosition: downState.fieldPos,
+                yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+            },
+        });
+
+        $setBallInactive();
+
+        $effect(($) => {
+            $.setAvatar(quarterbackId, AVATARS.CLOWN);
+        });
+
+        $dispose(() => {
+            $effect(($) => {
+                $.setAvatar(quarterbackId, null);
+            });
+
+            $setBallActive();
+        });
+
+        processOffensivePenalty({
+            event: penaltyResult.event,
+            onNextDown() {
+                $effect(($) => {
+                    $.send({
+                        message: cn(
+                            "❌",
+                            penaltyResult.downState,
+                            t`illegal advance beyond the LOS`,
+                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
+                            t`loss of down.`,
+                        ),
+                        color: COLOR.WARNING,
+                    });
+                });
+            },
+            onTurnoverOnDowns() {
+                $effect(($) => {
+                    $.send({
+                        message: cn(
+                            "❌",
+                            penaltyResult.downState,
+                            t`illegal advance beyond the LOS`,
+                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
+                            t`turnover on downs.`,
+                        ),
+                        color: COLOR.WARNING,
+                    });
+                });
+            },
+        });
+
+        $next({
+            to: "PRESNAP",
+            params: {
+                downState: penaltyResult.downState,
+            },
+            wait: ticks({ seconds: 1 }),
+        });
+    }
+
+    function $handleIllegalQuarterbackAdvance(frame: Frame) {
+        if (ballIsDead || frame.quarterback.isKickingBall) return;
+        if (!frame.ballBeyondLineOfScrimmage) return;
+        if (frame.quarterbackCrossedLineOfScrimmage) return;
+
+        $penalizeIllegalQuarterbackAdvance();
     }
 
     function $handleQuarterbackCrossedLine(frame: Frame) {
@@ -585,6 +673,7 @@ export function Blitz({
         $handleQuarterbackKick(frame);
         $handleOffensiveIllegalTouching(frame);
         $handleDefensiveTouching(frame);
+        $handleIllegalQuarterbackAdvance(frame);
         $handleQuarterbackCrossedLine(frame);
         $handleQuarterbackOutOfBounds(frame);
         $handleQuarterbackSacked(frame);

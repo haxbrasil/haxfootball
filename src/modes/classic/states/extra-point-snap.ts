@@ -259,7 +259,7 @@ export function ExtraPointSnap({
         $failTwoPointAttempt();
     }
 
-    function $failTwoPointAttempt() {
+    function $failTwoPointAttempt(): never {
         $setBallInactive();
 
         $next({
@@ -674,12 +674,7 @@ export function ExtraPointSnap({
     function $handleQuarterbackRun(frame: Frame) {
         if (frame.quarterback.isKickingBall) return;
         if (!frame.isQuarterbackEligibleToRun) return;
-        if (
-            !frame.quarterbackCrossedLineOfScrimmage &&
-            !frame.ballBeyondLineOfScrimmage
-        ) {
-            return;
-        }
+        if (!frame.quarterbackCrossedLineOfScrimmage) return;
 
         $effect(($) => {
             $.send({
@@ -701,11 +696,15 @@ export function ExtraPointSnap({
 
     function $handleIllegalQuarterbackAdvance(frame: Frame) {
         if (frame.quarterback.isKickingBall) return;
-        if (frame.isQuarterbackEligibleToRun) return;
-        if (
-            !frame.quarterbackCrossedLineOfScrimmage &&
-            !frame.ballBeyondLineOfScrimmage
-        ) {
+
+        const ballAdvancedWithoutQuarterback =
+            frame.ballBeyondLineOfScrimmage &&
+            !frame.quarterbackCrossedLineOfScrimmage;
+        const quarterbackAdvancedTooEarly =
+            frame.quarterbackCrossedLineOfScrimmage &&
+            !frame.isQuarterbackEligibleToRun;
+
+        if (!ballAdvancedWithoutQuarterback && !quarterbackAdvancedTooEarly) {
             return;
         }
 
