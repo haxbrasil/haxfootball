@@ -7,7 +7,11 @@ import {
 } from "@modes/classic/shared/down";
 import { cn, formatNames } from "@modes/classic/shared/message";
 import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
-import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
+import {
+    getTouchdownScore,
+    isTouchdown,
+    SCORES,
+} from "@modes/classic/shared/scoring";
 import { $config, $dispose, $effect, $next, $stat } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
@@ -87,8 +91,12 @@ export function Run({
             return;
         }
 
+        const { scores: scoreBeforeTouchdown } = $global();
         $global((state) =>
-            state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
+            state.incrementScore(
+                offensiveTeam,
+                getTouchdownScore(scoreBeforeTouchdown),
+            ),
         );
         const yards = getDistanceToGoalLine(offensiveTeam, downState.fieldPos);
         const endFieldPosition = { side: opposite(offensiveTeam), yards: 0 };

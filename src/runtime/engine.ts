@@ -103,6 +103,7 @@ export interface Engine<Cfg = unknown> {
     ) => void;
     handlePlayerLeave: (player: PlayerObject) => void;
     getGlobalStateSnapshot: <State = unknown>() => State | null;
+    getCurrentStateName: () => string | null;
     isRunning: () => boolean;
     readonly _configBrand?: Cfg;
 }
@@ -1129,6 +1130,10 @@ export function createEngine<Cfg>(
         return globalStore.getStateSnapshot() as State;
     }
 
+    function getCurrentStateName(): string | null {
+        return current?.name ?? null;
+    }
+
     return {
         start,
         stop,
@@ -1141,6 +1146,7 @@ export function createEngine<Cfg>(
         handlePlayerTeamChange,
         handlePlayerLeave,
         getGlobalStateSnapshot,
+        getCurrentStateName,
         isRunning,
     };
 }

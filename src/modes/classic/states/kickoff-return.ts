@@ -19,7 +19,11 @@ import {
     calculateYardsGained,
 } from "@modes/classic/shared/stadium";
 import { getInitialDownState } from "@modes/classic/shared/down";
-import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
+import {
+    getTouchdownScore,
+    isTouchdown,
+    SCORES,
+} from "@modes/classic/shared/scoring";
 import { cn, formatNames } from "@modes/classic/shared/message";
 import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
@@ -191,8 +195,12 @@ export function KickoffReturn({
             return;
         }
 
+        const { scores: scoreBeforeTouchdown } = $global();
         $global((state) =>
-            state.incrementScore(receivingTeam, SCORES.TOUCHDOWN),
+            state.incrementScore(
+                receivingTeam,
+                getTouchdownScore(scoreBeforeTouchdown),
+            ),
         );
         const endFieldPosition = { side: opposite(receivingTeam), yards: 0 };
         const yards = calculateYardsGained(
@@ -231,7 +239,7 @@ export function KickoffReturn({
                 message: cn(
                     "🔥",
                     scores,
-                    t`kickoff return touchdown by ${frame.player.name}!`,
+                    t`Kickoff return touchdown by ${frame.player.name}!`,
                 ),
                 color: COLOR.SUCCESS,
                 to: "mixed",

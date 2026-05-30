@@ -7,7 +7,11 @@ import {
 } from "@modes/classic/shared/down";
 import { cn, formatNames } from "@modes/classic/shared/message";
 import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
-import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
+import {
+    getTouchdownScore,
+    isTouchdown,
+    SCORES,
+} from "@modes/classic/shared/scoring";
 import { $config, $dispose, $effect, $next } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
@@ -84,8 +88,12 @@ export function FakeFieldGoal({
             return;
         }
 
+        const { scores: scoreBeforeTouchdown } = $global();
         $global((state) =>
-            state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
+            state.incrementScore(
+                offensiveTeam,
+                getTouchdownScore(scoreBeforeTouchdown),
+            ),
         );
 
         const { scores } = $global();

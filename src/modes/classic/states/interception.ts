@@ -29,7 +29,11 @@ import {
     TOUCHBACK_YARD_LINE,
 } from "@modes/classic/shared/stadium";
 import { getInitialDownState } from "@modes/classic/shared/down";
-import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
+import {
+    getTouchdownScore,
+    isTouchdown,
+    SCORES,
+} from "@modes/classic/shared/scoring";
 import { cn, formatNames } from "@modes/classic/shared/message";
 import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import { $global } from "@modes/classic/hooks/global";
@@ -137,7 +141,13 @@ export function Interception({
             return;
         }
 
-        $global((state) => state.incrementScore(playerTeam, SCORES.TOUCHDOWN));
+        const { scores: scoreBeforeTouchdown } = $global();
+        $global((state) =>
+            state.incrementScore(
+                playerTeam,
+                getTouchdownScore(scoreBeforeTouchdown),
+            ),
+        );
 
         $stat({
             type: Stat.PickSix,

@@ -19,7 +19,11 @@ import {
     TOUCHBACK_YARD_LINE,
 } from "@modes/classic/shared/stadium";
 import { getInitialDownState } from "@modes/classic/shared/down";
-import { isTouchdown, SCORES } from "@modes/classic/shared/scoring";
+import {
+    getTouchdownScore,
+    isTouchdown,
+    SCORES,
+} from "@modes/classic/shared/scoring";
 import { cn, formatNames } from "@modes/classic/shared/message";
 import { formatSafetyScoreMessage } from "@modes/classic/shared/safety";
 import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
@@ -103,8 +107,12 @@ export function PuntReturn({
             return;
         }
 
+        const { scores: scoreBeforeTouchdown } = $global();
         $global((state) =>
-            state.incrementScore(receivingTeam, SCORES.TOUCHDOWN),
+            state.incrementScore(
+                receivingTeam,
+                getTouchdownScore(scoreBeforeTouchdown),
+            ),
         );
         $stat({
             type: Stat.Return,
@@ -137,7 +145,7 @@ export function PuntReturn({
                 message: cn(
                     "🔥",
                     scores,
-                    t`punt return touchdown by ${frame.player.name}!`,
+                    t`Punt return touchdown by ${frame.player.name}!`,
                 ),
                 color: COLOR.SUCCESS,
                 to: "mixed",

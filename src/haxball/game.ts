@@ -249,7 +249,7 @@ function getScoresObject(room: NativeRoom): ScoresObject | null {
         blue: room.gameState.blueScore,
         time: room.gameState.timeElapsed,
         scoreLimit: room.gameState.scoreLimit,
-        timeLimit: room.gameState.timeLimit,
+        timeLimit: room.gameState.timeLimit * 60,
     };
 }
 

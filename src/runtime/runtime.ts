@@ -321,6 +321,12 @@ export function $isGamePaused(): boolean {
     return RUNTIME.isPaused;
 }
 
+export function $scores(): ReturnType<Room["getScores"]> {
+    if (!RUNTIME) throw new Error("$scores used outside of runtime");
+
+    return RUNTIME.room.getScores();
+}
+
 /**
  * Allows late replacement of the room reference (no-op if not installed).
  */

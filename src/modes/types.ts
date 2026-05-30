@@ -33,6 +33,12 @@ export type GameModeStopContext = {
     room: Room;
 };
 
+export type GameModeTickEndContext = {
+    engine: Engine<unknown> | null;
+    gameScoreStore?: GameScoreStore;
+    room: Room;
+};
+
 export type GameModeRuntime = {
     commands: CommandDefinition[];
     createEngineOptions(args: {
@@ -43,6 +49,7 @@ export type GameModeRuntime = {
         engine: Engine<unknown> | null,
         gameScoreStore?: GameScoreStore,
     ): void;
+    handleGameTickEnd?(ctx: GameModeTickEndContext): void;
     handleGameStop(ctx: GameModeStopContext): void;
 };
 

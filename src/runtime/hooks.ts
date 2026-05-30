@@ -9,5 +9,6 @@ export {
     $isGamePaused,
     $next,
     $restore,
+    $scores,
     $stat,
 } from "@runtime/runtime";

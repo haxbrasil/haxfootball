@@ -20,7 +20,7 @@ import {
     processDefensivePenaltyEvent,
     processOffensivePenalty,
 } from "@modes/classic/shared/penalty";
-import { SCORES } from "@modes/classic/shared/scoring";
+import { getTouchdownScore } from "@modes/classic/shared/scoring";
 import {
     $before,
     $dispose,
@@ -409,8 +409,12 @@ export function Snap({
                 });
             },
             onTouchdown() {
+                const { scores: scoreBeforeTouchdown } = $global();
                 $global((state) =>
-                    state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
+                    state.incrementScore(
+                        offensiveTeam,
+                        getTouchdownScore(scoreBeforeTouchdown),
+                    ),
                 );
 
                 const { scores } = $global();
@@ -551,8 +555,12 @@ export function Snap({
                 });
             },
             onTouchdown() {
+                const { scores: scoreBeforeTouchdown } = $global();
                 $global((state) =>
-                    state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
+                    state.incrementScore(
+                        offensiveTeam,
+                        getTouchdownScore(scoreBeforeTouchdown),
+                    ),
                 );
 
                 const { scores } = $global();
@@ -694,8 +702,12 @@ export function Snap({
                 });
             },
             onTouchdown() {
+                const { scores: scoreBeforeTouchdown } = $global();
                 $global((state) =>
-                    state.incrementScore(offensiveTeam, SCORES.TOUCHDOWN),
+                    state.incrementScore(
+                        offensiveTeam,
+                        getTouchdownScore(scoreBeforeTouchdown),
+                    ),
                 );
 
                 const { scores } = $global();

@@ -28,74 +28,74 @@ msgid "{0} and {1}"
 msgstr "{0} e {1}"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/fake-field-goal.ts:279
-#: src/modes/classic/states/fake-field-goal.ts:293
-#: src/modes/classic/states/fake-field-goal.ts:307
-#: src/modes/classic/states/fake-field-goal.ts:321
-#: src/modes/classic/states/fake-field-goal.ts:336
-#: src/modes/classic/states/live-ball.ts:633
-#: src/modes/classic/states/live-ball.ts:647
-#: src/modes/classic/states/live-ball.ts:661
-#: src/modes/classic/states/live-ball.ts:675
-#: src/modes/classic/states/live-ball.ts:690
-#: src/modes/classic/states/quarterback-run.ts:363
-#: src/modes/classic/states/quarterback-run.ts:377
-#: src/modes/classic/states/quarterback-run.ts:391
-#: src/modes/classic/states/quarterback-run.ts:405
-#: src/modes/classic/states/quarterback-run.ts:420
-#: src/modes/classic/states/run.ts:363
-#: src/modes/classic/states/run.ts:377
-#: src/modes/classic/states/run.ts:391
-#: src/modes/classic/states/run.ts:405
-#: src/modes/classic/states/run.ts:420
+#: src/modes/classic/states/fake-field-goal.ts:287
+#: src/modes/classic/states/fake-field-goal.ts:301
+#: src/modes/classic/states/fake-field-goal.ts:315
+#: src/modes/classic/states/fake-field-goal.ts:329
+#: src/modes/classic/states/fake-field-goal.ts:344
+#: src/modes/classic/states/live-ball.ts:641
+#: src/modes/classic/states/live-ball.ts:655
+#: src/modes/classic/states/live-ball.ts:669
+#: src/modes/classic/states/live-ball.ts:683
+#: src/modes/classic/states/live-ball.ts:698
+#: src/modes/classic/states/quarterback-run.ts:371
+#: src/modes/classic/states/quarterback-run.ts:385
+#: src/modes/classic/states/quarterback-run.ts:399
+#: src/modes/classic/states/quarterback-run.ts:413
+#: src/modes/classic/states/quarterback-run.ts:428
+#: src/modes/classic/states/run.ts:371
+#: src/modes/classic/states/run.ts:385
+#: src/modes/classic/states/run.ts:399
+#: src/modes/classic/states/run.ts:413
+#: src/modes/classic/states/run.ts:428
 msgid "{0} brought down by {catcherNames}"
 msgstr "{0} derrubado por {catcherNames}"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/interception.ts:302
-#: src/modes/classic/states/kickoff-return.ts:397
-#: src/modes/classic/states/punt-return.ts:303
-#: src/modes/classic/states/safety-kick-return.ts:389
+#: src/modes/classic/states/interception.ts:312
+#: src/modes/classic/states/kickoff-return.ts:405
+#: src/modes/classic/states/punt-return.ts:311
+#: src/modes/classic/states/safety-kick-return.ts:397
 msgid "{0} is down in the end zone"
 msgstr "{0} caiu na end zone"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/kickoff-return.ts:130
-#: src/modes/classic/states/punt-return.ts:457
-#: src/modes/classic/states/safety-kick-return.ts:127
+#: src/modes/classic/states/kickoff-return.ts:134
+#: src/modes/classic/states/punt-return.ts:465
+#: src/modes/classic/states/safety-kick-return.ts:131
 msgid "{0} left from the end zone"
 msgstr "{0} saiu da end zone"
 
 #. placeholder {0}: frame.player.name
 #. placeholder {0}: frame.quarterback.name
 #: src/modes/classic/states/blitz.ts:384
-#: src/modes/classic/states/fake-field-goal.ts:143
-#: src/modes/classic/states/live-ball.ts:434
-#: src/modes/classic/states/quarterback-run.ts:193
-#: src/modes/classic/states/run.ts:193
+#: src/modes/classic/states/fake-field-goal.ts:151
+#: src/modes/classic/states/live-ball.ts:442
+#: src/modes/classic/states/quarterback-run.ts:201
+#: src/modes/classic/states/run.ts:201
 msgid "{0} stepped out"
 msgstr "{0} saiu de campo"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/fake-field-goal.ts:230
-#: src/modes/classic/states/interception.ts:223
-#: src/modes/classic/states/kickoff-return.ts:318
-#: src/modes/classic/states/live-ball.ts:521
-#: src/modes/classic/states/punt-return.ts:224
-#: src/modes/classic/states/quarterback-run.ts:280
-#: src/modes/classic/states/run.ts:280
-#: src/modes/classic/states/safety-kick-return.ts:309
+#: src/modes/classic/states/fake-field-goal.ts:238
+#: src/modes/classic/states/interception.ts:233
+#: src/modes/classic/states/kickoff-return.ts:326
+#: src/modes/classic/states/live-ball.ts:529
+#: src/modes/classic/states/punt-return.ts:232
+#: src/modes/classic/states/quarterback-run.ts:288
+#: src/modes/classic/states/run.ts:288
+#: src/modes/classic/states/safety-kick-return.ts:317
 msgid "{0} went out in the end zone"
 msgstr "{0} saiu na end zone"
 
 #. placeholder {0}: Crowding.CROWDING_PENALTY_YARDS
-#: src/modes/classic/states/snap.ts:541
-#: src/modes/classic/states/snap.ts:567
+#: src/modes/classic/states/snap.ts:545
+#: src/modes/classic/states/snap.ts:575
 msgid "{0}-yard penalty"
 msgstr "penalidade de {0} jardas"
 
 #. placeholder {0}: Crowding.CROWDING_PENALTY_YARDS
-#: src/modes/classic/states/snap.ts:521
+#: src/modes/classic/states/snap.ts:525
 msgid "{0}-yard penalty."
 msgstr "penalidade de {0} jardas."
 
@@ -110,7 +110,7 @@ msgid "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 msgstr "{BLITZ_BASE_DELAY_IN_SECONDS}s até a blitz!"
 
 #: src/modes/classic/states/snap.ts:396
-#: src/modes/classic/states/snap.ts:425
+#: src/modes/classic/states/snap.ts:429
 msgid "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty"
 msgstr "penalidade de {DEFENSIVE_OFFSIDE_PENALTY_YARDS} jardas"
 
@@ -118,12 +118,12 @@ msgstr "penalidade de {DEFENSIVE_OFFSIDE_PENALTY_YARDS} jardas"
 msgid "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty."
 msgstr "penalidade de {DEFENSIVE_OFFSIDE_PENALTY_YARDS} jardas."
 
-#: src/modes/classic/states/snap.ts:681
-#: src/modes/classic/states/snap.ts:710
+#: src/modes/classic/states/snap.ts:689
+#: src/modes/classic/states/snap.ts:722
 msgid "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty"
 msgstr "penalidade de {DEFENSIVE_TOUCHING_PENALTY_YARDS} jardas"
 
-#: src/modes/classic/states/snap.ts:660
+#: src/modes/classic/states/snap.ts:668
 msgid "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty."
 msgstr "penalidade de {DEFENSIVE_TOUCHING_PENALTY_YARDS} jardas."
 
@@ -133,12 +133,12 @@ msgstr "penalidade de {DEFENSIVE_TOUCHING_PENALTY_YARDS} jardas."
 #: src/modes/classic/states/blitz.ts:295
 #: src/modes/classic/states/snap.ts:274
 #: src/modes/classic/states/snap.ts:288
-#: src/modes/classic/states/snap.ts:799
-#: src/modes/classic/states/snap.ts:813
-#: src/modes/classic/states/snap.ts:883
-#: src/modes/classic/states/snap.ts:897
-#: src/modes/classic/states/snap.ts:956
-#: src/modes/classic/states/snap.ts:970
+#: src/modes/classic/states/snap.ts:811
+#: src/modes/classic/states/snap.ts:825
+#: src/modes/classic/states/snap.ts:895
+#: src/modes/classic/states/snap.ts:909
+#: src/modes/classic/states/snap.ts:968
+#: src/modes/classic/states/snap.ts:982
 msgid "{OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty"
 msgstr "penalidade de {OFFENSIVE_FOUL_PENALTY_YARDS} jardas"
 
@@ -158,18 +158,18 @@ msgid "{teamName} {0}"
 msgstr "{teamName} {0}"
 
 #: src/modes/classic/states/blitz.ts:580
-#: src/modes/classic/states/fake-field-goal.ts:294
-#: src/modes/classic/states/live-ball.ts:648
-#: src/modes/classic/states/quarterback-run.ts:378
-#: src/modes/classic/states/run.ts:378
+#: src/modes/classic/states/fake-field-goal.ts:302
+#: src/modes/classic/states/live-ball.ts:656
+#: src/modes/classic/states/quarterback-run.ts:386
+#: src/modes/classic/states/run.ts:386
 msgid "{yardsGained} yard gain"
 msgstr "ganho de {yardsGained} jardas"
 
 #: src/modes/classic/states/blitz.ts:398
-#: src/modes/classic/states/fake-field-goal.ts:157
-#: src/modes/classic/states/live-ball.ts:448
-#: src/modes/classic/states/quarterback-run.ts:207
-#: src/modes/classic/states/run.ts:207
+#: src/modes/classic/states/fake-field-goal.ts:165
+#: src/modes/classic/states/live-ball.ts:456
+#: src/modes/classic/states/quarterback-run.ts:215
+#: src/modes/classic/states/run.ts:215
 msgid "{yardsGained}-yard gain"
 msgstr "ganho de {yardsGained} jardas"
 
@@ -183,18 +183,18 @@ msgid "{yardsGained}-yard penalty"
 msgstr "penalidade de {yardsGained} jardas"
 
 #: src/modes/classic/states/blitz.ts:608
-#: src/modes/classic/states/fake-field-goal.ts:322
-#: src/modes/classic/states/live-ball.ts:676
-#: src/modes/classic/states/quarterback-run.ts:406
-#: src/modes/classic/states/run.ts:406
+#: src/modes/classic/states/fake-field-goal.ts:330
+#: src/modes/classic/states/live-ball.ts:684
+#: src/modes/classic/states/quarterback-run.ts:414
+#: src/modes/classic/states/run.ts:414
 msgid "{yardsLost} yard loss"
 msgstr "perda de {yardsLost} jardas"
 
 #: src/modes/classic/states/blitz.ts:424
-#: src/modes/classic/states/fake-field-goal.ts:183
-#: src/modes/classic/states/live-ball.ts:474
-#: src/modes/classic/states/quarterback-run.ts:233
-#: src/modes/classic/states/run.ts:233
+#: src/modes/classic/states/fake-field-goal.ts:191
+#: src/modes/classic/states/live-ball.ts:482
+#: src/modes/classic/states/quarterback-run.ts:241
+#: src/modes/classic/states/run.ts:241
 msgid "{yardsLost}-yard loss"
 msgstr "perda de {yardsLost} jardas"
 
@@ -209,12 +209,12 @@ msgid "•"
 msgstr "•"
 
 #. placeholder {0}: disabledFlags.join(", ") || t`none`
-#: src/modes/classic/definition.ts:260
+#: src/modes/classic/definition.ts:639
 msgid "• Disabled: {0}"
 msgstr "• Desativadas: {0}"
 
 #. placeholder {0}: enabledFlags.join(", ") || t`none`
-#: src/modes/classic/definition.ts:254
+#: src/modes/classic/definition.ts:633
 msgid "• Enabled: {0}"
 msgstr "• Ativas: {0}"
 
@@ -283,7 +283,7 @@ msgid "⚙️ {0} set {1} as quarterback."
 msgstr "⚙️ {0} definiu {1} como quarterback."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/definition.ts:357
+#: src/modes/classic/definition.ts:736
 msgid "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 msgstr "⚙️ {0} definiu {requestedFlagName} como {newFlagState}."
 
@@ -297,16 +297,16 @@ msgstr "⚙️ {0} definiu a distância para {distance}."
 msgid "⚙️ {0} set down to {down}."
 msgstr "⚙️ {0} definiu a descida para {down}."
 
-#: src/modes/classic/definition.ts:301
+#: src/modes/classic/definition.ts:680
 msgid "⚙️ {requestedFlagName}: {flagState}."
 msgstr "⚙️ {requestedFlagName}: {flagState}."
 
-#: src/modes/classic/definition.ts:248
+#: src/modes/classic/definition.ts:627
 msgid "⚙️ Available flags:"
 msgstr "⚙️ Flags disponíveis:"
 
 #. placeholder {0}: flagNames.join(", ") || t`none`
-#: src/modes/classic/definition.ts:239
+#: src/modes/classic/definition.ts:618
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Flags disponíveis: {0}."
 
@@ -314,7 +314,7 @@ msgstr "⚙️ Flags disponíveis: {0}."
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal está disponível somente no campo da defesa."
 
-#: src/modes/classic/definition.ts:327
+#: src/modes/classic/definition.ts:706
 msgid "⚠️ Flags cannot be changed while a game is in progress."
 msgstr "⚠️ As flags não podem ser alteradas com o jogo em andamento."
 
@@ -322,7 +322,7 @@ msgstr "⚠️ As flags não podem ser alteradas com o jogo em andamento."
 msgid "⚠️ Game mode cannot be changed while a game is in progress."
 msgstr "⚠️ O modo de jogo não pode ser alterado enquanto a partida está em andamento."
 
-#: src/modes/classic/definition.ts:340
+#: src/modes/classic/definition.ts:719
 msgid "⚠️ Invalid value. Use true/false, on/off, 1/0, yes/no."
 msgstr "⚠️ Valor inválido. Use true/false, on/off, 1/0, yes/no."
 
@@ -360,7 +360,7 @@ msgstr "⚠️ Apenas admins podem pedir reposicionamento."
 msgid "⚠️ Only admins can change game positioning."
 msgstr "⚠️ Apenas admins podem alterar o posicionamento do jogo."
 
-#: src/modes/classic/definition.ts:317
+#: src/modes/classic/definition.ts:696
 msgid "⚠️ Only admins can modify flags."
 msgstr "⚠️ Apenas admins podem alterar flags."
 
@@ -420,12 +420,12 @@ msgstr "⚠️ Login indisponível no momento. Tente novamente em instantes."
 
 #. placeholder {0}: ownerModeDefinition.label
 #. placeholder {1}: selectedModeDefinition.label
-#: src/room/shared/modules/game.ts:151
+#: src/room/shared/modules/game.ts:159
 msgid "⚠️ That {0} command is unavailable in {1} mode."
 msgstr "⚠️ O comando de {0} não está disponível no modo {1}."
 
-#: src/modes/classic/definition.ts:378
-#: src/room/shared/modules/game.ts:175
+#: src/modes/classic/definition.ts:757
+#: src/room/shared/modules/game.ts:183
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ A partida ainda não foi iniciada."
 
@@ -437,7 +437,7 @@ msgstr "⚠️ Tentativa de 2 pontos não está mais disponível"
 msgid "⚠️ Unknown command. Use !help to see available commands."
 msgstr "⚠️ Comando desconhecido. Use !help para ver os comandos disponíveis."
 
-#: src/modes/classic/definition.ts:284
+#: src/modes/classic/definition.ts:663
 msgid "⚠️ Unknown flag. Use !flags to list available flags."
 msgstr "⚠️ Flag desconhecida. Use !flags para listar as flags disponíveis."
 
@@ -454,7 +454,7 @@ msgstr "⚠️ Uso: !distance <1-20>."
 msgid "⚠️ Usage: !down <1-4>."
 msgstr "⚠️ Uso: !down <1-4>."
 
-#: src/modes/classic/definition.ts:270
+#: src/modes/classic/definition.ts:649
 msgid "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 msgstr "⚠️ Uso: !flag <FLAG_NAME> [VALUE]."
 
@@ -511,8 +511,8 @@ msgstr "⚠️ Você não pode chutar punt enquanto um companheiro estiver além
 msgid "⚠️ You cannot snap while a teammate is past the LOS."
 msgstr "⚠️ Você não pode dar hike enquanto um companheiro estiver além da linha de scrimmage."
 
-#: src/modes/classic/definition.ts:377
-#: src/room/shared/modules/game.ts:174
+#: src/modes/classic/definition.ts:756
+#: src/room/shared/modules/game.ts:182
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ Você não pode usar esse comando agora."
 
@@ -525,7 +525,7 @@ msgid "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 msgstr "⚠️ Você deve voltar para trás da linha de scrimmage para permitir o snap!"
 
 #: src/modes/classic/states/extra-point-snap.ts:667
-#: src/modes/classic/states/snap.ts:1052
+#: src/modes/classic/states/snap.ts:1064
 msgid "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 msgstr "⚡ Blitz antecipada ficará disponível em {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 
@@ -717,7 +717,7 @@ msgid "🎯 Training lane ready. Clear all 10 targets before everyone else."
 msgstr "🎯 Área de Training pronta. Elimine os 10 alvos antes dos outros."
 
 #. placeholder {0}: runner.name
-#: src/modes/classic/states/snap.ts:745
+#: src/modes/classic/states/snap.ts:757
 msgid "🏃 {0} takes the handoff and starts a run!"
 msgstr "🏃 {0} inicia uma corrida!"
 
@@ -737,7 +737,7 @@ msgid "🏃 Quarterback {0} keeps it and runs!"
 msgstr "🏃 O quarterback {0} segurou e correu!"
 
 #: src/modes/classic/states/blitz.ts:327
-#: src/modes/classic/states/snap.ts:1008
+#: src/modes/classic/states/snap.ts:1020
 msgid "🏃 Quarterback crossed the LOS"
 msgstr "🏃 O quarterback cruzou a linha de scrimmage"
 
@@ -747,7 +747,7 @@ msgid "🏆 {0} cleared all 10 Training targets first!"
 msgstr "🏆 {0} eliminou todos os 10 alvos do Training primeiro!"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/live-ball.ts:204
+#: src/modes/classic/states/live-ball.ts:208
 msgid "🏈 {0} loses it on contact by {catcherNames}"
 msgstr "🏈 {0} sofreu fumble no contato de {catcherNames}"
 
@@ -817,10 +817,10 @@ msgid "🏈 Welcome to HaxFootball!"
 msgstr "🏈 Seja bem-vindo à Brazilian HaxFootball League (BFL)!"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/interception.ts:346
-#: src/modes/classic/states/kickoff-return.ts:457
-#: src/modes/classic/states/punt-return.ts:361
-#: src/modes/classic/states/safety-kick-return.ts:450
+#: src/modes/classic/states/interception.ts:356
+#: src/modes/classic/states/kickoff-return.ts:465
+#: src/modes/classic/states/punt-return.ts:369
+#: src/modes/classic/states/safety-kick-return.ts:458
 msgid "💥 {0} brought down by {catcherNames}!"
 msgstr "💥 {0} derrubado por {catcherNames}!"
 
@@ -911,49 +911,49 @@ msgid "🚧 Pass batted by {0}"
 msgstr "🚧 Passe desviado por {0}"
 
 #: src/modes/classic/states/extra-point-snap.ts:732
-#: src/modes/classic/states/snap.ts:1066
+#: src/modes/classic/states/snap.ts:1078
 msgid "🚨 Defense is bringing the blitz!"
 msgstr "🚨 A defesa veio para a blitz!"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/kickoff-return.ts:76
+#: src/modes/classic/states/kickoff-return.ts:80
 msgid "🚪 {0} left during the kickoff return!"
 msgstr "🚪 {0} saiu durante o retorno de kickoff!"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/punt-return.ts:403
+#: src/modes/classic/states/punt-return.ts:411
 msgid "🚪 {0} left during the punt return!"
 msgstr "🚪 {0} saiu durante o retorno de punt!"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/safety-kick-return.ts:73
+#: src/modes/classic/states/safety-kick-return.ts:77
 msgid "🚪 {0} left during the safety-kick return!"
 msgstr "🚪 {0} saiu durante o retorno de chute de safety!"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/kickoff-return.ts:98
-#: src/modes/classic/states/punt-return.ts:425
-#: src/modes/classic/states/safety-kick-return.ts:95
+#: src/modes/classic/states/kickoff-return.ts:102
+#: src/modes/classic/states/punt-return.ts:433
+#: src/modes/classic/states/safety-kick-return.ts:99
 msgid "🚪 {0} left from the end zone"
 msgstr "🚪 {0} saiu da end zone"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/interception.ts:187
+#: src/modes/classic/states/interception.ts:197
 msgid "🚪 {0} stepped out on the interception return."
 msgstr "🚪 {0} saiu no retorno da interceptação."
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/kickoff-return.ts:282
+#: src/modes/classic/states/kickoff-return.ts:290
 msgid "🚪 {0} stepped out on the kickoff return."
 msgstr "🚪 {0} saiu no retorno de kickoff."
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/punt-return.ts:188
+#: src/modes/classic/states/punt-return.ts:196
 msgid "🚪 {0} stepped out on the punt return."
 msgstr "🚪 {0} saiu no retorno de punt."
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/safety-kick-return.ts:273
+#: src/modes/classic/states/safety-kick-return.ts:281
 msgid "🚪 {0} stepped out on the safety-kick return."
 msgstr "🚪 {0} saiu no retorno de chute de safety."
 
@@ -991,10 +991,10 @@ msgid "🚫 You must be an admin to use this command."
 msgstr "🚫 Você precisa ser admin para usar este comando."
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/interception.ts:262
-#: src/modes/classic/states/kickoff-return.ts:357
-#: src/modes/classic/states/punt-return.ts:263
-#: src/modes/classic/states/safety-kick-return.ts:348
+#: src/modes/classic/states/interception.ts:272
+#: src/modes/classic/states/kickoff-return.ts:365
+#: src/modes/classic/states/punt-return.ts:271
+#: src/modes/classic/states/safety-kick-return.ts:356
 msgid "🛑 {0} is down in the end zone"
 msgstr "🛑 {0} foi derrubado na end zone"
 
@@ -1011,19 +1011,19 @@ msgstr "🛡️ INTERCEPTAÇÃO de {0}!"
 msgid "Already connected ({0})."
 msgstr "Você já está conectado ({0})."
 
-#: src/modes/classic/definition.ts:57
+#: src/modes/classic/definition.ts:42
 msgid "Attempt a field goal"
 msgstr "Tentar um field goal"
 
 #: src/modes/classic/states/snap.ts:397
-#: src/modes/classic/states/snap.ts:542
-#: src/modes/classic/states/snap.ts:682
+#: src/modes/classic/states/snap.ts:546
+#: src/modes/classic/states/snap.ts:690
 msgid "automatic first down."
 msgstr "primeira descida automática."
 
-#: src/modes/classic/states/snap.ts:426
-#: src/modes/classic/states/snap.ts:568
-#: src/modes/classic/states/snap.ts:711
+#: src/modes/classic/states/snap.ts:430
+#: src/modes/classic/states/snap.ts:576
+#: src/modes/classic/states/snap.ts:723
 msgid "automatic touchdown."
 msgstr "touchdown automático."
 
@@ -1034,8 +1034,8 @@ msgstr "bola em jogo"
 #: src/modes/classic/states/snap-in-flight.ts:173
 #: src/modes/classic/states/snap-in-flight.ts:184
 #: src/modes/classic/states/snap-in-flight.ts:195
-#: src/modes/classic/states/snap.ts:882
-#: src/modes/classic/states/snap.ts:896
+#: src/modes/classic/states/snap.ts:894
+#: src/modes/classic/states/snap.ts:908
 msgid "ball out of bounds"
 msgstr "bola fora de campo"
 
@@ -1066,12 +1066,12 @@ msgid "Clear all bans"
 msgstr "Remover todos os bans"
 
 #: src/modes/classic/states/extra-point-snap.ts:533
-#: src/modes/classic/states/snap.ts:540
-#: src/modes/classic/states/snap.ts:566
+#: src/modes/classic/states/snap.ts:544
+#: src/modes/classic/states/snap.ts:574
 msgid "crowd abuse by {crowdingOffenderNames}"
 msgstr "crowd abuse por {crowdingOffenderNames}"
 
-#: src/modes/classic/states/snap.ts:520
+#: src/modes/classic/states/snap.ts:524
 msgid "Crowd abuse by {crowdingOffenderNames}"
 msgstr "Crowd abuse por {crowdingOffenderNames}"
 
@@ -1084,9 +1084,9 @@ msgstr "a defesa retorna"
 msgid "defensive illegal touch"
 msgstr "toque ilegal da defesa"
 
-#: src/modes/classic/states/snap.ts:659
-#: src/modes/classic/states/snap.ts:680
-#: src/modes/classic/states/snap.ts:709
+#: src/modes/classic/states/snap.ts:667
+#: src/modes/classic/states/snap.ts:688
+#: src/modes/classic/states/snap.ts:721
 msgid "defensive illegal touch by {offenderNames}"
 msgstr "toque ilegal da defesa por {offenderNames}"
 
@@ -1097,7 +1097,7 @@ msgstr "Chute ilegal da defesa"
 #: src/modes/classic/states/extra-point-snap.ts:367
 #: src/modes/classic/states/snap.ts:374
 #: src/modes/classic/states/snap.ts:395
-#: src/modes/classic/states/snap.ts:424
+#: src/modes/classic/states/snap.ts:428
 msgid "defensive offside"
 msgstr "offside da defesa"
 
@@ -1133,20 +1133,20 @@ msgstr "field goal é bom!"
 
 #: src/modes/classic/states/blitz.ts:385
 #: src/modes/classic/states/blitz.ts:566
-#: src/modes/classic/states/fake-field-goal.ts:144
-#: src/modes/classic/states/fake-field-goal.ts:280
-#: src/modes/classic/states/live-ball.ts:435
-#: src/modes/classic/states/live-ball.ts:634
-#: src/modes/classic/states/quarterback-run.ts:194
-#: src/modes/classic/states/quarterback-run.ts:364
-#: src/modes/classic/states/run.ts:194
-#: src/modes/classic/states/run.ts:364
+#: src/modes/classic/states/fake-field-goal.ts:152
+#: src/modes/classic/states/fake-field-goal.ts:288
+#: src/modes/classic/states/live-ball.ts:443
+#: src/modes/classic/states/live-ball.ts:642
+#: src/modes/classic/states/quarterback-run.ts:202
+#: src/modes/classic/states/quarterback-run.ts:372
+#: src/modes/classic/states/run.ts:202
+#: src/modes/classic/states/run.ts:372
 #: src/modes/classic/states/snap-in-flight.ts:117
 #: src/modes/classic/states/snap-in-flight.ts:174
 msgid "FIRST DOWN!"
 msgstr "FIRST DOWN!"
 
-#: src/modes/classic/definition.ts:148
+#: src/modes/classic/definition.ts:471
 msgid "Game ended in a tie!"
 msgstr "Jogo terminou empatado!"
 
@@ -1159,13 +1159,13 @@ msgstr "tempo para o hike esgotado"
 #: src/modes/classic/states/blitz.ts:294
 #: src/modes/classic/states/extra-point-blitz.ts:189
 #: src/modes/classic/states/extra-point-snap.ts:715
-#: src/modes/classic/states/snap.ts:955
-#: src/modes/classic/states/snap.ts:969
+#: src/modes/classic/states/snap.ts:967
+#: src/modes/classic/states/snap.ts:981
 msgid "illegal advance beyond the LOS"
 msgstr "avanço ilegal além da linha de scrimmage"
 
-#: src/modes/classic/states/snap.ts:798
-#: src/modes/classic/states/snap.ts:812
+#: src/modes/classic/states/snap.ts:810
+#: src/modes/classic/states/snap.ts:824
 msgid "illegal touch by {offenderNames}"
 msgstr "toque ilegal por {offenderNames}"
 
@@ -1174,7 +1174,7 @@ msgstr "toque ilegal por {offenderNames}"
 msgid "Illegal touch by {offenderNames}"
 msgstr "Toque ilegal por {offenderNames}"
 
-#: src/modes/classic/states/interception.ts:385
+#: src/modes/classic/states/interception.ts:395
 msgid "Interception"
 msgstr "Interceptação"
 
@@ -1203,14 +1203,14 @@ msgstr "tempo para o kickoff esgotado"
 msgid "Kickoff in flight"
 msgstr "Kickoff no ar"
 
-#: src/modes/classic/states/kickoff-return.ts:496
+#: src/modes/classic/states/kickoff-return.ts:504
 msgid "Kickoff return"
 msgstr "Retorno de kickoff"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/kickoff-return.ts:234
-msgid "kickoff return touchdown by {0}!"
-msgstr "touchdown no retorno de kickoff por {0}!"
+#: src/modes/classic/states/kickoff-return.ts:242
+msgid "Kickoff return touchdown by {0}!"
+msgstr "Touchdown no retorno de kickoff por {0}!"
 
 #. placeholder {0}: catcher.name
 #: src/modes/classic/states/kickoff-in-flight.ts:145
@@ -1222,16 +1222,16 @@ msgstr "kickoff tocado primeiro por {0}, do time que chutou."
 #~ msgid "Kickoff."
 #~ msgstr "Kickoff."
 
-#: src/modes/classic/definition.ts:107
+#: src/modes/classic/definition.ts:92
 msgid "List all config flags"
 msgstr "Listar todas as flags de configuração"
 
 #: src/modes/classic/states/blitz.ts:189
 #: src/modes/classic/states/blitz.ts:282
 #: src/modes/classic/states/snap.ts:275
-#: src/modes/classic/states/snap.ts:800
-#: src/modes/classic/states/snap.ts:884
-#: src/modes/classic/states/snap.ts:957
+#: src/modes/classic/states/snap.ts:812
+#: src/modes/classic/states/snap.ts:896
+#: src/modes/classic/states/snap.ts:969
 msgid "loss of down."
 msgstr "perde a descida."
 
@@ -1241,46 +1241,46 @@ msgstr "perde a descida."
 #: src/modes/classic/states/blitz.ts:581
 #: src/modes/classic/states/blitz.ts:595
 #: src/modes/classic/states/blitz.ts:609
-#: src/modes/classic/states/fake-field-goal.ts:158
-#: src/modes/classic/states/fake-field-goal.ts:171
-#: src/modes/classic/states/fake-field-goal.ts:184
-#: src/modes/classic/states/fake-field-goal.ts:295
-#: src/modes/classic/states/fake-field-goal.ts:309
-#: src/modes/classic/states/fake-field-goal.ts:323
-#: src/modes/classic/states/live-ball.ts:449
-#: src/modes/classic/states/live-ball.ts:462
-#: src/modes/classic/states/live-ball.ts:475
-#: src/modes/classic/states/live-ball.ts:649
-#: src/modes/classic/states/live-ball.ts:663
-#: src/modes/classic/states/live-ball.ts:677
-#: src/modes/classic/states/quarterback-run.ts:208
-#: src/modes/classic/states/quarterback-run.ts:221
-#: src/modes/classic/states/quarterback-run.ts:234
-#: src/modes/classic/states/quarterback-run.ts:379
-#: src/modes/classic/states/quarterback-run.ts:393
-#: src/modes/classic/states/quarterback-run.ts:407
-#: src/modes/classic/states/run.ts:208
-#: src/modes/classic/states/run.ts:221
-#: src/modes/classic/states/run.ts:234
-#: src/modes/classic/states/run.ts:379
-#: src/modes/classic/states/run.ts:393
-#: src/modes/classic/states/run.ts:407
+#: src/modes/classic/states/fake-field-goal.ts:166
+#: src/modes/classic/states/fake-field-goal.ts:179
+#: src/modes/classic/states/fake-field-goal.ts:192
+#: src/modes/classic/states/fake-field-goal.ts:303
+#: src/modes/classic/states/fake-field-goal.ts:317
+#: src/modes/classic/states/fake-field-goal.ts:331
+#: src/modes/classic/states/live-ball.ts:457
+#: src/modes/classic/states/live-ball.ts:470
+#: src/modes/classic/states/live-ball.ts:483
+#: src/modes/classic/states/live-ball.ts:657
+#: src/modes/classic/states/live-ball.ts:671
+#: src/modes/classic/states/live-ball.ts:685
+#: src/modes/classic/states/quarterback-run.ts:216
+#: src/modes/classic/states/quarterback-run.ts:229
+#: src/modes/classic/states/quarterback-run.ts:242
+#: src/modes/classic/states/quarterback-run.ts:387
+#: src/modes/classic/states/quarterback-run.ts:401
+#: src/modes/classic/states/quarterback-run.ts:415
+#: src/modes/classic/states/run.ts:216
+#: src/modes/classic/states/run.ts:229
+#: src/modes/classic/states/run.ts:242
+#: src/modes/classic/states/run.ts:387
+#: src/modes/classic/states/run.ts:401
+#: src/modes/classic/states/run.ts:415
 msgid "next down."
 msgstr "próxima descida."
 
 #: src/modes/classic/states/blitz.ts:594
-#: src/modes/classic/states/fake-field-goal.ts:308
-#: src/modes/classic/states/live-ball.ts:662
-#: src/modes/classic/states/quarterback-run.ts:392
-#: src/modes/classic/states/run.ts:392
+#: src/modes/classic/states/fake-field-goal.ts:316
+#: src/modes/classic/states/live-ball.ts:670
+#: src/modes/classic/states/quarterback-run.ts:400
+#: src/modes/classic/states/run.ts:400
 msgid "no gain"
 msgstr "sem ganho"
 
 #: src/modes/classic/states/blitz.ts:411
-#: src/modes/classic/states/fake-field-goal.ts:170
-#: src/modes/classic/states/live-ball.ts:461
-#: src/modes/classic/states/quarterback-run.ts:220
-#: src/modes/classic/states/run.ts:220
+#: src/modes/classic/states/fake-field-goal.ts:178
+#: src/modes/classic/states/live-ball.ts:469
+#: src/modes/classic/states/quarterback-run.ts:228
+#: src/modes/classic/states/run.ts:228
 msgid "No gain"
 msgstr "Sem ganho"
 
@@ -1290,9 +1290,9 @@ msgstr "Sem ganho"
 msgid "no gain."
 msgstr "sem ganho."
 
-#: src/modes/classic/definition.ts:239
-#: src/modes/classic/definition.ts:254
-#: src/modes/classic/definition.ts:260
+#: src/modes/classic/definition.ts:618
+#: src/modes/classic/definition.ts:633
+#: src/modes/classic/definition.ts:639
 msgid "none"
 msgstr "nenhuma"
 
@@ -1318,7 +1318,7 @@ msgid "PAT is good!"
 msgstr "extra point é bom!"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/interception.ts:155
+#: src/modes/classic/states/interception.ts:165
 msgid "PICK-SIX by {0}!"
 msgstr "PICK-SIX de {0}!"
 
@@ -1338,16 +1338,16 @@ msgstr "Punt no ar"
 msgid "Punt out in the end zone"
 msgstr "Punt saiu na end zone"
 
-#: src/modes/classic/states/punt-return.ts:485
+#: src/modes/classic/states/punt-return.ts:493
 msgid "Punt return"
 msgstr "Retorno de punt"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/punt-return.ts:140
-msgid "punt return touchdown by {0}!"
-msgstr "touchdown no retorno de punt por {0}!"
+#: src/modes/classic/states/punt-return.ts:148
+msgid "Punt return touchdown by {0}!"
+msgstr "Touchdown no retorno de punt por {0}!"
 
-#: src/modes/classic/definition.ts:52
+#: src/modes/classic/definition.ts:37
 msgid "Punt the ball"
 msgstr "Chutar punt"
 
@@ -1379,7 +1379,7 @@ msgid "Quarterback {0} went out in the end zone"
 msgstr "O quarterback {0} saiu na end zone"
 
 #: src/modes/classic/states/blitz.ts:328
-#: src/modes/classic/states/snap.ts:1009
+#: src/modes/classic/states/snap.ts:1021
 msgid "quarterback run is live."
 msgstr "corrida do quarterback liberada."
 
@@ -1405,7 +1405,7 @@ msgstr "Remover a senha da sala"
 msgid "replay the try."
 msgstr "repete a tentativa."
 
-#: src/modes/classic/definition.ts:87
+#: src/modes/classic/definition.ts:72
 msgid "Reposition players"
 msgstr "Reposicionar jogadores"
 
@@ -1425,7 +1425,7 @@ msgstr "Safety"
 msgid "Safety kick in flight"
 msgstr "Chute de safety no ar"
 
-#: src/modes/classic/states/safety-kick-return.ts:489
+#: src/modes/classic/states/safety-kick-return.ts:497
 msgid "Safety kick return"
 msgstr "Retorno de chute de safety"
 
@@ -1439,9 +1439,9 @@ msgid "safety-kick clock expired"
 msgstr "tempo para o chute de safety esgotado"
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/safety-kick-return.ts:225
-msgid "safety-kick return touchdown by {0}!"
-msgstr "touchdown no retorno do chute de safety por {0}!"
+#: src/modes/classic/states/safety-kick-return.ts:233
+msgid "Safety-kick return touchdown by {0}!"
+msgstr "Touchdown no retorno do chute de safety por {0}!"
 
 #: src/modes/classic/shared/safety.ts:7
 msgid "SAFETY!"
@@ -1451,19 +1451,19 @@ msgstr "SAFETY!"
 msgid "SAFETY! Kick within {SAFETY_KICK_TIMEOUT_SECONDS}s."
 msgstr "SAFETY! Chute em até {SAFETY_KICK_TIMEOUT_SECONDS}s."
 
-#: src/modes/classic/definition.ts:97
+#: src/modes/classic/definition.ts:82
 msgid "Set or clear the current quarterback"
 msgstr "Definir ou remover o quarterback atual"
 
-#: src/modes/classic/definition.ts:67
+#: src/modes/classic/definition.ts:52
 msgid "Set the current down"
 msgstr "Definir a descida atual"
 
-#: src/modes/classic/definition.ts:62
+#: src/modes/classic/definition.ts:47
 msgid "Set the distance to first down"
 msgstr "Definir a distância para o first down"
 
-#: src/modes/classic/definition.ts:72
+#: src/modes/classic/definition.ts:57
 msgid "Set the line of scrimmage"
 msgstr "Definir a linha de scrimmage"
 
@@ -1475,7 +1475,7 @@ msgstr "Definir a senha da sala"
 msgid "Show available commands or details for one command"
 msgstr "Mostrar comandos disponíveis ou detalhes de um comando"
 
-#: src/modes/classic/definition.ts:82
+#: src/modes/classic/definition.ts:67
 msgid "Show game info"
 msgstr "Mostrar informações da partida"
 
@@ -1491,7 +1491,7 @@ msgstr "Mostrar o link de convite do Discord"
 msgid "Show the game version"
 msgstr "Mostrar a versão do jogo"
 
-#: src/modes/classic/definition.ts:92
+#: src/modes/classic/definition.ts:77
 msgid "Show the score"
 msgstr "Mostrar o placar"
 
@@ -1503,47 +1503,51 @@ msgstr "Mostrar o link do tutorial"
 msgid "Sign-in timed out."
 msgstr "Tempo para login esgotado."
 
+#: src/modes/classic/definition.ts:553
+msgid "Time limit reached with a tied game, overtime is active and the next score wins."
+msgstr "Tempo esgotado com o jogo empatado, a prorrogação está ativa e o próximo ponto vence."
+
 #: src/room/managed/modules/admin.ts:20
 msgid "Toggle HaxBall admin mode"
 msgstr "Ativar ou desativar o modo admin do HaxBall"
 
-#: src/modes/classic/states/interception.ts:263
-#: src/modes/classic/states/kickoff-return.ts:99
-#: src/modes/classic/states/kickoff-return.ts:358
+#: src/modes/classic/states/interception.ts:273
+#: src/modes/classic/states/kickoff-return.ts:103
+#: src/modes/classic/states/kickoff-return.ts:366
 #: src/modes/classic/states/punt-in-flight.ts:68
 #: src/modes/classic/states/punt-in-flight.ts:119
-#: src/modes/classic/states/punt-return.ts:264
-#: src/modes/classic/states/punt-return.ts:426
-#: src/modes/classic/states/safety-kick-return.ts:96
-#: src/modes/classic/states/safety-kick-return.ts:349
+#: src/modes/classic/states/punt-return.ts:272
+#: src/modes/classic/states/punt-return.ts:434
+#: src/modes/classic/states/safety-kick-return.ts:100
+#: src/modes/classic/states/safety-kick-return.ts:357
 msgid "touchback."
 msgstr "touchback."
 
 #. placeholder {0}: frame.player.name
-#: src/modes/classic/states/fake-field-goal.ts:98
-#: src/modes/classic/states/live-ball.ts:341
-#: src/modes/classic/states/quarterback-run.ts:130
-#: src/modes/classic/states/run.ts:130
+#: src/modes/classic/states/fake-field-goal.ts:106
+#: src/modes/classic/states/live-ball.ts:349
+#: src/modes/classic/states/quarterback-run.ts:138
+#: src/modes/classic/states/run.ts:138
 msgid "TOUCHDOWN by {0}!"
 msgstr "TOUCHDOWN de {0}!"
 
 #. placeholder {0}: fieldPos.yards
-#: src/modes/classic/states/live-ball.ts:205
+#: src/modes/classic/states/live-ball.ts:209
 msgid "turnover at the {0}-yard line!"
 msgstr "posse trocada na linha de {0} jardas!"
 
 #: src/modes/classic/states/blitz.ts:435
 #: src/modes/classic/states/blitz.ts:623
 #: src/modes/classic/states/blocked-pass.ts:109
-#: src/modes/classic/states/fake-field-goal.ts:194
-#: src/modes/classic/states/fake-field-goal.ts:337
-#: src/modes/classic/states/live-ball.ts:485
-#: src/modes/classic/states/live-ball.ts:691
+#: src/modes/classic/states/fake-field-goal.ts:202
+#: src/modes/classic/states/fake-field-goal.ts:345
+#: src/modes/classic/states/live-ball.ts:493
+#: src/modes/classic/states/live-ball.ts:699
 #: src/modes/classic/states/presnap.ts:752
-#: src/modes/classic/states/quarterback-run.ts:244
-#: src/modes/classic/states/quarterback-run.ts:421
-#: src/modes/classic/states/run.ts:244
-#: src/modes/classic/states/run.ts:421
+#: src/modes/classic/states/quarterback-run.ts:252
+#: src/modes/classic/states/quarterback-run.ts:429
+#: src/modes/classic/states/run.ts:252
+#: src/modes/classic/states/run.ts:429
 #: src/modes/classic/states/snap-in-flight.ts:139
 #: src/modes/classic/states/snap-in-flight.ts:196
 msgid "TURNOVER ON DOWNS!"
@@ -1552,9 +1556,9 @@ msgstr "TURNOVER ON DOWNS!"
 #: src/modes/classic/states/blitz.ts:203
 #: src/modes/classic/states/blitz.ts:296
 #: src/modes/classic/states/snap.ts:289
-#: src/modes/classic/states/snap.ts:814
-#: src/modes/classic/states/snap.ts:898
-#: src/modes/classic/states/snap.ts:971
+#: src/modes/classic/states/snap.ts:826
+#: src/modes/classic/states/snap.ts:910
+#: src/modes/classic/states/snap.ts:983
 msgid "turnover on downs."
 msgstr "turnover on downs."
 
@@ -1589,15 +1593,15 @@ msgstr "tentativa de 2 pontos é boa!"
 msgid "two-point try is no longer available."
 msgstr "tentativa de 2 pontos não está mais disponível."
 
-#: src/modes/classic/definition.ts:77
+#: src/modes/classic/definition.ts:62
 msgid "Undo the last play"
 msgstr "Desfazer a última jogada"
 
 #. placeholder {0}: formatTeamName(winnerTeam)
-#: src/modes/classic/definition.ts:157
+#: src/modes/classic/definition.ts:480
 msgid "Victory for the {0} team!"
 msgstr "Vitória do time {0}!"
 
-#: src/modes/classic/definition.ts:102
+#: src/modes/classic/definition.ts:87
 msgid "View or set a config flag"
 msgstr "Ver ou alterar uma flag de configuração"

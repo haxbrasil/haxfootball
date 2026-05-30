@@ -1,11 +1,13 @@
 import { PointLike } from "@common/math/geometry";
 import { opposite } from "@common/game/game";
+import type { ScoreState } from "@common/game/game";
 import {
     calculateDirectionalGain,
     getPositionFromFieldPosition,
     intersectsEndZone,
 } from "./stadium";
-import { FieldTeam } from "@runtime/models";
+import { FieldTeam, Team } from "@runtime/models";
+import { $scores } from "@runtime/runtime";
 
 export const SCORES = {
     SAFETY: 2,
@@ -14,6 +16,24 @@ export const SCORES = {
     EXTRA_POINT: 1,
     TWO_POINT: 2,
 };
+
+export function getTouchdownScore(scoreBeforeTouchdown: ScoreState): number {
+    const nativeScores = $scores();
+
+    const isExpectedTimeReached =
+        !!nativeScores &&
+        nativeScores.timeLimit > 0 &&
+        nativeScores.time >= nativeScores.timeLimit;
+
+    const isTiedBeforeTouchdown =
+        scoreBeforeTouchdown[Team.RED] === scoreBeforeTouchdown[Team.BLUE];
+
+    if (isExpectedTimeReached && isTiedBeforeTouchdown) {
+        return SCORES.TOUCHDOWN + SCORES.EXTRA_POINT;
+    }
+
+    return SCORES.TOUCHDOWN;
+}
 
 export function isTouchdown({
     player,

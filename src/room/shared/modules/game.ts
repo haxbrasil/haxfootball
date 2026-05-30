@@ -100,9 +100,17 @@ export function createGameModule({
             engine.start(mode.start.state, mode.start.params);
             syncGameScore();
         })
-        .onGameTick(() => {
+        .onGameTick((room) => {
             engine?.tick();
             syncGameScore();
+
+            if (activeMode) {
+                modeRuntimes[activeMode].handleGameTickEnd?.({
+                    engine,
+                    ...(gameScoreStore ? { gameScoreStore } : {}),
+                    room,
+                });
+            }
         })
         .onPlayerBallKick((_room, player) => {
             engine?.trackPlayerBallKick(player.id);

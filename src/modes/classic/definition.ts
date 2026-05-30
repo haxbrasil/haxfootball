@@ -8,9 +8,11 @@ import { cn, formatTeamName } from "@modes/classic/shared/message";
 import { CLASSIC_COMMAND } from "@modes/classic/shared/commands/names";
 import type { GameModeDefinition } from "@modes/types";
 import { GAME_MODE } from "@modes/types";
-import { Team } from "@runtime/models";
+import { Team, type FieldTeam } from "@runtime/models";
 import type { GlobalSchemaState } from "@runtime/global";
 import { CommandCategory } from "@room/shared/domain/command-categories";
+import { opposite } from "@common/game/game";
+import { SCORES } from "@modes/classic/shared/scoring";
 import {
     createConfig,
     defaultConfig,
@@ -27,23 +29,6 @@ type ClassicGlobalSnapshot = GlobalSchemaState<typeof classicGlobalSchema>;
 export const CLASSIC_STATE = {
     KICKOFF: "KICKOFF",
 } as const;
-
-const TRUE_FLAG_VALUES = new Set([
-    "1",
-    "true",
-    "on",
-    "yes",
-    "enabled",
-    "enable",
-]);
-const FALSE_FLAG_VALUES = new Set([
-    "0",
-    "false",
-    "off",
-    "no",
-    "disabled",
-    "disable",
-]);
 
 const CLASSIC_COMMAND_DEFINITIONS: CommandDefinition[] = [
     {
@@ -108,55 +93,394 @@ const CLASSIC_COMMAND_DEFINITIONS: CommandDefinition[] = [
     },
 ];
 
-const parseFlagName = (name: string | undefined): ConfigFlagName | null => {
-    if (!name) return null;
+namespace Flags {
+    const TRUE_FLAG_VALUES = new Set([
+        "1",
+        "true",
+        "on",
+        "yes",
+        "enabled",
+        "enable",
+    ]);
+    const FALSE_FLAG_VALUES = new Set([
+        "0",
+        "false",
+        "off",
+        "no",
+        "disabled",
+        "disable",
+    ]);
 
-    const normalizedName = name
-        .trim()
-        .toUpperCase()
-        .replace(/[\s-]+/g, "_");
+    export const parseFlagName = (
+        name: string | undefined,
+    ): ConfigFlagName | null => {
+        if (!name) return null;
 
-    if (!hasConfigFlag(normalizedName)) {
+        const normalizedName = name
+            .trim()
+            .toUpperCase()
+            .replace(/[\s-]+/g, "_");
+
+        if (!hasConfigFlag(normalizedName)) {
+            return null;
+        }
+
+        return normalizedName;
+    };
+
+    export const parseFlagValue = (
+        value: string | undefined,
+    ): boolean | null => {
+        if (!value) return null;
+
+        const normalizedValue = value.trim().toLowerCase();
+
+        if (TRUE_FLAG_VALUES.has(normalizedValue)) {
+            return true;
+        }
+
+        if (FALSE_FLAG_VALUES.has(normalizedValue)) {
+            return false;
+        }
+
         return null;
+    };
+
+    export const toFlagState = (value: boolean): "ON" | "OFF" => {
+        return value ? "ON" : "OFF";
+    };
+}
+
+namespace EndGame {
+    type ClassicEndGameReason = "regulation-ended" | "overtime-score";
+    type ClassicMatchResult = {
+        status: "complete";
+        expectedTimeReached: boolean;
+        overage: boolean;
+        winnerTeam: FieldTeam;
+        loserTeam: FieldTeam;
+        finalScore: ScoreState;
+        reason: ClassicEndGameReason;
+        elapsedSeconds: number;
+    };
+    type ScoreEvent = {
+        team: FieldTeam;
+        points: number;
+        scoreBefore: ScoreState;
+        scoreAfter: ScoreState;
+    };
+
+    const LEGAL_END_STATES = new Set([
+        "PRESNAP",
+        "KICKOFF",
+        "PUNT",
+        "SAFETY",
+        "EXTRA_POINT",
+        "EXTRA_POINT_RETRY",
+    ]);
+
+    const cloneScore = (score: ScoreState): ScoreState => ({
+        [Team.RED]: score[Team.RED],
+        [Team.BLUE]: score[Team.BLUE],
+    });
+
+    const isScoreTied = (score: ScoreState): boolean =>
+        score[Team.RED] === score[Team.BLUE];
+
+    const getWinnerTeam = (score: ScoreState): FieldTeam | null => {
+        if (isScoreTied(score)) return null;
+
+        return score[Team.RED] > score[Team.BLUE] ? Team.RED : Team.BLUE;
+    };
+
+    const addScore = (
+        score: ScoreState,
+        team: FieldTeam,
+        points: number,
+    ): ScoreState => ({
+        ...score,
+        [team]: score[team] + points,
+    });
+
+    const getScoreEvent = (
+        previousScore: ScoreState | null,
+        score: ScoreState,
+    ): ScoreEvent | null => {
+        if (!previousScore) return null;
+
+        const redDelta = score[Team.RED] - previousScore[Team.RED];
+        const blueDelta = score[Team.BLUE] - previousScore[Team.BLUE];
+
+        if (redDelta > 0 && blueDelta === 0) {
+            return {
+                team: Team.RED,
+                points: redDelta,
+                scoreBefore: cloneScore(previousScore),
+                scoreAfter: cloneScore(score),
+            };
+        }
+
+        if (blueDelta > 0 && redDelta === 0) {
+            return {
+                team: Team.BLUE,
+                points: blueDelta,
+                scoreBefore: cloneScore(previousScore),
+                scoreAfter: cloneScore(score),
+            };
+        }
+
+        return null;
+    };
+
+    const shouldAllowFinalExtraPointAttempt = (
+        scoreAfterTouchdown: ScoreState,
+        scoringTeam: FieldTeam,
+    ): boolean => {
+        const margin =
+            scoreAfterTouchdown[scoringTeam] -
+            scoreAfterTouchdown[opposite(scoringTeam)];
+
+        return margin >= -2 && margin <= 0;
+    };
+
+    export function createController() {
+        let expectedTimeReached = false;
+        let overage = false;
+        let previousScore: ScoreState | null = null;
+        let pendingStop: ClassicMatchResult | null = null;
+        let completedResult: ClassicMatchResult | null = null;
+        let awaitingFinalExtraPointAttempt: { scoringTeam: FieldTeam } | null =
+            null;
+        let tiedOverageAnnouncementPending = false;
+        let tiedOverageAnnounced = false;
+
+        const reset = () => {
+            expectedTimeReached = false;
+            overage = false;
+            previousScore = null;
+            pendingStop = null;
+            completedResult = null;
+            awaitingFinalExtraPointAttempt = null;
+            tiedOverageAnnouncementPending = false;
+            tiedOverageAnnounced = false;
+        };
+
+        const buildResult = ({
+            elapsedSeconds,
+            finalScore,
+            reason,
+        }: {
+            elapsedSeconds: number;
+            finalScore: ScoreState;
+            reason: ClassicEndGameReason;
+        }): ClassicMatchResult | null => {
+            const winnerTeam = getWinnerTeam(finalScore);
+            if (!winnerTeam) return null;
+
+            return {
+                status: "complete",
+                expectedTimeReached,
+                overage,
+                winnerTeam,
+                loserTeam: opposite(winnerTeam),
+                finalScore: cloneScore(finalScore),
+                reason,
+                elapsedSeconds,
+            };
+        };
+
+        const markPendingStop = (result: ClassicMatchResult | null) => {
+            pendingStop = result;
+        };
+
+        const markTiedOverage = () => {
+            overage = true;
+
+            if (!tiedOverageAnnounced) {
+                tiedOverageAnnouncementPending = true;
+                tiedOverageAnnounced = true;
+            }
+        };
+
+        const completeIfLegal = (stateName: string | null) => {
+            if (
+                !pendingStop ||
+                !stateName ||
+                !LEGAL_END_STATES.has(stateName)
+            ) {
+                return null;
+            }
+
+            completedResult = pendingStop;
+
+            return completedResult;
+        };
+
+        const resolveAwaitingFinalExtraPointAttempt = ({
+            elapsedSeconds,
+            score,
+            scoreEvent,
+            stateName,
+        }: {
+            elapsedSeconds: number;
+            score: ScoreState;
+            scoreEvent: ScoreEvent | null;
+            stateName: string | null;
+        }) => {
+            if (!awaitingFinalExtraPointAttempt) return false;
+
+            const scoringTeam = awaitingFinalExtraPointAttempt.scoringTeam;
+            const resolvedByScore =
+                scoreEvent?.team === scoringTeam &&
+                (scoreEvent.points === SCORES.EXTRA_POINT ||
+                    scoreEvent.points === SCORES.TWO_POINT);
+            const resolvedWithoutScore = stateName === "KICKOFF";
+
+            if (!resolvedByScore && !resolvedWithoutScore) {
+                return true;
+            }
+
+            awaitingFinalExtraPointAttempt = null;
+
+            if (isScoreTied(score)) {
+                markTiedOverage();
+                markPendingStop(null);
+                return false;
+            }
+
+            markPendingStop(
+                buildResult({
+                    elapsedSeconds,
+                    finalScore: score,
+                    reason: "regulation-ended",
+                }),
+            );
+
+            return false;
+        };
+
+        const onTick = ({
+            elapsedSeconds,
+            score,
+            stateName,
+            timeLimitSeconds,
+        }: {
+            elapsedSeconds: number;
+            score: ScoreState | null;
+            stateName: string | null;
+            timeLimitSeconds: number;
+        }): ClassicMatchResult | null => {
+            if (!score) {
+                previousScore = null;
+                return null;
+            }
+
+            const scoreEvent = getScoreEvent(previousScore, score);
+            previousScore = cloneScore(score);
+
+            if (timeLimitSeconds > 0 && elapsedSeconds >= timeLimitSeconds) {
+                expectedTimeReached = true;
+            }
+
+            if (!expectedTimeReached) return null;
+
+            if (
+                resolveAwaitingFinalExtraPointAttempt({
+                    elapsedSeconds,
+                    score,
+                    scoreEvent,
+                    stateName,
+                })
+            ) {
+                return null;
+            }
+
+            if (pendingStop && !scoreEvent) {
+                return completeIfLegal(stateName);
+            }
+
+            if (
+                scoreEvent?.points === SCORES.TOUCHDOWN &&
+                isScoreTied(scoreEvent.scoreBefore) &&
+                !isScoreTied(score)
+            ) {
+                overage = true;
+                markPendingStop(
+                    buildResult({
+                        elapsedSeconds,
+                        finalScore: addScore(
+                            score,
+                            scoreEvent.team,
+                            SCORES.EXTRA_POINT,
+                        ),
+                        reason: "overtime-score",
+                    }),
+                );
+            } else if (scoreEvent?.points === SCORES.TOUCHDOWN) {
+                if (shouldAllowFinalExtraPointAttempt(score, scoreEvent.team)) {
+                    awaitingFinalExtraPointAttempt = {
+                        scoringTeam: scoreEvent.team,
+                    };
+                    markPendingStop(null);
+
+                    if (isScoreTied(score)) {
+                        markTiedOverage();
+                    }
+
+                    return null;
+                }
+
+                markPendingStop(
+                    buildResult({
+                        elapsedSeconds,
+                        finalScore: score,
+                        reason: overage ? "overtime-score" : "regulation-ended",
+                    }),
+                );
+            } else if (isScoreTied(score)) {
+                markTiedOverage();
+                markPendingStop(null);
+            } else {
+                markPendingStop(
+                    buildResult({
+                        elapsedSeconds,
+                        finalScore: score,
+                        reason: overage ? "overtime-score" : "regulation-ended",
+                    }),
+                );
+            }
+
+            return completeIfLegal(stateName);
+        };
+
+        return {
+            consumeTiedOverageAnnouncement: () => {
+                const shouldAnnounce = tiedOverageAnnouncementPending;
+                tiedOverageAnnouncementPending = false;
+
+                return shouldAnnounce;
+            },
+            getCompletedResult: () => completedResult,
+            onTick,
+            reset,
+        };
     }
 
-    return normalizedName;
-};
+    export const getFinalScoreAnnouncement = (score: ScoreState): string => {
+        if (score[Team.RED] === score[Team.BLUE]) {
+            return cn("🏁", score, t`Game ended in a tie!`);
+        }
 
-const parseFlagValue = (value: string | undefined): boolean | null => {
-    if (!value) return null;
+        const winnerTeam =
+            score[Team.RED] > score[Team.BLUE] ? Team.RED : Team.BLUE;
 
-    const normalizedValue = value.trim().toLowerCase();
-
-    if (TRUE_FLAG_VALUES.has(normalizedValue)) {
-        return true;
-    }
-
-    if (FALSE_FLAG_VALUES.has(normalizedValue)) {
-        return false;
-    }
-
-    return null;
-};
-
-const toFlagState = (value: boolean): "ON" | "OFF" => {
-    return value ? "ON" : "OFF";
-};
-
-const getFinalScoreAnnouncement = (score: ScoreState): string => {
-    if (score[Team.RED] === score[Team.BLUE]) {
-        return cn("🏁", score, t`Game ended in a tie!`);
-    }
-
-    const winnerTeam =
-        score[Team.RED] > score[Team.BLUE] ? Team.RED : Team.BLUE;
-
-    return cn(
-        "🏁",
-        score,
-        t`Victory for the ${formatTeamName(winnerTeam)} team!`,
-    );
-};
+        return cn(
+            "🏁",
+            score,
+            t`Victory for the ${formatTeamName(winnerTeam)} team!`,
+        );
+    };
+}
 
 export const classicModeDefinition: GameModeDefinition = {
     name: GAME_MODE.CLASSIC,
@@ -174,10 +498,13 @@ export const classicModeDefinition: GameModeDefinition = {
     persistsMatches: true,
     createRuntime() {
         const gameConfig = createConfig(defaultConfig);
+        const endGame = EndGame.createController();
 
         return {
             commands: CLASSIC_COMMAND_DEFINITIONS,
             createEngineOptions({ statEvents }) {
+                endGame.reset();
+
                 return {
                     config: gameConfig,
                     globalSchema: classicGlobalSchema,
@@ -191,17 +518,68 @@ export const classicModeDefinition: GameModeDefinition = {
 
                 gameScoreStore?.set(snapshot?.scores);
             },
+            handleGameTickEnd({ engine, gameScoreStore, room }) {
+                const nativeScores = room.getScores();
+
+                const snapshot =
+                    engine?.getGlobalStateSnapshot<ClassicGlobalSnapshot>() ??
+                    null;
+
+                const timeLimitSeconds =
+                    typeof nativeScores?.timeLimit === "number"
+                        ? nativeScores.timeLimit
+                        : 0;
+
+                const elapsedSeconds =
+                    typeof nativeScores?.time === "number"
+                        ? nativeScores.time
+                        : 0;
+
+                const result = endGame.onTick({
+                    elapsedSeconds,
+                    score: snapshot?.scores ?? null,
+                    stateName: engine?.getCurrentStateName() ?? null,
+                    timeLimitSeconds,
+                });
+
+                if (
+                    snapshot?.scores &&
+                    endGame.consumeTiedOverageAnnouncement()
+                ) {
+                    room.send({
+                        message: cn(
+                            "⏱️",
+                            snapshot.scores,
+                            t`Time limit reached with a tied game, overtime is active and the next score wins.`,
+                        ),
+                        color: COLOR.SYSTEM,
+                        to: "mixed",
+                        sound: "notification",
+                        style: "bold",
+                    });
+                }
+
+                if (!result) return;
+
+                gameScoreStore?.set(result.finalScore);
+                room.stopGame();
+            },
             handleGameStop({ engine, gameScoreStore, room }) {
                 const snapshot =
                     engine?.getGlobalStateSnapshot<ClassicGlobalSnapshot>() ??
                     null;
-                const score = snapshot?.scores ?? null;
+
+                const score =
+                    endGame.getCompletedResult()?.finalScore ??
+                    snapshot?.scores ??
+                    null;
+
                 const shouldShowScore =
                     score && score[Team.RED] + score[Team.BLUE] > 0;
 
                 if (shouldShowScore) {
                     room.send({
-                        message: getFinalScoreAnnouncement(score),
+                        message: EndGame.getFinalScoreAnnouncement(score),
                         color:
                             score[Team.RED] === score[Team.BLUE]
                                 ? COLOR.SYSTEM
@@ -212,6 +590,7 @@ export const classicModeDefinition: GameModeDefinition = {
                     });
                 }
 
+                endGame.reset();
                 gameScoreStore?.reset();
             },
             handleCommand({ authorization, command, engine, player, room }) {
@@ -275,7 +654,7 @@ export const classicModeDefinition: GameModeDefinition = {
                             return { hideMessage: true };
                         }
 
-                        const requestedFlagName = parseFlagName(
+                        const requestedFlagName = Flags.parseFlagName(
                             command.args[0],
                         );
 
@@ -292,7 +671,7 @@ export const classicModeDefinition: GameModeDefinition = {
                         const requestedFlagValue = command.args[1];
                         const flagDescription =
                             getConfigFlagDescription(requestedFlagName);
-                        const flagState = toFlagState(
+                        const flagState = Flags.toFlagState(
                             getConfigFlagValue(gameConfig, requestedFlagName),
                         );
 
@@ -333,7 +712,7 @@ export const classicModeDefinition: GameModeDefinition = {
                         }
 
                         const parsedFlagValue =
-                            parseFlagValue(requestedFlagValue);
+                            Flags.parseFlagValue(requestedFlagValue);
 
                         if (parsedFlagValue === null) {
                             room.send({
@@ -351,7 +730,7 @@ export const classicModeDefinition: GameModeDefinition = {
                             parsedFlagValue,
                         );
 
-                        const newFlagState = toFlagState(parsedFlagValue);
+                        const newFlagState = Flags.toFlagState(parsedFlagValue);
 
                         room.send({
                             message: t`⚙️ ${player.name} set ${requestedFlagName} to ${newFlagState}.`,
