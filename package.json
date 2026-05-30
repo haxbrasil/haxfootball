@@ -7,9 +7,6 @@
     "files": [
         "dist"
     ],
-    "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
-    },
     "scripts": {
         "start:node": "node ./dist/environments/node.js",
         "dev:node": "DEBUG=true babel-node --extensions \".ts,.tsx\" ./src/environments/node.ts",
