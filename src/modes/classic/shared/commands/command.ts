@@ -1,5 +1,5 @@
 import { CommandHandleResult, type CommandSpec } from "@core/commands";
-import type { DownState } from "@modes/classic/shared/down";
+import type { DownState } from "@modes/classic/shared/rules/down";
 import { infoCommandHandler } from "@modes/classic/shared/commands/handlers/info";
 import { qbCommandHandler } from "@modes/classic/shared/commands/handlers/qb";
 import { scoreCommandHandler } from "@modes/classic/shared/commands/handlers/score";

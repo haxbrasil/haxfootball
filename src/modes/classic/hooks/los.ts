@@ -3,9 +3,9 @@ import { Team } from "@runtime/models";
 import {
     getLineOfScrimmage,
     getLineOfScrimmageBlockers,
-} from "@modes/classic/shared/stadium";
+} from "@modes/classic/shared/field";
 import { SPECIAL_HIDDEN_DISC_POSITION } from "@common/stadium-builder/consts";
-import { computeBlockingPlan } from "@modes/classic/shared/los-blocking";
+import { computeBlockingPlan } from "@modes/classic/shared/interaction/los-blocking";
 
 const LOS_BLOCKING_VERTICAL_EXTENSION = 2000;
 const LOS_BLOCKING_SLOT_RADIUS = 4;

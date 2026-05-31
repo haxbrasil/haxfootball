@@ -1,5 +1,5 @@
 import { CommandHandleResult, type CommandSpec } from "@core/commands";
-import type { DownState } from "@modes/classic/shared/down";
+import type { DownState } from "@modes/classic/shared/rules/down";
 import type { FieldTeam } from "@runtime/models";
 import {
     SHARED_COMMAND_NAMES,

@@ -8,7 +8,7 @@ A state is a self-contained phase of gameplay (presnap, live ball, interception,
 
 ## Where State Code Lives
 
-Check the mode registry for the authoritative list of states and their file paths. In this repo, states are currently under `src/modes/classic/states/` and registered in `src/modes/classic/registry.ts`, but future modes can use different directories.
+Check the mode registry for the authoritative list of states and their file paths. In this repo, Classic states are grouped by football phase under `src/modes/classic/states/` and registered in `src/modes/classic/registry.ts`, but future modes can use different directories.
 
 ## State API at a Glance
 

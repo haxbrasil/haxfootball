@@ -1,6 +1,6 @@
 import { $effect } from "@runtime/runtime";
 import { $global } from "@modes/classic/hooks/global";
-import { cn } from "@modes/classic/shared/message";
+import { cn } from "@modes/classic/shared/presentation/message";
 import type { SharedCommandImplementation } from "@modes/classic/shared/commands/types";
 
 export const infoCommandHandler: SharedCommandImplementation = ({

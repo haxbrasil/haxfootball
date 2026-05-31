@@ -45,7 +45,11 @@ LANGUAGE=pt-BR DEBUG=true TOKEN="<haxball-token>" pnpm run dev:node
 
 `src/runtime/*` implements the state engine and hooks. State code should interact through runtime hooks and `Room` effects rather than direct room mutation.
 
-`src/modes/classic/*` contains the current football game mode: config, hooks, shared rules, state registry, states, and stadium. The authoritative state list is `src/modes/classic/registry.ts`.
+`src/modes/classic/*` contains the current football game mode: config, hooks, shared rules, state registry, states, and stadium. The authoritative state list is `src/modes/classic/registry.ts`. Classic states are grouped by football phase under `src/modes/classic/states/scrimmage`, `src/modes/classic/states/kicking`, `src/modes/classic/states/extra-point`, and `src/modes/classic/states/trick`.
+
+Classic shared code is grouped by domain under `src/modes/classic/shared/`: `rules` for football rule primitives, `interaction` for player/ball interaction detectors and evaluators, `field` for field geometry and special discs, `formation` for positioning, `presentation` for message formatting, and `commands` for command plumbing. Root-level shared files should generally be barrels or compatibility entrypoints, not new implementation modules.
+
+Classic mode-level definition code lives under `src/modes/classic/definition/`. Keep command metadata, flag parsing, end-game control, and the final mode definition in separate files there instead of recreating a broad `definition.ts`.
 
 `src/common/*` contains reusable game, geometry, stadium-builder, stadium-generator, and general helpers. Prefer these over duplicating geometry or physics logic in states.
 
@@ -79,6 +83,12 @@ Prefer `Room.send(...)` for announcements. It supports player ids, player object
 
 States are self-contained gameplay phases. A state factory returns a `StateApi` with `run` and optional `join`, `leave`, `chat`, and `command` handlers.
 
+Intentional repetition inside Classic state files is part of the design. Do not extract state policy, transition flow, or football-rule sequencing just to remove duplication across states. Previous broad abstractions for state policy made the room harder to reason about. Prefer keeping each state locally explicit, even when similar code exists in nearby states.
+
+Shared Classic helpers should be used for stable domain primitives, geometry, parsing, physics hooks, command plumbing, formatting, and other behavior that is genuinely lower-level than a gameplay state. Avoid central “transition helper” or “rule engine” modules that hide who scores, who gets possession, who kicks next, or which state comes next.
+
+When repeated state logic is subtle, improve the local code instead of extracting it: use clearer local names, short comments that state the football rule being applied, and consistent branch ordering. A reader should be able to understand a state by reading that state file without jumping through a shared policy abstraction.
+
 Use `$effect` for room side effects. Effects are deferred and are not visible in the current snapshot.
 
 Use `$next` for transitions. `$next` stops the current handler by throwing the runtime sentinel; do not add dead `return` statements after it.
@@ -97,7 +107,7 @@ Chat and command handlers run outside the tick loop and see the last snapshot. D
 
 ## Gameplay Helpers and Physics
 
-Prefer shared helpers from `@common`, `@modes/classic/shared`, and `@modes/classic/hooks`. Do not re-implement field geometry, LOS math, down-state updates, penalties, scoring, reception, interception, pushing, crowding, or stadium positioning when helpers exist.
+Prefer shared helpers from `@common`, `@modes/classic/shared`, and `@modes/classic/hooks` for lower-level reusable mechanics. Do not re-implement field geometry, LOS math, down-state updates, penalties, scoring constants, reception detection, interception detection, pushing, crowding, or stadium positioning when helpers exist. This does not override the state convention above: repeated state policy may remain explicit inside states when extraction would make rule flow less local.
 
 Use hooks such as `$lockBall`, `$unlockBall`, `$setBallActive`, `$setBallInactive`, `$setLineOfScrimmage`, `$unsetLineOfScrimmage`, `$setFirstDownLine`, `$unsetFirstDownLine`, and crowding helpers instead of raw disc mutation in states.
 

@@ -1,7 +1,7 @@
 import { $effect } from "@runtime/hooks";
 import { Team } from "@runtime/models";
 import type { EffectApi } from "@runtime/runtime";
-import { getPlaneMask } from "@modes/classic/shared/stadium";
+import { getPlaneMask } from "@modes/classic/shared/field";
 
 const PLAYER_MOVEABLE_INV_MASS = 0.5;
 const PLAYER_UNMOVEABLE_INV_MASS = 1e26;
