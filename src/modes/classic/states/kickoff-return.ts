@@ -146,7 +146,7 @@ export function KickoffReturn({
                         $next({
                             to: "SAFETY",
                             params: {
-                                kickingTeam: opposite(receivingTeam),
+                                kickingTeam: receivingTeam,
                             },
                             wait: ticks({ seconds: 2 }),
                         });
@@ -423,7 +423,7 @@ export function KickoffReturn({
                     $next({
                         to: "SAFETY",
                         params: {
-                            kickingTeam: opposite(receivingTeam),
+                            kickingTeam: receivingTeam,
                         },
                         wait: ticks({ seconds: 2 }),
                     });

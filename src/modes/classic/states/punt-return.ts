@@ -329,7 +329,7 @@ export function PuntReturn({
                     $next({
                         to: "SAFETY",
                         params: {
-                            kickingTeam: opposite(receivingTeam),
+                            kickingTeam: receivingTeam,
                         },
                         wait: ticks({ seconds: 2 }),
                     });
@@ -477,7 +477,7 @@ export function PuntReturn({
                         $next({
                             to: "SAFETY",
                             params: {
-                                kickingTeam: opposite(receivingTeam),
+                                kickingTeam: receivingTeam,
                             },
                             wait: ticks({ seconds: 2 }),
                         });
