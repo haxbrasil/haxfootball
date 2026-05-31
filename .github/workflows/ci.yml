@@ -42,6 +42,9 @@ jobs:
             - name: Typecheck
               run: pnpm exec tsc --noEmit
 
+            - name: State transitions
+              run: pnpm run states:check
+
             - name: Test
               run: pnpm test -- --run
 

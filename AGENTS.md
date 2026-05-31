@@ -20,6 +20,7 @@ pnpm run build
 pnpm run i18n
 pnpm run format:ci
 pnpm run lint
+pnpm run states:check
 ```
 
 Run a room in dev mode with:
