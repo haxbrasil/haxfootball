@@ -1,7 +1,7 @@
 import type { FieldTeam } from "@runtime/models";
 import type { FieldPosition } from "@common/game/game";
 
-export const STAT_SCHEMA_NAME = "haxfootball";
+export const EVENT_SCHEMA_NAME = "haxfootball";
 export const GAME_MODE_NAME = "haxfootball";
 
 export const Stat = {
@@ -39,7 +39,6 @@ export type Stat = (typeof Stat)[keyof typeof Stat];
 export type ClassicStatEventType = Stat;
 
 export type ClassicStatValue = {
-    source: string;
     team?: FieldTeam;
     down?: number;
     distance?: number;
@@ -75,7 +74,6 @@ export type ClassicStatEventInput = {
 type JsonExpression = unknown;
 
 const numberValueSchema = { type: "number" } as const;
-const stringValueSchema = { type: "string" } as const;
 const booleanValueSchema = { type: "boolean" } as const;
 const fieldPositionSchema = {
     type: "object",
@@ -87,9 +85,7 @@ const fieldPositionSchema = {
 
 const statValueSchema = {
     type: "object",
-    required: ["source"],
     properties: {
-        source: stringValueSchema,
         team: numberValueSchema,
         down: numberValueSchema,
         distance: numberValueSchema,
@@ -127,12 +123,14 @@ const statValueSchema = {
 } as const;
 
 const count = (metric: string) => ({
+    target: "actor",
     metric,
     initial: 0,
     step: { op: "add", args: [{ path: "acc" }, 1] },
 });
 
 const sumValue = (metric: string, path: string) => ({
+    target: "actor",
     metric,
     initial: 0,
     step: {
@@ -185,7 +183,7 @@ const statCategory = (key: string, primaryMetric: string) => ({
     primaryMetric,
 });
 
-export const statEventSchemaDefinition = {
+export const eventSchemaDefinition = {
     presentation: {
         label: "schema.haxfootball",
         description: "schema.haxfootball.description",
@@ -326,7 +324,7 @@ export const statEventSchemaDefinition = {
     ],
 } as const;
 
-export const statEventSchemaValues = [
+export const eventSchemaValues = [
     label("schema.haxfootball", "HaxFootball", "HaxFootball"),
     label(
         "schema.haxfootball.description",

@@ -6,7 +6,7 @@ import type {
 import type { Room } from "@core/room";
 import type { StadiumObject } from "@haxball/stadium";
 import type { Engine, EngineOptions, StateRegistry } from "@runtime/engine";
-import type { RuntimeStatEventSink } from "@runtime/runtime";
+import type { RuntimeMatchEventSink } from "@runtime/runtime";
 import type { GameScoreStore } from "@room/shared/domain/game-score";
 import type { RoomAuthorization } from "@room/shared/domain/authorization";
 import { GAME_MODE, type GameModeName } from "./game-mode";
@@ -42,7 +42,7 @@ export type GameModeTickEndContext = {
 export type GameModeRuntime = {
     commands: CommandDefinition[];
     createEngineOptions(args: {
-        statEvents?: RuntimeStatEventSink;
+        matchEvents?: RuntimeMatchEventSink;
     }): EngineOptions<unknown>;
     handleCommand(ctx: GameModeCommandContext): CommandResponse | null;
     syncGameScore(

@@ -1,5 +1,5 @@
 import { GameState } from "@runtime/engine";
-import { $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import { $dispose, $effect, $next, $event } from "@runtime/runtime";
 import {
     DownState,
     incrementDownState,
@@ -62,7 +62,7 @@ export function BlockedPass({
         const { event, downState: baseDownState } =
             incrementDownState(downState);
         const nextDownState = withLastBallYAtCenter(baseDownState);
-        $stat({
+        $event({
             type: Stat.PassBlocked,
             playerId: blockerId,
             value: {

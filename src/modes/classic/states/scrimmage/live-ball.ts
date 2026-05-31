@@ -19,7 +19,7 @@ import {
     $dispose,
     $effect,
     $next,
-    $stat,
+    $event,
 } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
@@ -140,7 +140,7 @@ export function LiveBall({
                 : yards;
             const yardsAfterCatch = yards - airYards;
 
-            $stat({
+            $event({
                 type: Stat.PassCompletion,
                 playerId: passerId,
                 value: {
@@ -156,7 +156,7 @@ export function LiveBall({
                 },
             });
 
-            $stat({
+            $event({
                 type: Stat.Reception,
                 playerId,
                 value: {
@@ -173,7 +173,7 @@ export function LiveBall({
             });
         }
 
-        $stat({
+        $event({
             type: Stat.FumbleLost,
             playerId,
             value: {
@@ -188,7 +188,7 @@ export function LiveBall({
         });
 
         catcherIds.forEach((catcherId) => {
-            $stat({
+            $event({
                 type: Stat.ForcedFumble,
                 playerId: catcherId,
                 value: {
@@ -275,7 +275,7 @@ export function LiveBall({
                 : yards;
             const yardsAfterCatch = yards - airYards;
 
-            $stat({
+            $event({
                 type: Stat.PassCompletion,
                 playerId: passerId,
                 value: {
@@ -291,7 +291,7 @@ export function LiveBall({
                 },
             });
 
-            $stat({
+            $event({
                 type: Stat.Reception,
                 playerId,
                 value: {
@@ -307,7 +307,7 @@ export function LiveBall({
                 },
             });
         }
-        $stat({
+        $event({
             type: Stat.ReceivingTouchdown,
             playerId,
             value: {
@@ -323,7 +323,7 @@ export function LiveBall({
         });
 
         if (passerId) {
-            $stat({
+            $event({
                 type: Stat.PassingTouchdown,
                 playerId: passerId,
                 value: {
@@ -398,7 +398,7 @@ export function LiveBall({
                     : yards;
                 const yardsAfterCatch = yards - airYards;
 
-                $stat({
+                $event({
                     type: Stat.PassCompletion,
                     playerId: passerId,
                     value: {
@@ -414,7 +414,7 @@ export function LiveBall({
                     },
                 });
 
-                $stat({
+                $event({
                     type: Stat.Reception,
                     playerId,
                     value: {
@@ -582,7 +582,7 @@ export function LiveBall({
                 : yards;
             const yardsAfterCatch = yards - airYards;
 
-            $stat({
+            $event({
                 type: Stat.PassCompletion,
                 playerId: passerId,
                 value: {
@@ -598,7 +598,7 @@ export function LiveBall({
                 },
             });
 
-            $stat({
+            $event({
                 type: Stat.Reception,
                 playerId,
                 value: {
@@ -615,7 +615,7 @@ export function LiveBall({
             });
         }
         catchers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Tackle,
                 playerId: player.id,
                 value: {

@@ -1,4 +1,4 @@
-import { $config, $dispose, $effect, $next, $stat } from "@runtime/hooks";
+import { $config, $dispose, $effect, $next, $event } from "@runtime/hooks";
 import type { FieldTeam } from "@runtime/models";
 import { ticks } from "@common/general/time";
 import {
@@ -209,7 +209,7 @@ export function KickoffReturn({
             endFieldPosition,
         );
 
-        $stat({
+        $event({
             type: Stat.Return,
             playerId,
             value: {
@@ -220,7 +220,7 @@ export function KickoffReturn({
                 touchdown: true,
             },
         });
-        $stat({
+        $event({
             type: Stat.ReturnTouchdown,
             playerId,
             value: {
@@ -270,7 +270,7 @@ export function KickoffReturn({
         const fieldPos = getFieldPosition(frame.player.x);
 
         if (isCompletelyInsideMainField(frame.player)) {
-            $stat({
+            $event({
                 type: Stat.Return,
                 playerId,
                 value: {
@@ -437,7 +437,7 @@ export function KickoffReturn({
                 fieldPos,
             );
 
-            $stat({
+            $event({
                 type: Stat.Return,
                 playerId,
                 value: {
@@ -449,7 +449,7 @@ export function KickoffReturn({
                 },
             });
             catchers.forEach((player) => {
-                $stat({
+                $event({
                     type: Stat.Tackle,
                     playerId: player.id,
                     value: {

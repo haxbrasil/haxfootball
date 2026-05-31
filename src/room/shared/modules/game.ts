@@ -1,7 +1,7 @@
 import { createModule, type Module } from "@core/module";
 import { COMMAND_PREFIX } from "@core/commands";
 import { createEngine, type Engine } from "@runtime/engine";
-import type { RuntimeStatEventSink } from "@runtime/runtime";
+import type { RuntimeMatchEventSink } from "@runtime/runtime";
 import { t } from "@lingui/core/macro";
 import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
@@ -25,13 +25,13 @@ export function createGameModule({
     gameModeStore,
     gameScoreStore,
     getPlayerSession,
-    statEvents,
+    matchEvents,
 }: {
     authorization: RoomAuthorization;
     gameModeStore: GameModeStore;
     gameScoreStore?: GameScoreStore;
     getPlayerSession: PlayerSessionReader;
-    statEvents?: RuntimeStatEventSink;
+    matchEvents?: RuntimeMatchEventSink;
 }): Module {
     const modeRuntimes = Object.fromEntries(
         GAME_MODE_LIST.map((mode) => [mode.name, mode.createRuntime()]),
@@ -93,7 +93,7 @@ export function createGameModule({
                 room,
                 mode.registry,
                 modeRuntime.createEngineOptions({
-                    ...(statEvents ? { statEvents } : {}),
+                    ...(matchEvents ? { matchEvents } : {}),
                 }),
             );
 

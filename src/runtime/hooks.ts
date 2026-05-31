@@ -10,5 +10,5 @@ export {
     $next,
     $restore,
     $scores,
-    $stat,
+    $event,
 } from "@runtime/runtime";

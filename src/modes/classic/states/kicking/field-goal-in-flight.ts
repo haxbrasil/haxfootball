@@ -2,7 +2,7 @@ import type { GameState } from "@runtime/engine";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
 import { t } from "@lingui/core/macro";
-import { $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import { $dispose, $effect, $next, $event } from "@runtime/runtime";
 import { $global } from "@modes/classic/hooks/global";
 import { $setBallActive } from "@modes/classic/hooks/game";
 import { $lockBall, $unlockBall } from "@modes/classic/hooks/physics";
@@ -77,7 +77,7 @@ export function FieldGoalInFlight({
                     state.incrementScore(offensiveTeam, SCORES.FIELD_GOAL),
                 );
                 if (kickerId) {
-                    $stat({
+                    $event({
                         type: Stat.FieldGoalMade,
                         playerId: kickerId,
                         value: {
@@ -122,7 +122,7 @@ export function FieldGoalInFlight({
                 });
             });
             if (kickerId) {
-                $stat({
+                $event({
                     type: Stat.FieldGoalMissed,
                     playerId: kickerId,
                     value: {
@@ -152,7 +152,7 @@ export function FieldGoalInFlight({
                 });
             });
             if (kickerId) {
-                $stat({
+                $event({
                     type: Stat.FieldGoalMissed,
                     playerId: kickerId,
                     value: {
@@ -185,7 +185,7 @@ export function FieldGoalInFlight({
                 });
             });
             if (kickerId) {
-                $stat({
+                $event({
                     type: Stat.FieldGoalMissed,
                     playerId: kickerId,
                     value: {

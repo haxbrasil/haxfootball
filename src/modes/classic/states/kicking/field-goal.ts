@@ -13,7 +13,7 @@ import {
 import { ticks } from "@common/general/time";
 import { findCatchers, opposite } from "@common/game/game";
 import { t } from "@lingui/core/macro";
-import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $event } from "@runtime/runtime";
 import {
     $setFirstDownLine,
     $setLineOfScrimmage,
@@ -300,7 +300,7 @@ export function FieldGoal({
         $lockBall();
 
         if (isEarlyOutOfBounds(frame.state.ball)) {
-            $stat({
+            $event({
                 type: Stat.FieldGoalMissed,
                 playerId: kickerId,
                 value: {

@@ -5,7 +5,7 @@ import {
     $effect,
     $global,
     $next,
-    $stat,
+    $event,
 } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
@@ -123,7 +123,7 @@ export function Blitz({
     function $handleQuarterbackKick(frame: Frame) {
         if (ballIsDead || !frame.quarterback.isKickingBall) return;
 
-        $stat({
+        $event({
             type: Stat.PassAttempt,
             playerId: quarterbackId,
             value: {
@@ -163,7 +163,7 @@ export function Blitz({
         );
 
         offensiveTouchers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Foul,
                 playerId: player.id,
                 value: {
@@ -243,7 +243,7 @@ export function Blitz({
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
 
-        $stat({
+        $event({
             type: Stat.Foul,
             playerId: quarterbackId,
             value: {
@@ -360,7 +360,7 @@ export function Blitz({
                 fieldPos,
             );
 
-            $stat({
+            $event({
                 type: Stat.QuarterbackCarry,
                 playerId: quarterbackId,
                 value: {
@@ -513,7 +513,7 @@ export function Blitz({
             -calculateYardsGained(offensiveTeam, downState.fieldPos, fieldPos),
         );
 
-        $stat({
+        $event({
             type: Stat.SackTaken,
             playerId: quarterbackId,
             value: {
@@ -527,7 +527,7 @@ export function Blitz({
             },
         });
         catchers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Sack,
                 playerId: player.id,
                 value: {
@@ -540,7 +540,7 @@ export function Blitz({
                     sacked: quarterbackId,
                 },
             });
-            $stat({
+            $event({
                 type: Stat.Tackle,
                 playerId: player.id,
                 value: {

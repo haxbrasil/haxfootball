@@ -1,5 +1,5 @@
 import { GameState, GameStateBall, GameStatePlayer } from "@runtime/engine";
-import { $before, $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import { $before, $dispose, $effect, $next, $event } from "@runtime/runtime";
 import { DownState } from "@modes/classic/shared/rules/down";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
@@ -94,7 +94,7 @@ export function InterceptionAttempt({
         blocker: GameStatePlayer;
         intersectionPoint: PointLike;
     }) {
-        $stat({
+        $event({
             type: Stat.Interception,
             playerId: args.blocker.id,
             value: {
@@ -106,7 +106,7 @@ export function InterceptionAttempt({
             },
         });
         if (passerId) {
-            $stat({
+            $event({
                 type: Stat.InterceptionThrown,
                 playerId: passerId,
                 value: {

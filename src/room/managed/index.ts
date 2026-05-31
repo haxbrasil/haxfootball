@@ -33,7 +33,7 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         gameModeStore,
         gameScoreStore,
         getPlayerSession: sessionStore.get,
-        statEvents: matchPersistence.statEvents,
+        matchEvents: matchPersistence.matchEvents,
     });
     const downstreamModules = [matchPersistence.module, ...sharedModules];
 

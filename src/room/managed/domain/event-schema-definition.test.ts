@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { sameStatEventSchemaDefinition } from "./stat-event-schema-definition";
+import { sameEventSchemaDefinition } from "./event-schema-definition";
 
-describe("sameStatEventSchemaDefinition", () => {
+describe("sameEventSchemaDefinition", () => {
     it("matches definitions with different object key order", () => {
         const left = {
             events: [
@@ -54,12 +54,12 @@ describe("sameStatEventSchemaDefinition", () => {
             ],
         };
 
-        expect(sameStatEventSchemaDefinition(left, right)).toBe(true);
+        expect(sameEventSchemaDefinition(left, right)).toBe(true);
     });
 
     it("ignores undefined object fields", () => {
         expect(
-            sameStatEventSchemaDefinition(
+            sameEventSchemaDefinition(
                 {
                     events: [
                         {
@@ -81,7 +81,7 @@ describe("sameStatEventSchemaDefinition", () => {
 
     it("detects changed aggregations", () => {
         expect(
-            sameStatEventSchemaDefinition(
+            sameEventSchemaDefinition(
                 {
                     events: [
                         {

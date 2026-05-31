@@ -47,13 +47,13 @@ export const classicModeDefinition: GameModeDefinition = {
 
         return {
             commands: CLASSIC_COMMAND_DEFINITIONS,
-            createEngineOptions({ statEvents }) {
+            createEngineOptions({ matchEvents }) {
                 endGame.reset();
 
                 return {
                     config: gameConfig,
                     globalSchema: classicGlobalSchema,
-                    ...(statEvents ? { statEvents } : {}),
+                    ...(matchEvents ? { matchEvents } : {}),
                 };
             },
             syncGameScore(engine, gameScoreStore) {

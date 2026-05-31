@@ -4,7 +4,7 @@ import type { RoomAuthorization } from "../domain/authorization";
 import type { GameModeStore } from "../domain/game-mode";
 import type { GameScoreStore } from "../domain/game-score";
 import type { PlayerSessionReader } from "../domain/player-sessions";
-import type { RuntimeStatEventSink } from "@runtime/runtime";
+import type { RuntimeMatchEventSink } from "@runtime/runtime";
 import { createChatLoggingModule } from "./chat-logging";
 import { createCommunityModule } from "./community";
 import { createGameModule } from "./game";
@@ -19,7 +19,7 @@ export function createSharedRoomModules({
     autoManageNativeAdmins,
     gameScoreStore,
     gameModeStore,
-    statEvents,
+    matchEvents,
 }: {
     authorization: RoomAuthorization;
     getPlayerSession: PlayerSessionReader;
@@ -27,7 +27,7 @@ export function createSharedRoomModules({
     gameScoreStore?: GameScoreStore;
     officialAdmins?: OfficialAdminRegistry;
     autoManageNativeAdmins: boolean;
-    statEvents?: RuntimeStatEventSink;
+    matchEvents?: RuntimeMatchEventSink;
 }): Module[] {
     return [
         createPasswordModule({ authorization }),
@@ -44,7 +44,7 @@ export function createSharedRoomModules({
             ...(gameScoreStore ? { gameScoreStore } : {}),
             gameModeStore,
             getPlayerSession,
-            ...(statEvents ? { statEvents } : {}),
+            ...(matchEvents ? { matchEvents } : {}),
         }),
     ];
 }

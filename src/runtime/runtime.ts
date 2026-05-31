@@ -67,20 +67,21 @@ export type TickState = {
     self: number;
 };
 
-export type RuntimeStatEvent = {
+export type RuntimeMatchEvent = {
     type: string;
     playerId: number;
+    sourceState: string;
     value: Record<string, unknown>;
     tick: number;
 };
 
-export type RuntimeStatEventInput = {
+export type RuntimeMatchEventInput = {
     type: string;
     playerId: number;
     value?: Record<string, unknown>;
 };
 
-export type RuntimeStatEventSink = (event: RuntimeStatEvent) => void;
+export type RuntimeMatchEventSink = (event: RuntimeMatchEvent) => void;
 
 const BALL_DEFAULT_INDEX = 0;
 
@@ -206,7 +207,7 @@ let RUNTIME: {
     beforeGameState: GameState | null;
     muteEffects: boolean;
     globalStore: GlobalStoreApi<any> | null;
-    statEvents: RuntimeStatEventSink | null;
+    matchEvents: RuntimeMatchEventSink | null;
     checkpointDrafts: Array<CheckpointDraft>;
     resolveCheckpoint:
         | ((args: CheckpointRestoreArgs) => {
@@ -262,7 +263,7 @@ export function installRuntime(ctx: {
     beforeGameState?: GameState | null;
     muteEffects?: boolean;
     globalStore?: GlobalStoreApi<any> | null;
-    statEvents?: RuntimeStatEventSink | null;
+    matchEvents?: RuntimeMatchEventSink | null;
     checkpointDrafts?: Array<CheckpointDraft>;
     resolveCheckpoint?: (args: CheckpointRestoreArgs) => {
         transition: Transition;
@@ -300,7 +301,7 @@ export function installRuntime(ctx: {
             ctx.beforeGameState === undefined ? null : ctx.beforeGameState,
         muteEffects: !!ctx.muteEffects,
         globalStore: ctx.globalStore ?? null,
-        statEvents: ctx.statEvents ?? null,
+        matchEvents: ctx.matchEvents ?? null,
         checkpointDrafts: ctx.checkpointDrafts ?? [],
         resolveCheckpoint: ctx.resolveCheckpoint ?? null,
         listCheckpoints: ctx.listCheckpoints ?? null,
@@ -444,20 +445,18 @@ export function $config<Cfg>(): Cfg {
     return RUNTIME.config as Cfg;
 }
 
-export function $stat(event: RuntimeStatEventInput): void {
-    if (!RUNTIME) throw new Error("$stat used outside of runtime");
+export function $event(event: RuntimeMatchEventInput): void {
+    if (!RUNTIME) throw new Error("$event used outside of runtime");
     if (!RUNTIME.sourceState) {
-        throw new Error("$stat used without a source state");
+        throw new Error("$event used without a source state");
     }
-    if (!RUNTIME.statEvents) return;
+    if (!RUNTIME.matchEvents) return;
 
-    RUNTIME.statEvents({
+    RUNTIME.matchEvents({
         type: event.type,
         playerId: event.playerId,
-        value: {
-            source: RUNTIME.sourceState,
-            ...(event.value ?? {}),
-        },
+        sourceState: RUNTIME.sourceState,
+        value: event.value ?? {},
         tick: RUNTIME.tickNumber,
     });
 }

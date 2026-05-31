@@ -12,7 +12,7 @@ import {
     isTouchdown,
     SCORES,
 } from "@modes/classic/shared/rules/scoring";
-import { $config, $dispose, $effect, $next, $stat } from "@runtime/runtime";
+import { $config, $dispose, $effect, $next, $event } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
@@ -101,7 +101,7 @@ export function Run({
         const yards = getDistanceToGoalLine(offensiveTeam, downState.fieldPos);
         const endFieldPosition = { side: opposite(offensiveTeam), yards: 0 };
 
-        $stat({
+        $event({
             type: Stat.Carry,
             playerId,
             value: {
@@ -114,7 +114,7 @@ export function Run({
                 touchdown: true,
             },
         });
-        $stat({
+        $event({
             type: Stat.RushingTouchdown,
             playerId,
             value: {
@@ -177,7 +177,7 @@ export function Run({
                 fieldPos,
             );
 
-            $stat({
+            $event({
                 type: Stat.Carry,
                 playerId,
                 value: {
@@ -331,7 +331,7 @@ export function Run({
             fieldPos,
         );
 
-        $stat({
+        $event({
             type: Stat.Carry,
             playerId,
             value: {
@@ -345,7 +345,7 @@ export function Run({
             },
         });
         catchers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Tackle,
                 playerId: player.id,
                 value: {

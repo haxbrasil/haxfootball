@@ -7,7 +7,7 @@ import {
     type MutationBuffer,
     type CheckpointDraft,
     type CheckpointRestoreArgs,
-    type RuntimeStatEventSink,
+    type RuntimeMatchEventSink,
     type Transition,
 } from "@runtime/runtime";
 import { Room } from "@core/room";
@@ -40,7 +40,7 @@ export type StateRegistry = Record<string, StateFactory<any>>;
 export interface EngineOptions<Cfg> {
     config: Cfg;
     globalSchema?: GlobalSchema<any, any>;
-    statEvents?: RuntimeStatEventSink;
+    matchEvents?: RuntimeMatchEventSink;
     trackedDiscs?: Readonly<Record<string, number>>;
 }
 
@@ -469,7 +469,7 @@ export function createEngine<Cfg>(
             tickNumber,
             mutations: optsRun?.mutations ?? sharedTickMutations ?? undefined,
             globalStore,
-            statEvents: opts.statEvents ?? null,
+            matchEvents: opts.matchEvents ?? null,
             isPaused,
             ...(optsRun?.disposals ? { disposals: optsRun.disposals } : {}),
             ...(optsRun?.checkpointDrafts
@@ -929,7 +929,7 @@ export function createEngine<Cfg>(
                 tickNumber: currentTickNumber,
                 mutations: sharedTickMutations ?? undefined,
                 globalStore,
-                statEvents: opts.statEvents ?? null,
+                matchEvents: opts.matchEvents ?? null,
                 disposals: current.disposals,
                 checkpointDrafts: current.checkpointDrafts,
                 beforeGameState: lastGameState,

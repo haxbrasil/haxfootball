@@ -1,4 +1,4 @@
-export function sameStatEventSchemaDefinition(
+export function sameEventSchemaDefinition(
     left: unknown,
     right: unknown,
 ): boolean {

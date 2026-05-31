@@ -1,5 +1,5 @@
 import type {
-    AddMatchStatEventInput,
+    AddMatchEventInput,
     CreateMatchInput,
     MatchEventInput,
     Recording,
@@ -9,7 +9,10 @@ import { COLOR } from "@common/general/color";
 import { createModule, type Module } from "@core/module";
 import type { Room } from "@core/room";
 import { Team } from "@runtime/models";
-import type { RuntimeStatEvent, RuntimeStatEventSink } from "@runtime/runtime";
+import type {
+    RuntimeMatchEvent,
+    RuntimeMatchEventSink,
+} from "@runtime/runtime";
 import type {
     PlayerSessionReader,
     PlayerSessionStore,
@@ -18,7 +21,7 @@ import type { GameScoreReader } from "@room/shared/domain/game-score";
 import type { GameModeReader } from "@room/shared/domain/game-mode";
 import { shouldPersistGameMode } from "@modes/registry";
 import { createPublicWebUrl } from "@room/shared/domain/public-web-url";
-import { ensureStatEventSchema } from "@room/managed/domain/stat-event-schema";
+import { ensureEventSchema } from "@room/managed/domain/event-schema";
 import { GAME_MODE_NAME } from "@modes/classic/stats";
 import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
 import { t } from "@lingui/core/macro";
@@ -39,7 +42,7 @@ type MatchSession = {
     matchCreationStarted: boolean;
     ended: boolean;
     events: MatchEventInput[];
-    stats: RuntimeStatEvent[];
+    gameEvents: RuntimeMatchEvent[];
     playerIds: Map<number, string>;
     replay: ReplayRecorder;
 };
@@ -58,7 +61,7 @@ export function createManagedMatchPersistence({
     sessionStore,
 }: CreateManagedMatchPersistenceOptions): {
     module: Module;
-    statEvents: RuntimeStatEventSink;
+    matchEvents: RuntimeMatchEventSink;
 } {
     let session: MatchSession | null = null;
     let queue = Promise.resolve();
@@ -120,10 +123,10 @@ export function createManagedMatchPersistence({
         });
     };
 
-    const statEvents: RuntimeStatEventSink = (event) => {
+    const matchEvents: RuntimeMatchEventSink = (event) => {
         if (!session || session.ended) return;
 
-        session.stats.push(event);
+        session.gameEvents.push(event);
         if (!session.matchId) return;
 
         const currentSession = session;
@@ -147,7 +150,7 @@ export function createManagedMatchPersistence({
                 matchCreationStarted: false,
                 ended: false,
                 events: [],
-                stats: [],
+                gameEvents: [],
                 playerIds: new Map(),
                 replay: new ReplayRecorder(),
             };
@@ -157,7 +160,7 @@ export function createManagedMatchPersistence({
             for (const player of room.getPlayerList()) {
                 appendPlayerEvent(
                     session,
-                    "player_join",
+                    "player-joined",
                     player,
                     sessionStore.get,
                 );
@@ -172,19 +175,19 @@ export function createManagedMatchPersistence({
         })
         .onPlayerJoin((room, player) => {
             if (!session || session.ended) return;
-            appendPlayerEvent(session, "player_join", player, sessionStore.get);
+            appendPlayerEvent(
+                session,
+                "player-joined",
+                player,
+                sessionStore.get,
+            );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
             persistIfEligible(session);
         })
         .onPlayerLeave((room, player) => {
             if (!session || session.ended) return;
-            appendPlayerEvent(
-                session,
-                "player_leave",
-                player,
-                sessionStore.get,
-            );
+            appendPlayerEvent(session, "player-left", player, sessionStore.get);
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
 
@@ -199,7 +202,7 @@ export function createManagedMatchPersistence({
             if (!session || session.ended) return;
             appendPlayerEvent(
                 session,
-                "player_team_change",
+                "player-team-changed",
                 player,
                 sessionStore.get,
             );
@@ -214,13 +217,13 @@ export function createManagedMatchPersistence({
             finishSession(room, currentSession);
         });
 
-    return { module, statEvents };
+    return { module, matchEvents };
 }
 
 async function createMatch(session: MatchSession): Promise<void> {
     if (session.matchId) return;
 
-    const statEventSchema = await ensureStatEventSchema();
+    const eventSchema = await ensureEventSchema();
     const eventCount = session.events.length;
     const events = session.events.slice(0, eventCount);
     const body: CreateMatchInput = {
@@ -238,9 +241,9 @@ async function createMatch(session: MatchSession): Promise<void> {
                   },
               }
             : {}),
-        ...(statEventSchema
+        ...(eventSchema
             ? {
-                  statEventSchema,
+                  eventSchema,
               }
             : {}),
     };
@@ -261,43 +264,40 @@ async function flushBufferedData(
 ): Promise<void> {
     if (!session.matchId) return;
 
-    const eventCount = session.events.length;
-    const events = session.events.slice(0, eventCount);
-    if (events.length > 0) {
-        const result = await api.matches.appendEvents(session.matchId, {
-            events,
-        });
+    while (session.events.length > 0) {
+        const event = session.events[0];
+        if (!event) break;
+
+        const result = await api.matches.addEvent(session.matchId, event);
         if (!result.ok) {
-            console.error("Failed to append match events:", result.error);
-        } else {
-            session.events.splice(0, eventCount);
-        }
-    }
-
-    while (session.stats.length > 0) {
-        const rawStatEvent = session.stats[0];
-        if (!rawStatEvent) break;
-
-        const statEvent = toStatEventInput(
-            session,
-            rawStatEvent,
-            getPlayerSession,
-        );
-        if (!statEvent) {
-            session.stats.shift();
-            continue;
-        }
-
-        const result = await api.matches.addStatEvent(
-            session.matchId,
-            statEvent,
-        );
-        if (!result.ok) {
-            console.error("Failed to add match stat event:", result.error);
+            console.error("Failed to add match event:", result.error);
             break;
         }
 
-        session.stats.shift();
+        session.events.shift();
+    }
+
+    while (session.gameEvents.length > 0) {
+        const rawGameEvent = session.gameEvents[0];
+        if (!rawGameEvent) break;
+
+        const event = toMatchEventInput(
+            session,
+            rawGameEvent,
+            getPlayerSession,
+        );
+        if (!event) {
+            session.gameEvents.shift();
+            continue;
+        }
+
+        const result = await api.matches.addEvent(session.matchId, event);
+        if (!result.ok) {
+            console.error("Failed to add match event:", result.error);
+            break;
+        }
+
+        session.gameEvents.shift();
     }
 }
 
@@ -386,38 +386,44 @@ function appendPlayerEvent(
         session.playerIds.get(player.id);
 
     if (!backendPlayerId) return;
-    if (type !== "player_leave") {
+    if (type !== "player-left") {
         session.playerIds.set(player.id, backendPlayerId);
     }
 
     const event: MatchEventInput = {
+        domain: "room",
         type,
-        playerId: backendPlayerId,
+        scope: "player",
+        actorPlayerId: backendPlayerId,
         roomPlayerId: player.id,
+        value: {},
         occurredAt: new Date().toISOString(),
         elapsedSeconds: elapsedSinceStart(session),
     };
 
-    if (type !== "player_leave") {
+    if (type !== "player-left") {
         event.team = toApiTeam(player.team);
     }
 
     session.events.push(event);
 }
 
-function toStatEventInput(
+function toMatchEventInput(
     session: MatchSession,
-    event: RuntimeStatEvent,
+    event: RuntimeMatchEvent,
     getPlayerSession: PlayerSessionReader,
-): AddMatchStatEventInput | null {
+): AddMatchEventInput | null {
     const backendPlayerId =
         getBackendPlayerId(event.playerId, getPlayerSession) ??
         session.playerIds.get(event.playerId);
     if (!backendPlayerId) return null;
 
     return {
+        domain: "game",
         type: event.type,
-        playerId: backendPlayerId,
+        scope: "player",
+        actorPlayerId: backendPlayerId,
+        sourceState: event.sourceState,
         value: event.value,
         tick: event.tick,
     };

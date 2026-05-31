@@ -22,7 +22,7 @@ importers:
     dependencies:
       '@haxbrasil/haxfootball-api-sdk':
         specifier: github:haxbrasil/haxfootball-api-sdk
-        version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/6d958a410d7802a300c50b0bf87261a44c3e1494
+        version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/07584e59ec916344de5543a4fb23476780d4f05f
       '@lingui/core':
         specifier: ^5.9.5
         version: 5.9.5(@lingui/babel-plugin-lingui-macro@5.9.5(babel-plugin-macros@3.1.0)(typescript@5.9.3))(babel-plugin-macros@3.1.0)
@@ -1146,8 +1146,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/6d958a410d7802a300c50b0bf87261a44c3e1494':
-    resolution: {gitHosted: true, integrity: sha512-mt8cL/FmhjZaRqMoqjivwmcZzgU7Ue7ckbsAZoKVFmy3gGbheFztCf2fA/sU4CDlpYT2C/MKPAHYnXQLcAkRfw==, tarball: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/6d958a410d7802a300c50b0bf87261a44c3e1494}
+  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/07584e59ec916344de5543a4fb23476780d4f05f':
+    resolution: {gitHosted: true, integrity: sha512-J0ccwKQTVtUNEZ40oRs26bYoF70B2EA+P34uTWVweLbWedVbgjwB4aVgNhn23Zi7NsFeeK0Zl//F/DuN5o0qHg==, tarball: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/07584e59ec916344de5543a4fb23476780d4f05f}
     version: 0.1.0
     engines: {node: '>=20'}
 
@@ -4014,7 +4014,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/6d958a410d7802a300c50b0bf87261a44c3e1494': {}
+  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/07584e59ec916344de5543a4fb23476780d4f05f': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:

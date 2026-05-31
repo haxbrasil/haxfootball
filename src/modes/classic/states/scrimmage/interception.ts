@@ -10,7 +10,7 @@ import {
     $dispose,
     $effect,
     $next,
-    $stat,
+    $event,
 } from "@runtime/runtime";
 import { PointLike } from "@common/math/geometry";
 import { ticks } from "@common/general/time";
@@ -149,7 +149,7 @@ export function Interception({
             ),
         );
 
-        $stat({
+        $event({
             type: Stat.PickSix,
             playerId,
             value: {
@@ -340,7 +340,7 @@ export function Interception({
             const fieldPos = getFieldPosition(frame.player.x);
 
             catchers.forEach((player) => {
-                $stat({
+                $event({
                     type: Stat.Tackle,
                     playerId: player.id,
                     value: {

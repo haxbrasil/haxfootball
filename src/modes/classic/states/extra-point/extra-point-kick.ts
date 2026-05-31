@@ -2,7 +2,7 @@ import type { GameState } from "@runtime/engine";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
 import { t } from "@lingui/core/macro";
-import { $dispose, $effect, $next, $stat, $tick } from "@runtime/runtime";
+import { $dispose, $effect, $next, $event, $tick } from "@runtime/runtime";
 import { $global } from "@modes/classic/hooks/global";
 import { $setBallActive } from "@modes/classic/hooks/game";
 import { $lockBall, $unlockBall } from "@modes/classic/hooks/physics";
@@ -67,7 +67,7 @@ export function ExtraPointKick({
                     state.incrementScore(offensiveTeam, SCORES.EXTRA_POINT),
                 );
                 if (kickerId) {
-                    $stat({
+                    $event({
                         type: Stat.ExtraPointMade,
                         playerId: kickerId,
                         value: {
@@ -104,7 +104,7 @@ export function ExtraPointKick({
                 });
             });
             if (kickerId) {
-                $stat({
+                $event({
                     type: Stat.ExtraPointMissed,
                     playerId: kickerId,
                     value: {
@@ -130,7 +130,7 @@ export function ExtraPointKick({
                 });
             });
             if (kickerId) {
-                $stat({
+                $event({
                     type: Stat.ExtraPointMissed,
                     playerId: kickerId,
                     value: {
@@ -161,7 +161,7 @@ export function ExtraPointKick({
                 });
             });
             if (kickerId) {
-                $stat({
+                $event({
                     type: Stat.ExtraPointMissed,
                     playerId: kickerId,
                     value: {

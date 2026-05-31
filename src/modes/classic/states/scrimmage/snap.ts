@@ -26,7 +26,7 @@ import {
     $dispose,
     $effect,
     $next,
-    $stat,
+    $event,
     $tick,
 } from "@runtime/runtime";
 import {
@@ -235,7 +235,7 @@ export function Snap({
         const pusherIds = pushing.pushers.map((player) => player.id);
 
         pushing.pushers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Foul,
                 playerId: player.id,
                 value: {
@@ -326,7 +326,7 @@ export function Snap({
             "Offside defender must exist for defensive offside penalty",
         );
 
-        $stat({
+        $event({
             type: Stat.Foul,
             playerId: offsideDefenderId,
             value: {
@@ -337,7 +337,7 @@ export function Snap({
                 yards: DEFENSIVE_OFFSIDE_PENALTY_YARDS,
             },
         });
-        $stat({
+        $event({
             type: Stat.Invasion,
             playerId: offsideDefenderId,
             value: {
@@ -481,7 +481,7 @@ export function Snap({
         );
 
         crowdingOffenderIds.forEach((playerId) => {
-            $stat({
+            $event({
                 type: Stat.Foul,
                 playerId,
                 value: {
@@ -492,7 +492,7 @@ export function Snap({
                     yards: Crowding.CROWDING_PENALTY_YARDS,
                 },
             });
-            $stat({
+            $event({
                 type: Stat.Invasion,
                 playerId,
                 value: {
@@ -629,7 +629,7 @@ export function Snap({
         );
 
         defensiveTouchers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Foul,
                 playerId: player.id,
                 value: {
@@ -786,7 +786,7 @@ export function Snap({
         );
 
         illegalTouchers.forEach((player) => {
-            $stat({
+            $event({
                 type: Stat.Foul,
                 playerId: player.id,
                 value: {
@@ -865,7 +865,7 @@ export function Snap({
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
 
-        $stat({
+        $event({
             type: Stat.Foul,
             playerId: quarterbackId,
             value: {
@@ -930,7 +930,7 @@ export function Snap({
             -OFFENSIVE_FOUL_PENALTY_YARDS,
         );
 
-        $stat({
+        $event({
             type: Stat.Foul,
             playerId: quarterbackId,
             value: {
@@ -1036,7 +1036,7 @@ export function Snap({
     function $handleSnapKick(frame: Frame) {
         if (!frame.quarterback.isKickingBall) return;
 
-        $stat({
+        $event({
             type: Stat.PassAttempt,
             playerId: quarterbackId,
             value: {
