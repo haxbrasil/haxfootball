@@ -87,14 +87,13 @@ export function createGameModule({
         .onGameStart((room) => {
             const mode = getSelectedModeDefinition();
             const modeRuntime = getSelectedRuntime();
+            const engineOptionsArgs = matchEvents ? { matchEvents } : {};
 
             activeMode = mode.name;
             engine = createEngine(
                 room,
                 mode.registry,
-                modeRuntime.createEngineOptions({
-                    ...(matchEvents ? { matchEvents } : {}),
-                }),
+                modeRuntime.createEngineOptions(engineOptionsArgs),
             );
 
             engine.start(mode.start.state, mode.start.params);

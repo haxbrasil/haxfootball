@@ -102,7 +102,11 @@ function isScoreState(value: unknown): value is ScoreState {
 }
 
 function hasAscii(text: string): boolean {
-    return /[\x00-\x7F]/.test(text);
+    for (let i = 0; i < text.length; i += 1) {
+        if (text.charCodeAt(i) <= 0x7f) return true;
+    }
+
+    return false;
 }
 
 export function cn(

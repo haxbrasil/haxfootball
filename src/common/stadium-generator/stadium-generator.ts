@@ -244,7 +244,7 @@ const resolvePointRef = (
     inlineVertexes.push({
         x: ref.x,
         y: ref.y,
-        ...(ref.vertex ?? {}),
+        ...ref.vertex,
     });
 
     return index;
@@ -480,7 +480,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
         return {
             x: point.x,
             y: point.y,
-            ...(point.vertex ?? {}),
+            ...point.vertex,
         };
     });
 
@@ -526,7 +526,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
         return {
             v0,
             v1,
-            ...(line.segment ?? {}),
+            ...line.segment,
         };
     });
 
@@ -545,13 +545,13 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
 
         const discA: Disc = {
             ...DEFAULT_DYNAMIC_LINE_DISC,
-            ...(line.disc ?? {}),
-            ...(line.endpoints?.a ?? {}),
+            ...line.disc,
+            ...line.endpoints?.a,
         };
         const discB: Disc = {
             ...DEFAULT_DYNAMIC_LINE_DISC,
-            ...(line.disc ?? {}),
-            ...(line.endpoints?.b ?? {}),
+            ...line.disc,
+            ...line.endpoints?.b,
         };
 
         const d0 = builtDiscs.length;
@@ -682,7 +682,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
                 planeBuilds.push({
                     plane: {
                         ...plane,
-                        ...(props ?? {}),
+                        ...props,
                     },
                     ...(name ? { name } : {}),
                     ...(tags ? { tags } : {}),
@@ -696,7 +696,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
             planeBuilds.push({
                 plane: {
                     ...plane,
-                    ...(props ?? {}),
+                    ...props,
                 },
                 ...(name ? { name } : {}),
                 ...(tags ? { tags } : {}),
@@ -716,7 +716,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
             planeBuilds.push({
                 plane: {
                     ...plane,
-                    ...(props ?? {}),
+                    ...props,
                 },
                 ...(derivedName ? { name: derivedName } : {}),
                 ...(tags ? { tags } : {}),

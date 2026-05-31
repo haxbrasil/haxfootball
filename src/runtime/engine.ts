@@ -507,6 +507,7 @@ export function createEngine<Cfg>(
             uninstall();
 
             if (!allowTransition && flushed.transition) {
+                // oxlint-disable-next-line no-unsafe-finally
                 throw new Error(
                     "$next cannot be used during state setup/cleanup",
                 );

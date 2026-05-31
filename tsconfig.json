@@ -32,6 +32,5 @@
             "@api/*": ["./src/api/*"],
             "@env/*": ["./src/env/*"]
         }
-    },
-    "exclude": ["prettier.config.js"]
+    }
 }

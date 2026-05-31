@@ -14,8 +14,10 @@
         "i18n:extract": "lingui extract",
         "i18n:compile": "lingui compile",
         "i18n": "pnpm run i18n:extract && pnpm run i18n:compile",
-        "format": "prettier --write .",
-        "format:ci": "prettier --check .",
+        "format": "oxfmt",
+        "format:ci": "oxfmt --check",
+        "lint": "oxlint --deny-warnings",
+        "lint:fix": "oxlint --fix",
         "test": "vitest"
     },
     "keywords": [],
@@ -33,7 +35,8 @@
         "@types/node": "^24.10.0",
         "babel-plugin-macros": "^3.1.0",
         "babel-plugin-module-resolver": "^5.0.3",
-        "prettier": "^3.8.3",
+        "oxfmt": "^0.52.0",
+        "oxlint": "^1.67.0",
         "tsx": "^4.20.6",
         "typescript": "^5.9.3",
         "vitest": "^4.1.6"

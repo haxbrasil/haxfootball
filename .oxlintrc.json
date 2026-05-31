@@ -1,0 +1,11 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "unicorn", "oxc", "import", "promise", "vitest"],
+    "ignorePatterns": [
+        "dist/**",
+        "game.js",
+        "node_modules/**",
+        "pnpm-lock.yaml",
+        "src/locales/**"
+    ]
+}

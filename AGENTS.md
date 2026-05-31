@@ -19,6 +19,7 @@ pnpm test -- --run
 pnpm run build
 pnpm run i18n
 pnpm run format:ci
+pnpm run lint
 ```
 
 Run a room in dev mode with:
@@ -141,7 +142,7 @@ The project is strict TypeScript with `moduleResolution: "bundler"` and path ali
 
 Prefer explicit domain types and small pure helpers. Avoid hidden side effects, exception-based control flow for normal gameplay rules, unnecessary `let`, IIFEs for simple derivations, and mutation of arrays/objects unless it is clearly contained and simpler.
 
-Use project formatting through Prettier. Do not churn unrelated formatting.
+Use project formatting through Oxfmt and linting through Oxlint. Do not churn unrelated formatting.
 
 Keep docs source readable. Do not hard-wrap prose in the middle of sentences unless the surrounding file already follows that style and the edit is intentionally narrow.
 

@@ -244,7 +244,7 @@ declare global {
 
     type NodeHaxballIPv4Range = { ip: number; mask: number };
 
-    type NodeHaxballIPv6Range = { ip: BigInt; mask: BigInt };
+    type NodeHaxballIPv6Range = { ip: bigint; mask: bigint };
 
     type NodeHaxballIpBanTarget =
         | string

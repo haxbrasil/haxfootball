@@ -78,13 +78,13 @@ describe("buildStadium", () => {
 
         const midfieldIndex = index.names.segments["midfieldLine"];
 
-        expect(midfieldIndex).toBeDefined();
-
-        if (midfieldIndex !== undefined) {
-            const midfield = stadium.segments?.[midfieldIndex];
-            const v0 = midfield ? stadium.vertexes?.[midfield.v0] : null;
-
-            expect(v0?.x).toBe(0);
+        if (midfieldIndex === undefined) {
+            throw new Error("Missing midfield line index");
         }
+
+        const midfield = stadium.segments?.[midfieldIndex];
+        const v0 = midfield ? stadium.vertexes?.[midfield.v0] : null;
+
+        expect(v0?.x).toBe(0);
     });
 });
