@@ -257,7 +257,7 @@ export function Run({
             });
 
             $effect(($) => {
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, yards < 0 ? AVATARS.CANCEL : null);
             });
 
             $dispose(() => {
@@ -435,7 +435,7 @@ export function Run({
         });
 
         $effect(($) => {
-            $.setAvatar(playerId, AVATARS.CANCEL);
+            $.setAvatar(playerId, yards < 0 ? AVATARS.CANCEL : null);
 
             catchers.forEach((p) => {
                 $.setAvatar(p.id, AVATARS.MUSCLE);

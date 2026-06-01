@@ -39,13 +39,19 @@ export function createGameModule({
     const modeCommandDefinitions = GAME_MODE_LIST.flatMap(
         (mode) => modeRuntimes[mode.name].commands,
     );
-    const commandOwners = new Map<string, GameModeName>();
+    const commandOwners = new Map<string, Set<GameModeName>>();
+
+    const addCommandOwner = (commandName: string, modeName: GameModeName) => {
+        const owners = commandOwners.get(commandName) ?? new Set();
+        owners.add(modeName);
+        commandOwners.set(commandName, owners);
+    };
 
     GAME_MODE_LIST.forEach((mode) => {
         modeRuntimes[mode.name].commands.forEach((command) => {
-            commandOwners.set(command.name, mode.name);
+            addCommandOwner(command.name, mode.name);
             command.aliases?.forEach((alias) => {
-                commandOwners.set(alias, mode.name);
+                addCommandOwner(alias, mode.name);
             });
         });
     });
@@ -149,10 +155,17 @@ export function createGameModule({
             const selectedModeDefinition = activeMode
                 ? getGameModeDefinition(activeMode)
                 : getSelectedModeDefinition();
-            const commandOwner = commandOwners.get(command.name);
+            const commandModeOwners = commandOwners.get(command.name);
 
-            if (commandOwner && commandOwner !== selectedModeDefinition.name) {
-                const ownerModeDefinition = getGameModeDefinition(commandOwner);
+            if (
+                commandModeOwners &&
+                !commandModeOwners.has(selectedModeDefinition.name)
+            ) {
+                const ownerMode = Array.from(commandModeOwners)[0];
+                if (!ownerMode) {
+                    return { hideMessage: true };
+                }
+                const ownerModeDefinition = getGameModeDefinition(ownerMode);
 
                 room.send({
                     message: t`⚠️ That ${ownerModeDefinition.label} command is unavailable in ${selectedModeDefinition.label} mode.`,

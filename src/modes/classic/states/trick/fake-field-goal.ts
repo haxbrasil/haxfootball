@@ -16,6 +16,7 @@ import { $config, $dispose, $effect, $next } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
+    calculateYardsGained,
     getFieldPosition,
     isInMainField,
     isOutOfBounds,
@@ -139,6 +140,11 @@ export function FakeFieldGoal({
                 fieldPos,
             );
             const nextDownState = withLastBallY(baseDownState, frame.player.y);
+            const yards = calculateYardsGained(
+                offensiveTeam,
+                downState.fieldPos,
+                fieldPos,
+            );
 
             processDownEvent({
                 event,
@@ -207,7 +213,7 @@ export function FakeFieldGoal({
             });
 
             $effect(($) => {
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, yards < 0 ? AVATARS.CANCEL : null);
             });
 
             $dispose(() => {
@@ -275,6 +281,11 @@ export function FakeFieldGoal({
             fieldPos,
         );
         const nextDownState = withLastBallY(baseDownState, frame.player.y);
+        const yards = calculateYardsGained(
+            offensiveTeam,
+            downState.fieldPos,
+            fieldPos,
+        );
 
         processDownEvent({
             event,
@@ -351,7 +362,7 @@ export function FakeFieldGoal({
         });
 
         $effect(($) => {
-            $.setAvatar(playerId, AVATARS.CANCEL);
+            $.setAvatar(playerId, yards < 0 ? AVATARS.CANCEL : null);
 
             catchers.forEach((p) => {
                 $.setAvatar(p.id, AVATARS.MUSCLE);

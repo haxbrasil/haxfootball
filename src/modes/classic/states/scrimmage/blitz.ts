@@ -440,7 +440,7 @@ export function Blitz({
             });
 
             $effect(($) => {
-                $.setAvatar(quarterbackId, AVATARS.CANCEL);
+                $.setAvatar(quarterbackId, yards < 0 ? AVATARS.CANCEL : null);
             });
 
             $dispose(() => {
@@ -629,7 +629,7 @@ export function Blitz({
         });
 
         $effect(($) => {
-            $.setAvatar(quarterbackId, AVATARS.CANCEL);
+            $.setAvatar(quarterbackId, sackYards > 0 ? AVATARS.CANCEL : null);
 
             catchers.forEach((player) => {
                 $.setAvatar(player.id, AVATARS.MUSCLE);

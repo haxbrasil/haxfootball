@@ -1,5 +1,6 @@
 export const GAME_MODE = {
     CLASSIC: "classic",
+    FLAG: "flag",
     TRAINING: "training",
 } as const;
 

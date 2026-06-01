@@ -282,7 +282,7 @@ export function SafetyKickReturn({
                     color: COLOR.WARNING,
                 });
 
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, null);
             });
 
             $dispose(() => {
@@ -359,7 +359,7 @@ export function SafetyKickReturn({
                             color: COLOR.ALERT,
                         });
 
-                        $.setAvatar(playerId, AVATARS.CANCEL);
+                        $.setAvatar(playerId, null);
                     });
 
                     $dispose(() => {
@@ -463,7 +463,7 @@ export function SafetyKickReturn({
                     $.setAvatar(p.id, AVATARS.MUSCLE);
                 });
 
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, null);
             });
 
             $dispose(() => {

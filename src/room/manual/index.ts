@@ -21,6 +21,7 @@ export function createModules(_options: ManualRoomModulesOptions = {}) {
     const nativeAdminAuthorization = createNativeAdminAuthorization();
     const authorization = {
         ...nativeAdminAuthorization,
+        canChangeGameMode: (player: PlayerObject) => officialAdmins.has(player),
         canKickOrBan: (player: PlayerObject) => officialAdmins.has(player),
     };
 

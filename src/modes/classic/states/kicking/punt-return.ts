@@ -197,7 +197,7 @@ export function PuntReturn({
                     color: COLOR.WARNING,
                 });
 
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, null);
             });
 
             $dispose(() => {
@@ -274,7 +274,7 @@ export function PuntReturn({
                             color: COLOR.ALERT,
                         });
 
-                        $.setAvatar(playerId, AVATARS.CANCEL);
+                        $.setAvatar(playerId, null);
                     });
 
                     $dispose(() => {
@@ -374,7 +374,7 @@ export function PuntReturn({
                     $.setAvatar(p.id, AVATARS.MUSCLE);
                 });
 
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, null);
             });
 
             $dispose(() => {

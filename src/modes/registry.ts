@@ -1,4 +1,5 @@
 import { classicModeDefinition } from "@modes/classic/definition";
+import { flagModeDefinition } from "@modes/flag/definition";
 import { trainingModeDefinition } from "@modes/training/definition";
 import {
     DEFAULT_GAME_MODE,
@@ -18,6 +19,7 @@ export type {
 
 export const GAME_MODE_DEFINITIONS = {
     [GAME_MODE.CLASSIC]: classicModeDefinition,
+    [GAME_MODE.FLAG]: flagModeDefinition,
     [GAME_MODE.TRAINING]: trainingModeDefinition,
 } satisfies Record<GameModeName, GameModeDefinition>;
 

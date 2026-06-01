@@ -198,7 +198,7 @@ export function Interception({
                     color: COLOR.WARNING,
                 });
 
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, null);
             });
 
             $dispose(() => {
@@ -275,7 +275,7 @@ export function Interception({
                             color: COLOR.ALERT,
                         });
 
-                        $.setAvatar(playerId, AVATARS.CANCEL);
+                        $.setAvatar(playerId, null);
                     });
 
                     $dispose(() => {
@@ -361,7 +361,7 @@ export function Interception({
                     $.setAvatar(p.id, AVATARS.MUSCLE);
                 });
 
-                $.setAvatar(playerId, AVATARS.CANCEL);
+                $.setAvatar(playerId, null);
             });
 
             $dispose(() => {

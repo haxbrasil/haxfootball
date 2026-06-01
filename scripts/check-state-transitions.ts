@@ -33,6 +33,11 @@ const modes: ModeTransitionCheckConfig[] = [
         sourceRoot: path.join(rootDir, "src/modes/classic"),
     },
     {
+        name: "Flag",
+        registryFile: path.join(rootDir, "src/modes/flag/registry.ts"),
+        sourceRoot: path.join(rootDir, "src/modes/flag"),
+    },
+    {
         name: "Training",
         registryFile: path.join(rootDir, "src/modes/training/registry.ts"),
         sourceRoot: path.join(rootDir, "src/modes/training"),
