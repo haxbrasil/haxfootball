@@ -1,6 +1,6 @@
 {
     "name": "@haxbrasil/haxfootball",
-    "version": "1.0.33",
+    "version": "1.0.34",
     "description": "HaxBall headless room package for room-server",
     "packageManager": "pnpm@11.0.9",
     "main": "dist/environments/room-server.js",
@@ -10,7 +10,7 @@
     "scripts": {
         "start:node": "node ./dist/environments/node.js",
         "dev:node": "DEBUG=true babel-node --extensions \".ts,.tsx\" ./src/environments/node.ts",
-        "build": "babel ./src --extensions \".ts,.tsx\" --out-dir ./dist --copy-files",
+        "build": "rm -rf ./dist && babel ./src --extensions \".ts,.tsx\" --out-dir ./dist --copy-files",
         "i18n:extract": "lingui extract",
         "i18n:compile": "lingui compile",
         "i18n": "pnpm run i18n:extract && pnpm run i18n:compile",
