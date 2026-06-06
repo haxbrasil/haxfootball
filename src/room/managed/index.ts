@@ -8,6 +8,7 @@ import { createManagedAuthorization } from "./domain/authorization";
 import { createManagedAdminModule } from "./modules/admin";
 import { createAuthenticationModule } from "./modules/authentication";
 import { createManagedMatchPersistence } from "./modules/match-persistence";
+import { createManagedRoomEvents } from "./modules/room-events";
 
 type ManagedRoomModulesOptions = {
     publicWebBaseUrl?: string | undefined;
@@ -35,7 +36,15 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         getPlayerSession: sessionStore.get,
         matchEvents: matchPersistence.matchEvents,
     });
-    const downstreamModules = [matchPersistence.module, ...sharedModules];
+    const roomEvents = createManagedRoomEvents({
+        roomId: options.roomId,
+        sessionStore,
+    });
+    const downstreamModules = [
+        roomEvents,
+        matchPersistence.module,
+        ...sharedModules,
+    ];
 
     return [
         createRoomSetupModule(),

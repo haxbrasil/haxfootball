@@ -24,6 +24,10 @@ import { createPublicWebUrl } from "@room/shared/domain/public-web-url";
 import { ensureEventSchema } from "@room/managed/domain/event-schema";
 import { GAME_MODE_NAME } from "@modes/classic/stats";
 import { ReplayRecorder } from "@room/managed/domain/replay-recorder";
+import {
+    type MatchPlayerEventHook,
+    projectMatchPlayerEvent,
+} from "@room/managed/domain/match-player-events";
 import { t } from "@lingui/core/macro";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
@@ -44,6 +48,7 @@ type MatchSession = {
     events: MatchEventInput[];
     gameEvents: RuntimeMatchEvent[];
     playerIds: Map<number, string>;
+    fieldParticipantRoomIds: Set<number>;
     replay: ReplayRecorder;
 };
 
@@ -152,15 +157,16 @@ export function createManagedMatchPersistence({
                 events: [],
                 gameEvents: [],
                 playerIds: new Map(),
+                fieldParticipantRoomIds: new Set(),
                 replay: new ReplayRecorder(),
             };
 
             session.replay.start(room);
 
             for (const player of room.getPlayerList()) {
-                appendPlayerEvent(
+                appendDispatchedMatchPlayerEvent(
                     session,
-                    "player-joined",
+                    "onPlayerJoin",
                     player,
                     sessionStore.get,
                 );
@@ -175,9 +181,9 @@ export function createManagedMatchPersistence({
         })
         .onPlayerJoin((room, player) => {
             if (!session || session.ended) return;
-            appendPlayerEvent(
+            appendDispatchedMatchPlayerEvent(
                 session,
-                "player-joined",
+                "onPlayerJoin",
                 player,
                 sessionStore.get,
             );
@@ -187,7 +193,12 @@ export function createManagedMatchPersistence({
         })
         .onPlayerLeave((room, player) => {
             if (!session || session.ended) return;
-            appendPlayerEvent(session, "player-left", player, sessionStore.get);
+            appendDispatchedMatchPlayerEvent(
+                session,
+                "onPlayerLeave",
+                player,
+                sessionStore.get,
+            );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
 
@@ -200,9 +211,9 @@ export function createManagedMatchPersistence({
         })
         .onPlayerTeamChange((room, player) => {
             if (!session || session.ended) return;
-            appendPlayerEvent(
+            appendDispatchedMatchPlayerEvent(
                 session,
-                "player-team-changed",
+                "onPlayerTeamChange",
                 player,
                 sessionStore.get,
             );
@@ -375,37 +386,23 @@ async function uploadRecording(
     return result.data;
 }
 
-function appendPlayerEvent(
+function appendDispatchedMatchPlayerEvent(
     session: MatchSession,
-    type: MatchEventInput["type"],
+    hook: MatchPlayerEventHook,
     player: PlayerObject,
     getPlayerSession: PlayerSessionReader,
 ): void {
-    const backendPlayerId =
-        getBackendPlayerId(player.id, getPlayerSession) ??
-        session.playerIds.get(player.id);
-
-    if (!backendPlayerId) return;
-    if (type !== "player-left") {
-        session.playerIds.set(player.id, backendPlayerId);
-    }
-
-    const event: MatchEventInput = {
-        domain: "room",
-        type,
-        scope: "player",
-        actorPlayerId: backendPlayerId,
-        roomPlayerId: player.id,
-        value: {},
-        occurredAt: new Date().toISOString(),
+    const event = projectMatchPlayerEvent({
+        hook,
+        state: session,
+        player,
+        getPlayerSession,
         elapsedSeconds: elapsedSinceStart(session),
-    };
+    });
 
-    if (type !== "player-left") {
-        event.team = toApiTeam(player.team);
+    if (event) {
+        session.events.push(event);
     }
-
-    session.events.push(event);
 }
 
 function toMatchEventInput(
@@ -440,12 +437,6 @@ function getBackendPlayerId(
     }
 
     return null;
-}
-
-function toApiTeam(team: number): NonNullable<MatchEventInput["team"]> {
-    if (team === Team.RED) return "red";
-    if (team === Team.BLUE) return "blue";
-    return "spectators";
 }
 
 function hasActivePlayers(room: Room): boolean {
