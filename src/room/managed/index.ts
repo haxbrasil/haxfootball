@@ -7,6 +7,7 @@ import { createGameModeStore } from "@room/shared/domain/game-mode";
 import { createManagedAuthorization } from "./domain/authorization";
 import { createManagedAdminModule } from "./modules/admin";
 import { createAuthenticationModule } from "./modules/authentication";
+import { createManagedLifecycleModule } from "./modules/lifecycle";
 import { createManagedMatchPersistence } from "./modules/match-persistence";
 import { createManagedRoomEvents } from "./modules/room-events";
 
@@ -36,6 +37,7 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         getPlayerSession: sessionStore.get,
         matchEvents: matchPersistence.matchEvents,
     });
+    const lifecycle = createManagedLifecycleModule({ gameModeStore });
     const roomEvents = createManagedRoomEvents({
         roomId: options.roomId,
         sessionStore,
@@ -44,6 +46,7 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         roomEvents,
         matchPersistence.module,
         ...sharedModules,
+        lifecycle,
     ];
 
     return [

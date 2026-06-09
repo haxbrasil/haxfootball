@@ -9,6 +9,7 @@ import type { RoomAuthorization } from "../domain/authorization";
 import { type GameModeName, type GameModeStore } from "../domain/game-mode";
 import type { PlayerSessionReader } from "../domain/player-sessions";
 import type { GameScoreStore } from "../domain/game-score";
+import { applyGameModeRoomSettings } from "../domain/game-mode-room-settings";
 import {
     GAME_MODE_LIST,
     getGameModeDefinition,
@@ -75,11 +76,7 @@ export function createGameModule({
         activeMode ? modeRuntimes[activeMode] : getSelectedRuntime();
 
     const applySelectedModeRoomSettings = (room: Room): void => {
-        const mode = getSelectedModeDefinition();
-
-        room.setScoreLimit(mode.room.scoreLimit);
-        room.setTimeLimit(mode.room.timeLimit);
-        room.setStadium(mode.stadium);
+        applyGameModeRoomSettings(room, getSelectedModeDefinition());
     };
 
     const module = createModule()
