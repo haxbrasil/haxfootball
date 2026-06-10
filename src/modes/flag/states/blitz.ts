@@ -268,7 +268,7 @@ export function Blitz({
                         message: cn(
                             "❌",
                             penaltyResult.downState,
-                            t`illegal quarterback run`,
+                            t`illegal advance beyond the LOS`,
                             t`loss of down.`,
                         ),
                         color: COLOR.WARNING,
@@ -281,7 +281,7 @@ export function Blitz({
                         message: cn(
                             "❌",
                             penaltyResult.downState,
-                            t`illegal quarterback run`,
+                            t`illegal advance beyond the LOS`,
                             t`turnover on downs.`,
                         ),
                         color: COLOR.WARNING,

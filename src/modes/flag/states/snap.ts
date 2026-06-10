@@ -933,7 +933,7 @@ export function Snap({
     function $penalizeIllegalQuarterbackAdvance(): never {
         $penalizeIllegalRun({
             playerIds: [quarterbackId],
-            message: t`illegal quarterback run`,
+            message: t`illegal advance beyond the LOS`,
         });
     }
 
