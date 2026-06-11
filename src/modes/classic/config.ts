@@ -12,7 +12,7 @@ export const {
 } = ConfigUtils.createConfig({
     defaultConfig: {
         flags: {
-            losBlocking: false,
+            losBlocking: true,
             requireQb: true,
             timeouts: true,
         },

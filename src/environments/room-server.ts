@@ -1,4 +1,4 @@
-import Haxball from "@haxball/game";
+import { HBInit } from "@haxbrasil/haxball-rs";
 import { createModule, updateRoomModules } from "@core/module";
 import { api } from "@api/client";
 import { env, type RoomServerEnvironment } from "@env/room-server";
@@ -14,7 +14,6 @@ async function bootstrap() {
         roomId: env.apiReadiness?.roomId,
     });
 
-    const HBInit: Function = await Haxball;
     const room = HBInit(createRoomConfig(env, getConfig()));
 
     updateRoomModules(room, [

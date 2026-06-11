@@ -29,7 +29,7 @@ export type RegisteredCommand = {
     description?: string;
 };
 
-export type FakePlayerIdentity = {
+export type DispatchedPlayerIdentity = {
     id: number;
     name: string;
     flag: string;
@@ -396,24 +396,6 @@ export class Room {
         this.invalidateCaches();
     }
 
-    public addPlayerBan(playerId: number): NodeHaxballBanEntryId | null {
-        return this.room.addPlayerBan(playerId);
-    }
-
-    public addIpBan(
-        ...ips: NodeHaxballIpBanTarget[]
-    ): Array<NodeHaxballBanEntryId | null> {
-        return this.room.addIpBan(...ips);
-    }
-
-    public addAuthBan(...auths: string[]): Array<NodeHaxballBanEntryId | null> {
-        return this.room.addAuthBan(...auths);
-    }
-
-    public removeBan(banId: NodeHaxballBanEntryId): boolean {
-        return this.room.removeBan(banId);
-    }
-
     public getPlayer(playerId: number): PlayerObject | null {
         return this.room.getPlayer(playerId);
     }
@@ -433,23 +415,12 @@ export class Room {
         this.invalidatePlayerListCache();
     }
 
-    public setAvatar(avatar: string): void;
     public setAvatar(player: PlayerObject, avatar: string | null): void;
     public setAvatar(playerId: number, avatar: string | null): void;
     public setAvatar(
-        playerOrAvatar: number | PlayerObject | string,
+        playerOrAvatar: number | PlayerObject,
         avatar?: string | null,
     ): void {
-        if (typeof playerOrAvatar === "string" && arguments.length === 1) {
-            this.room.setAvatar(playerOrAvatar);
-            return;
-        }
-
-        if (typeof playerOrAvatar === "string") {
-            this.room.setAvatar(playerOrAvatar);
-            return;
-        }
-
         const playerId =
             typeof playerOrAvatar === "number"
                 ? playerOrAvatar
@@ -480,10 +451,6 @@ export class Room {
 
     public getScores(): ScoresObject | null {
         return this.room.getScores();
-    }
-
-    public getCurrentFrameNo(): number {
-        return this.room.currentFrameNo;
     }
 
     public setScoreLimit(limit: number): void {
@@ -585,6 +552,7 @@ export class Room {
         textColor: number,
         colors: number[],
     ): void {
+        if (team === 0) return;
         this.room.setTeamColors(team, angle, textColor, colors);
     }
 
@@ -598,11 +566,6 @@ export class Room {
 
     public setRequireRecaptcha(required: boolean): void {
         this.room.setRequireRecaptcha(required);
-    }
-
-    public setProperties(properties: NodeHaxballSetRoomProperties): void {
-        this.room.setProperties(properties);
-        this.invalidateCaches();
     }
 
     public setKickRateLimit(min: number, rate: number, burst: number): void {
@@ -672,359 +635,76 @@ export class Room {
     }
 
     public startRecording(): boolean {
-        return this.room.startRecording();
+        this.room.startRecording();
+        return true;
     }
 
     public stopRecording(): Uint8Array | null {
         return this.room.stopRecording();
     }
 
-    public executeEvent(event: NodeHaxballHaxballEvent, byId: number): void {
-        this.room.executeEvent(event, byId);
-        this.invalidateCaches();
-    }
+    public dispatch(
+        operation: Extract<
+            RoomDispatchOperationObject,
+            { type: "playerLeave" }
+        >,
+    ): DispatchedPlayerIdentity | null;
+    public dispatch(
+        operation: Exclude<
+            RoomDispatchOperationObject,
+            { type: "playerLeave" }
+        >,
+    ): void;
+    public dispatch(
+        operation: RoomDispatchOperationObject,
+    ): DispatchedPlayerIdentity | null | void {
+        const result = this.room.dispatch(operation as never);
 
-    public executeEventWithTarget(
-        event: NodeHaxballHaxballEvent,
-        targetId: number,
-    ): void {
-        this.room.executeEventWithTarget(event, targetId);
-        this.invalidateCaches();
-    }
+        switch (operation.type) {
+            case "playerJoin":
+            case "playerLeave":
+            case "playerTeam":
+            case "playerAvatar":
+            case "playerAdmin":
+            case "teamsLock":
+            case "autoTeams":
+            case "reorderPlayers":
+                this.invalidatePlayerListCache();
+                break;
+            case "kickPlayer":
+            case "startGame":
+            case "stopGame":
+            case "pauseGame":
+            case "customStadium":
+            case "defaultStadium":
+                this.invalidateCaches();
+                break;
+        }
 
-    public clearEvents(): void {
-        this.room.clearEvents();
-    }
+        if (operation.type === "playerTeam") {
+            this.invalidatePlayerDiscCache(operation.playerId);
+        }
 
-    public sendCustomEvent(
-        type: number,
-        data: object,
-        targetId?: number,
-    ): void {
-        this.room.sendCustomEvent(type, data, targetId);
-    }
-
-    public sendBinaryCustomEvent(
-        type: number,
-        data: Uint8Array,
-        targetId?: number,
-    ): void {
-        this.room.sendBinaryCustomEvent(type, data, targetId);
-    }
-
-    public setPlayerIdentity(
-        playerId: number,
-        data: object,
-        targetId?: number,
-    ): void {
-        this.room.setPlayerIdentity(playerId, data, targetId);
-    }
-
-    public fakePlayerJoin(
-        id: number,
-        name: string,
-        flag: string,
-        avatar: string,
-        conn: string,
-        auth: string,
-    ): void {
-        this.room.fakePlayerJoin(id, name, flag, avatar, conn, auth);
-        this.invalidatePlayerListCache();
-    }
-
-    public fakePlayerLeave(playerId: number): FakePlayerIdentity {
-        const player = this.room.fakePlayerLeave(playerId);
-        this.invalidatePlayerListCache();
-        return player;
+        return result ?? null;
     }
 
     public renamePlayer(player: PlayerObject, name: string): void {
-        const identity = this.room.fakePlayerLeave(player.id);
+        const identity = this.dispatch({
+            type: "playerLeave",
+            playerId: player.id,
+        });
+        if (!identity)
+            throw new Error(`Player ${player.id} is not in the room.`);
 
-        this.room.fakePlayerJoin(
-            player.id,
+        this.dispatch({
+            type: "playerJoin",
+            id: player.id,
             name,
-            identity.flag,
-            identity.avatar,
-            identity.conn,
-            identity.auth,
-        );
-        this.invalidatePlayerListCache();
-    }
-
-    public fakeKickPlayer(
-        playerId: number,
-        reason: string | null,
-        ban: boolean,
-        byId: number,
-    ): void {
-        this.room.fakeKickPlayer(playerId, reason, ban, byId);
-        this.invalidateCaches();
-    }
-
-    public leave(): void {
-        this.room.leave();
-        this.invalidateCaches();
-    }
-
-    public setHandicap(handicap: number): void {
-        this.room.setHandicap(handicap);
-    }
-
-    public setChatIndicatorActive(active: boolean): void {
-        this.room.setChatIndicatorActive(active);
-    }
-
-    public setUnlimitedPlayerCount(on: boolean): void {
-        this.room.setUnlimitedPlayerCount(on);
-    }
-
-    public setFakePassword(fakePassword: boolean | null): void {
-        this.room.setFakePassword(fakePassword);
-    }
-
-    public getKeyState(): number {
-        return this.room.getKeyState();
-    }
-
-    public setKeyState(state: number, instant: boolean = true): void {
-        this.room.setKeyState(state, instant);
-    }
-
-    public isGamePaused(): boolean {
-        return this.room.isGamePaused();
-    }
-
-    public autoTeams(): void {
-        this.room.autoTeams();
-        this.invalidatePlayerListCache();
-    }
-
-    public changeTeam(teamId: TeamID): void {
-        this.room.changeTeam(teamId);
-        this.invalidatePlayerListCache();
-    }
-
-    public resetTeam(teamId: TeamID): void {
-        this.room.resetTeam(teamId);
-        this.invalidatePlayerListCache();
-    }
-
-    public resetTeams(): void {
-        this.room.resetTeams();
-        this.invalidatePlayerListCache();
-    }
-
-    public randTeams(): void {
-        this.room.randTeams();
-        this.invalidatePlayerListCache();
-    }
-
-    public setSync(value: boolean): void {
-        this.room.setSync(value);
-    }
-
-    public setCurrentStadium(stadium: NodeHaxballStadium): void {
-        this.room.setCurrentStadium(stadium);
-        this.invalidateCaches();
-    }
-
-    public getBall(extrapolated: boolean = false): NodeHaxballDisc {
-        return this.room.getBall(extrapolated);
-    }
-
-    public getDiscs(extrapolated: boolean = false): NodeHaxballDisc[] {
-        return this.room.getDiscs(extrapolated);
-    }
-
-    public getDisc(
-        discId: number,
-        extrapolated: boolean = false,
-    ): NodeHaxballDisc {
-        return this.room.getDisc(discId, extrapolated);
-    }
-
-    public getPlayerDisc(
-        playerId: number,
-        extrapolated: boolean = false,
-    ): NodeHaxballDisc {
-        return this.room.getPlayerDisc(playerId, extrapolated);
-    }
-
-    public getPlayerDisc_exp(playerId: number): NodeHaxballDisc {
-        return this.room.getPlayerDisc_exp(playerId);
-    }
-
-    public setPluginActive(name: string, active: boolean): void {
-        this.room.setPluginActive(name, active);
-    }
-
-    public startStreaming(
-        params: NodeHaxballStartStreamingParams,
-    ): NodeHaxballStartStreamingReturnValue | null {
-        return this.room.startStreaming(params);
-    }
-
-    public stopStreaming(): void {
-        this.room.stopStreaming();
-    }
-
-    public isRecording(): boolean {
-        return this.room.isRecording();
-    }
-
-    public extrapolate(
-        milliseconds: number,
-        ignoreMultipleCalls: boolean = false,
-    ): object {
-        return this.room.extrapolate(milliseconds, ignoreMultipleCalls);
-    }
-
-    public setConfig(roomConfig: NodeHaxballRoomConfig): void {
-        this.room.setConfig(roomConfig);
-    }
-
-    public mixConfig(roomConfig: NodeHaxballRoomConfig): void {
-        this.room.mixConfig(roomConfig);
-    }
-
-    public addPlugin(plugin: NodeHaxballPlugin): void {
-        this.room.addPlugin(plugin);
-    }
-
-    public movePlugin(pluginIndex: number, newIndex: number): void {
-        this.room.movePlugin(pluginIndex, newIndex);
-    }
-
-    public updatePlugin(pluginIndex: number, plugin: NodeHaxballPlugin): void {
-        this.room.updatePlugin(pluginIndex, plugin);
-    }
-
-    public removePlugin(plugin: NodeHaxballPlugin): void {
-        this.room.removePlugin(plugin);
-    }
-
-    public setRenderer(renderer: NodeHaxballRenderer): void {
-        this.room.setRenderer(renderer);
-    }
-
-    public addLibrary(library: NodeHaxballLibrary): void {
-        this.room.addLibrary(library);
-    }
-
-    public moveLibrary(libraryIndex: number, newIndex: number): void {
-        this.room.moveLibrary(libraryIndex, newIndex);
-    }
-
-    public updateLibrary(
-        libraryIndex: number,
-        library: NodeHaxballLibrary,
-    ): void {
-        this.room.updateLibrary(libraryIndex, library);
-    }
-
-    public removeLibrary(library: NodeHaxballLibrary): void {
-        this.room.removeLibrary(library);
-    }
-
-    public takeSnapshot(): object {
-        return this.room.takeSnapshot();
-    }
-
-    public fakeSendPlayerInput(input: number, byId: number): void {
-        this.room.fakeSendPlayerInput(input, byId);
-    }
-
-    public fakeSendPlayerChat(message: string, byId: number): void {
-        this.room.fakeSendPlayerChat(message, byId);
-    }
-
-    public fakeSetPlayerChatIndicator(value: boolean, byId: number): void {
-        this.room.fakeSetPlayerChatIndicator(value, byId);
-    }
-
-    public fakeSetPlayerAvatar(value: string, byId: number): void {
-        this.room.fakeSetPlayerAvatar(value, byId);
-        this.invalidatePlayerListCache();
-    }
-
-    public fakeSetPlayerAdmin(
-        playerId: number,
-        value: boolean,
-        byId: number,
-    ): void {
-        this.room.fakeSetPlayerAdmin(playerId, value, byId);
-        this.invalidatePlayerListCache();
-    }
-
-    public fakeSetPlayerSync(value: boolean, byId: number): void {
-        this.room.fakeSetPlayerSync(value, byId);
-    }
-
-    public fakeSetStadium(stadium: NodeHaxballStadium, byId: number): void {
-        this.room.fakeSetStadium(stadium, byId);
-        this.invalidateCaches();
-    }
-
-    public fakeStartGame(byId: number): void {
-        this.room.fakeStartGame(byId);
-        this.invalidateCaches();
-    }
-
-    public fakeStopGame(byId: number): void {
-        this.room.fakeStopGame(byId);
-        this.invalidateCaches();
-    }
-
-    public fakeSetGamePaused(value: boolean, byId: number): void {
-        this.room.fakeSetGamePaused(value, byId);
-        this.invalidateCaches();
-    }
-
-    public fakeSetScoreLimit(value: number, byId: number): void {
-        this.room.fakeSetScoreLimit(value, byId);
-    }
-
-    public fakeSetTimeLimit(value: number, byId: number): void {
-        this.room.fakeSetTimeLimit(value, byId);
-    }
-
-    public fakeSetTeamsLock(value: boolean, byId: number): void {
-        this.room.fakeSetTeamsLock(value, byId);
-        this.invalidatePlayerListCache();
-    }
-
-    public fakeAutoTeams(byId: number): void {
-        this.room.fakeAutoTeams(byId);
-        this.invalidatePlayerListCache();
-    }
-
-    public fakeSetPlayerTeam(
-        playerId: number,
-        teamId: TeamID,
-        byId: number,
-    ): void {
-        this.room.fakeSetPlayerTeam(playerId, teamId, byId);
-        this.invalidatePlayerListCache();
-        this.invalidatePlayerDiscCache(playerId);
-    }
-
-    public fakeSetKickRateLimit(
-        min: number,
-        rate: number,
-        burst: number,
-        byId: number,
-    ): void {
-        this.room.fakeSetKickRateLimit(min, rate, burst, byId);
-    }
-
-    public fakeSetTeamColors(
-        teamId: TeamID,
-        angle: number,
-        colors: number[],
-        byId: number,
-    ): void {
-        this.room.fakeSetTeamColors(teamId, angle, colors, byId);
+            flag: identity.flag,
+            avatar: identity.avatar,
+            conn: identity.conn,
+            auth: identity.auth,
+        });
     }
 
     public get collisionFlags(): CollisionFlagsObject {

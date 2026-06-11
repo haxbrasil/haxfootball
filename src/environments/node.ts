@@ -1,4 +1,4 @@
-import Haxball from "@haxball/game";
+import { HBInit } from "@haxbrasil/haxball-rs";
 import { updateRoomModules } from "@core/module";
 import { initI18n } from "@i18n";
 import { env, roomId } from "@env/node";
@@ -9,7 +9,6 @@ async function bootstrap() {
     const { getConfig, createModules } = await import("@room/manual");
     const modules = createModules({ roomId });
 
-    const HBInit: Function = await Haxball;
     const room = HBInit({
         ...getConfig(),
         token: env.TOKEN,
