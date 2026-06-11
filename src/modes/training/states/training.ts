@@ -269,7 +269,7 @@ export function Training() {
                 });
             }
 
-            $.fakeSendPlayerInput(0, player.id);
+            $.dispatch({ type: "playerInput", playerId: player.id, input: 0 });
             $.setPlayerDiscProperties(player.id, {
                 x: playerSpawn.x,
                 y: playerSpawn.y,
@@ -368,7 +368,7 @@ export function Training() {
                 });
             }
 
-            $.fakeSendPlayerInput(0, player.id);
+            $.dispatch({ type: "playerInput", playerId: player.id, input: 0 });
             $.setPlayerDiscProperties(player.id, {
                 x: playerSpawn.x,
                 y: playerSpawn.y,
@@ -489,7 +489,7 @@ export function Training() {
 
     function $blockPlayerInput(playerId: number) {
         $effect(($) => {
-            $.fakeSendPlayerInput(0, playerId);
+            $.dispatch({ type: "playerInput", playerId, input: 0 });
             $.setPlayerDiscProperties(playerId, {
                 xspeed: 0,
                 yspeed: 0,

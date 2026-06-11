@@ -28,6 +28,8 @@ jobs:
               run: corepack enable
 
             - name: Install dependencies
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
               run: pnpm install --frozen-lockfile
 
             - name: Build
@@ -294,6 +296,8 @@ jobs:
               run: corepack enable
 
             - name: Install dependencies
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
               run: pnpm install --frozen-lockfile
 
             - name: Build
@@ -347,6 +351,7 @@ jobs:
               id: package
               env:
                   ASSET_NAME: ${{ steps.staging_version.outputs.asset_name }}
+                  GITHUB_TOKEN: ${{ github.token }}
               run: |
                   package_dir="$RUNNER_TEMP/staging-package"
                   install_dir="$RUNNER_TEMP/staging-install"
