@@ -274,7 +274,7 @@ export function ExtraPointSnap({
     function $retryExtraPointAttempt(
         nextFieldPos: FieldPosition,
         nextDefensiveFouls: number,
-        options?: { disposal?: "IMMEDIATE" | "DELAYED" | "AFTER_RESUME" },
+        options?: { disposal?: "IMMEDIATE" | "DELAYED" | "AFTER_RESUME"; wait?: number },
     ) {
         $next({
             to: "EXTRA_POINT_RETRY",
@@ -500,7 +500,7 @@ export function ExtraPointSnap({
                     });
                 });
                 $retryExtraPointAttempt(nextFieldPos, nextDefensiveFouls, {
-                    disposal: "AFTER_RESUME",
+                    wait: ticks({ seconds: 1 }),
                 });
             },
             onFirstDown(yardsGained) {
@@ -517,7 +517,7 @@ export function ExtraPointSnap({
                     });
                 });
                 $retryExtraPointAttempt(nextFieldPos, nextDefensiveFouls, {
-                    disposal: "AFTER_RESUME",
+                    wait: ticks({ seconds: 1 }),
                 });
             },
             onTouchdown() {

@@ -530,7 +530,7 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: { downState: penaltyResult.downState },
-                    disposal: "AFTER_RESUME",
+                    wait: ticks({ seconds: 1 }),
                 });
             },
             onFirstDown() {
@@ -551,7 +551,7 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: { downState: penaltyResult.downState },
-                    disposal: "AFTER_RESUME",
+                    wait: ticks({ seconds: 1 }),
                 });
             },
             onTouchdown() {
