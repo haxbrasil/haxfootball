@@ -48,7 +48,8 @@ export class IncidentRecorder {
     private records: Array<IncidentRecord & { time: number }> = [];
     private readonly windowMs: number;
     private readonly maxRecords: number;
-    private snapshotProvider: (() => IncidentSnapshot | undefined) | null = null;
+    private snapshotProvider: (() => IncidentSnapshot | undefined) | null =
+        null;
 
     public constructor(options: IncidentRecorderOptions = {}) {
         this.windowMs = options.windowMs ?? DEFAULT_WINDOW_MS;

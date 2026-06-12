@@ -47,12 +47,11 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         roomId: options.roomId,
         sessionStore,
     });
-    const incidents =
-        options.incidentReporter
-            ? createManagedIncidentModule({
-                  reporter: options.incidentReporter,
-              })
-            : null;
+    const incidents = options.incidentReporter
+        ? createManagedIncidentModule({
+              reporter: options.incidentReporter,
+          })
+        : null;
     const downstreamModules = [
         roomEvents,
         matchPersistence.module,

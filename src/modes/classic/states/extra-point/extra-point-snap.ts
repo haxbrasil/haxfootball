@@ -274,7 +274,10 @@ export function ExtraPointSnap({
     function $retryExtraPointAttempt(
         nextFieldPos: FieldPosition,
         nextDefensiveFouls: number,
-        options?: { disposal?: "IMMEDIATE" | "DELAYED" | "AFTER_RESUME"; wait?: number },
+        options?: {
+            disposal?: "IMMEDIATE" | "DELAYED" | "AFTER_RESUME";
+            wait?: number;
+        },
     ) {
         $next({
             to: "EXTRA_POINT_RETRY",

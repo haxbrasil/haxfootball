@@ -152,10 +152,7 @@ declare global {
         onGamePause?: (byPlayer: PlayerObject | null) => void;
         onGameUnpause?: (byPlayer: PlayerObject | null) => void;
         onPlayerActivity?: (player: PlayerObject) => void;
-        onPlayerSyncChange?: (
-            player: PlayerObject,
-            desynced: boolean,
-        ) => void;
+        onPlayerSyncChange?: (player: PlayerObject, desynced: boolean) => void;
         onRoomOperation?: (operation: RoomMethodOperationObject) => void;
         onStadiumChange?: (
             newStadiumName: string | null,

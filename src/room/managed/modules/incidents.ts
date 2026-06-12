@@ -17,7 +17,10 @@ export type RoomIncidentReporter = {
         kind: IncidentKind,
         context?: Parameters<IncidentRecorder["captureIncident"]>[1],
     ): void;
-    flushCrash(kind: Exclude<IncidentKind, "desync">, reason: string): Promise<void>;
+    flushCrash(
+        kind: Exclude<IncidentKind, "desync">,
+        reason: string,
+    ): Promise<void>;
 };
 
 export function createRoomIncidentReporter({

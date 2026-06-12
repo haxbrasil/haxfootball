@@ -226,11 +226,7 @@ export class Module {
     }
 
     onPlayerSyncChange(
-        handler: (
-            room: Room,
-            player: PlayerObject,
-            desynced: boolean,
-        ) => void,
+        handler: (room: Room, player: PlayerObject, desynced: boolean) => void,
     ): this {
         this.events.push(["onPlayerSyncChange", handler]);
         return this;
