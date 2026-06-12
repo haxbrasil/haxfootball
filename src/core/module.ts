@@ -9,6 +9,7 @@ import {
     parseCommandMessage,
 } from "@core/commands";
 import { Room } from "@core/room";
+import type { IncidentRecorder } from "@room/shared/domain/incidents";
 
 export type StadiumChangeHandlerResponse = {
     undo?: boolean;
@@ -224,6 +225,17 @@ export class Module {
         return this;
     }
 
+    onPlayerSyncChange(
+        handler: (
+            room: Room,
+            player: PlayerObject,
+            desynced: boolean,
+        ) => void,
+    ): this {
+        this.events.push(["onPlayerSyncChange", handler]);
+        return this;
+    }
+
     onStadiumChange(
         handler: (
             room: Room,
@@ -313,9 +325,36 @@ export function createModule() {
     return new Module();
 }
 
-export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
+type UpdateRoomModulesOptions = {
+    incidents?: IncidentRecorder;
+};
+
+export function updateRoomModules(
+    roomObject: RoomObject,
+    modules: Module[],
+    options: UpdateRoomModulesOptions = {},
+) {
+    if (options.incidents) {
+        roomObject.onRoomOperation = (operation) => {
+            options.incidents?.record("room-operation", { ...operation });
+        };
+    }
+
     const room = new Room(roomObject);
     let ignoreNextStadiumUndo = false;
+
+    options.incidents?.setSnapshotProvider(() => ({
+        scores: room.getScores(),
+        ball: room.getBallPosition(),
+        discCount: room.getDiscCount(),
+        players: room.getPlayerList().map((player) => ({
+            id: player.id,
+            name: player.name,
+            team: player.team,
+            admin: player.admin,
+            position: player.position ?? null,
+        })),
+    }));
 
     const commandConfigs = modules
         .map((module) => module.getCommandConfig())
@@ -565,6 +604,7 @@ export function updateRoomModules(roomObject: RoomObject, modules: Module[]) {
     roomObject.onGameUnpause = emit("onGameUnpause");
     roomObject.onPositionsReset = emit("onPositionsReset");
     roomObject.onPlayerActivity = emit("onPlayerActivity");
+    roomObject.onPlayerSyncChange = emit("onPlayerSyncChange");
     roomObject.onStadiumChange = emitStadiumChange();
     roomObject.onRoomLink = emit("onRoomLink");
     roomObject.onKickRateLimitSet = emit("onKickRateLimitSet");

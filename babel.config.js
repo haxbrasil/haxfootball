@@ -32,6 +32,7 @@ module.exports = {
                     "@dev": "./src/dev",
                     "@api": "./src/api",
                     "@i18n": "./src/i18n",
+                    "@observability": "./src/observability",
                     "@stadium": "./src/stadium",
                     "@env": "./src/env",
                 },

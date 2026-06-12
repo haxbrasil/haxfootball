@@ -61,6 +61,10 @@ declare global {
     type RoomOperationObject = RoomOperation;
     type RoomOperationKind = RoomOperation["kind"];
     type RoomDispatchOperationObject = RoomDispatchOperation;
+    type RoomMethodOperationObject = {
+        type: string;
+        [key: string]: unknown;
+    };
 
     type ScoresObject = HaxballRsScoresObject;
 
@@ -113,6 +117,8 @@ declare global {
         | "onGamePause"
         | "onGameUnpause"
         | "onPlayerActivity"
+        | "onPlayerSyncChange"
+        | "onRoomOperation"
         | "onStadiumChange"
         | "onKickRateLimitSet"
         | "onTeamsLockChange"
@@ -146,6 +152,11 @@ declare global {
         onGamePause?: (byPlayer: PlayerObject | null) => void;
         onGameUnpause?: (byPlayer: PlayerObject | null) => void;
         onPlayerActivity?: (player: PlayerObject) => void;
+        onPlayerSyncChange?: (
+            player: PlayerObject,
+            desynced: boolean,
+        ) => void;
+        onRoomOperation?: (operation: RoomMethodOperationObject) => void;
         onStadiumChange?: (
             newStadiumName: string | null,
             byPlayer: PlayerObject | null,

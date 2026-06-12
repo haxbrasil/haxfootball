@@ -43,6 +43,16 @@ const roomServerEnvSchema = {
     ROOM_API_ROOM_ID: z.string().trim().min(1).optional(),
     __ROOM_COMM_ID: z.string().trim().min(1).optional(),
     ROOM_COMM_ID: z.string().trim().min(1).optional(),
+    HAXFOOTBALL_INCIDENT_BUFFER_SECONDS: z.coerce
+        .number()
+        .int()
+        .positive()
+        .optional(),
+    HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS: z.coerce
+        .number()
+        .int()
+        .positive()
+        .optional(),
 } satisfies z.ZodRawShape;
 
 export const env = createEnv(
@@ -64,6 +74,10 @@ export const env = createEnv(
                 ? { publicWebBaseUrl: rawEnv.PUBLIC_WEB_BASE_URL }
                 : {}),
             ...(roomId && commId ? { apiReadiness: { roomId, commId } } : {}),
+            incidentBuffer: {
+                seconds: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_SECONDS,
+                maxRecords: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS,
+            },
         };
     },
 );

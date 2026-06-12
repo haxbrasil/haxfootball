@@ -28,6 +28,7 @@
             "@types/*": ["./src/types/*"],
             "@dev/*": ["./src/dev/*"],
             "@i18n": ["./src/i18n.ts"],
+            "@observability/*": ["./src/observability/*"],
             "@common/*": ["./src/common/*"],
             "@api/*": ["./src/api/*"],
             "@env/*": ["./src/env/*"]

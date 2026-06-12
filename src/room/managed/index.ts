@@ -9,9 +9,14 @@ import { createManagedAdminModule } from "./modules/admin";
 import { createAuthenticationModule } from "./modules/authentication";
 import { createManagedLifecycleModule } from "./modules/lifecycle";
 import { createManagedMatchPersistence } from "./modules/match-persistence";
+import {
+    createManagedIncidentModule,
+    type RoomIncidentReporter,
+} from "./modules/incidents";
 import { createManagedRoomEvents } from "./modules/room-events";
 
 type ManagedRoomModulesOptions = {
+    incidentReporter?: RoomIncidentReporter | undefined;
     publicWebBaseUrl?: string | undefined;
     roomId?: string | undefined;
 };
@@ -42,10 +47,17 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         roomId: options.roomId,
         sessionStore,
     });
+    const incidents =
+        options.incidentReporter
+            ? createManagedIncidentModule({
+                  reporter: options.incidentReporter,
+              })
+            : null;
     const downstreamModules = [
         roomEvents,
         matchPersistence.module,
         ...sharedModules,
+        ...(incidents ? [incidents] : []),
         lifecycle,
     ];
 
