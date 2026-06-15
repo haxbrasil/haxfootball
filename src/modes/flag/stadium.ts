@@ -43,7 +43,7 @@ export const COLOR_SCHEMA = mapNestedRecordValues(
     (color: string) => color.slice(1, 7),
 );
 
-export const BALL_RADIUS = 7.85;
+export const BALL_RADIUS = 7;
 export const BALL_COLOR = COLOR_SCHEMA.BALL.DEFAULT;
 export const LOS_BLOCKER_DISC_COUNT = 36;
 
@@ -181,7 +181,7 @@ export const {
         playerPhysics: {
             bCoef: 0.75,
             invMass: 1e26,
-            kickStrength: 5.6,
+            kickStrength: 6,
         },
         cameraFollow: "player",
         ballPhysics: {
