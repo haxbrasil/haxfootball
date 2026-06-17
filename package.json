@@ -1,6 +1,6 @@
 {
     "name": "@haxbrasil/haxfootball",
-    "version": "1.0.45",
+    "version": "1.0.46",
     "description": "HaxBall headless room package for room-server",
     "packageManager": "pnpm@11.0.9",
     "main": "dist/environments/room-server.js",
@@ -46,7 +46,7 @@
         "vitest": "^4.1.6"
     },
     "dependencies": {
-        "@haxbrasil/haxball-rs": "0.1.6",
+        "@haxbrasil/haxball-rs": "0.1.7",
         "@haxbrasil/haxfootball-api-sdk": "github:haxbrasil/haxfootball-api-sdk",
         "@lingui/core": "^5.9.5",
         "@peculiar/webcrypto": "^1.5.0",

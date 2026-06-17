@@ -21,8 +21,8 @@ importers:
   .:
     dependencies:
       '@haxbrasil/haxball-rs':
-        specifier: 0.1.6
-        version: 0.1.6
+        specifier: 0.1.7
+        version: 0.1.7
       '@haxbrasil/haxfootball-api-sdk':
         specifier: github:haxbrasil/haxfootball-api-sdk
         version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/14dc62d772f85aa2885e84592fb5525817dabd79
@@ -1146,8 +1146,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@haxbrasil/haxball-rs@0.1.6':
-    resolution: {integrity: sha512-LVe6M09d+LI73sQf0zAhgexi4XLPR8WHNyovP+4BaKtrD89LpCKZentbRDjGdLGCEkwpOd5IuJiu9i0CQsfR2Q==, tarball: https://npm.pkg.github.com/download/@haxbrasil/haxball-rs/0.1.6/2a5a4dae1b3c93bc80e886232eeba4d2d06f7d76}
+  '@haxbrasil/haxball-rs@0.1.7':
+    resolution: {integrity: sha512-WPXoGnzCNuxpSM3zIekvxNEQrU1SjmVQe8qeIV+o1/wQI6oS4kgJylUd7r8cjIIs90eTusSbUcMQGC+dBB9cJA==, tarball: https://npm.pkg.github.com/download/@haxbrasil/haxball-rs/0.1.7/4753776b1aa75cc28e522ecb13662e1f86171ec3}
     engines: {node: '>= 18'}
 
   '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/14dc62d772f85aa2885e84592fb5525817dabd79':
@@ -4161,7 +4161,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@haxbrasil/haxball-rs@0.1.6': {}
+  '@haxbrasil/haxball-rs@0.1.7': {}
 
   '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/14dc62d772f85aa2885e84592fb5525817dabd79': {}
 
