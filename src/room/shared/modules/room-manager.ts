@@ -24,6 +24,7 @@ import {
     setPlayerAfk,
     type RoomManagementAction,
     type RoomManagementMessage,
+    type RoomManagementPlanningOptions,
     type RoomManagementPlayer,
     type RoomManagementSnapshot,
     type RoomManagerEventSink,
@@ -259,7 +260,9 @@ export function createRoomManagerModule({
         const delayMs = Math.max(0, pending.executeAtMs - Date.now());
         pendingTimer = setTimeout(() => {
             pendingTimer = null;
-            planAndExecute(room);
+            planAndExecute(room, {
+                allowPendingVisibleActionExecution: true,
+            });
         }, delayMs);
     };
 
@@ -424,7 +427,10 @@ export function createRoomManagerModule({
         }
     };
 
-    function planAndExecute(room: Room) {
+    function planAndExecute(
+        room: Room,
+        options: RoomManagementPlanningOptions = {},
+    ) {
         try {
             if (ownActionDepth > 0) {
                 replanAfterOwnAction = true;
@@ -449,7 +455,7 @@ export function createRoomManagerModule({
             }
 
             const snapshot = buildSnapshot(room);
-            const decision = planRoomManagement(snapshot, state);
+            const decision = planRoomManagement(snapshot, state, options);
 
             state = decision.state;
             schedulePendingTimer(room);

@@ -143,6 +143,9 @@ describe("planRoomManagement", () => {
                 ),
             }),
             scheduled.state,
+            {
+                allowPendingVisibleActionExecution: true,
+            },
         );
 
         expect(due.actions).toContainEqual({
@@ -152,6 +155,35 @@ describe("planRoomManagement", () => {
         expect(due.actions).toContainEqual({ type: "start-game" });
         expect(due.state.pendingVisibleAction).toBeNull();
         expect(due.state.activeRoster?.players).toHaveLength(8);
+    });
+
+    it("does not execute a due pending mode switch without timer permission", () => {
+        const scheduled = planRoomManagement(
+            createSnapshot({
+                players: Array.from({ length: 8 }, (_, index) =>
+                    createPlayer(index + 1),
+                ),
+            }),
+            createState(),
+        );
+
+        const due = planRoomManagement(
+            createSnapshot({
+                nowMs: 1_000,
+                players: Array.from({ length: 8 }, (_, index) =>
+                    createPlayer(index + 1),
+                ),
+            }),
+            scheduled.state,
+        );
+
+        expect(due.actions).toEqual([]);
+        expect(due.state.pendingVisibleAction).toMatchObject({
+            kind: "mode-sync",
+            desiredMode: "classic",
+            executeAtMs: 1_000,
+        });
+        expect(due.trace.reason).toBe("pending visible action ready");
     });
 
     it("separates a running mode restart into stop and later start decisions", () => {
@@ -179,6 +211,9 @@ describe("planRoomManagement", () => {
                 game: runningTraining,
             }),
             scheduled.state,
+            {
+                allowPendingVisibleActionExecution: true,
+            },
         );
 
         expect(stopDecision.actions).toContainEqual({
@@ -223,6 +258,9 @@ describe("planRoomManagement", () => {
                 }),
             }),
             settleDecision.state,
+            {
+                allowPendingVisibleActionExecution: true,
+            },
         );
 
         expect(startDecision.actions).toContainEqual({
@@ -294,6 +332,9 @@ describe("planRoomManagement", () => {
                 game: liveGame,
             }),
             scheduled.state,
+            {
+                allowPendingVisibleActionExecution: true,
+            },
         );
 
         expect(stillLive.actions).toEqual([]);
@@ -312,6 +353,9 @@ describe("planRoomManagement", () => {
                 },
             }),
             stillLive.state,
+            {
+                allowPendingVisibleActionExecution: true,
+            },
         );
 
         expect(beforePlayStart.actions).toContainEqual({
@@ -338,6 +382,9 @@ describe("planRoomManagement", () => {
                 }),
             }),
             beforePlayStart.state,
+            {
+                allowPendingVisibleActionExecution: true,
+            },
         );
 
         expect(afterStop.actions).toContainEqual({

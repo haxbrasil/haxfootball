@@ -11,6 +11,7 @@ import type {
     RoomManagementAction,
     RoomManagementDecision,
     RoomManagementMessage,
+    RoomManagementPlanningOptions,
     RoomManagementSnapshot,
     RoomManagerState,
 } from "./types";
@@ -18,7 +19,7 @@ import type {
 type MainRule = {
     name: string;
     when(ctx: ManagerContext): boolean;
-    plan(ctx: ManagerContext): RulePlan;
+    plan(ctx: ManagerContext, options?: RoomManagementPlanningOptions): RulePlan;
 };
 
 type RulePlan = {
@@ -850,7 +851,7 @@ const afkWarningClearRule: MainRule = {
 const pendingVisibleActionRule: MainRule = {
     name: "pendingVisibleActionRule",
     when: (ctx) => ctx.state.pendingVisibleAction !== null,
-    plan: (ctx) => {
+    plan: (ctx, { allowPendingVisibleActionExecution = false } = {}) => {
         const pending = ctx.state.pendingVisibleAction;
         if (!pending) {
             return {
@@ -891,6 +892,14 @@ const pendingVisibleActionRule: MainRule = {
                 };
             }
 
+            if (!allowPendingVisibleActionExecution) {
+                return {
+                    actions: [],
+                    state: ctx.state,
+                    reason: "pending visible action ready",
+                };
+            }
+
             if (ctx.snapshot.game.running) {
                 return {
                     actions: [],
@@ -922,6 +931,14 @@ const pendingVisibleActionRule: MainRule = {
                 actions: [],
                 state: ctx.state,
                 reason: "pending visible action waiting",
+            };
+        }
+
+        if (!allowPendingVisibleActionExecution) {
+            return {
+                actions: [],
+                state: ctx.state,
+                reason: "pending visible action ready",
             };
         }
 
@@ -1010,6 +1027,7 @@ export const managerRules = [
 export function planRoomManagement(
     snapshot: RoomManagementSnapshot,
     state: RoomManagerState,
+    options: RoomManagementPlanningOptions = {},
 ): RoomManagementDecision {
     const ctx = deriveManagerContext(snapshot, state);
     const invariantActions = getInvariantActions(ctx);
@@ -1017,7 +1035,7 @@ export function planRoomManagement(
     for (const rule of managerRules) {
         if (!rule.when(ctx)) continue;
 
-        const plan = rule.plan(ctx);
+        const plan = rule.plan(ctx, options);
 
         return {
             actions: [...invariantActions, ...plan.actions],

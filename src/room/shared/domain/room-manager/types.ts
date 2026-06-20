@@ -163,6 +163,10 @@ export type RoomManagementDecision = {
     trace: DecisionTrace;
 };
 
+export type RoomManagementPlanningOptions = {
+    allowPendingVisibleActionExecution?: boolean;
+};
+
 export type RoomManagerEventSink = (event: {
     type: string;
     payload: Record<string, number | string | boolean | null>;
