@@ -310,11 +310,11 @@ function getChatOperationText(message: unknown): string | null {
         return null;
     }
 
-    if (!("text" in message) || typeof message.text !== "string") {
+    if (!("message" in message) || typeof message.message !== "string") {
         return null;
     }
 
-    return message.text;
+    return message.message;
 }
 
 async function resolvePlayerBeforeJoin({
