@@ -217,6 +217,7 @@ export function createRoomManagerModule({
     };
     let teamsLocked = true;
     let pendingTimer: ReturnType<typeof setTimeout> | null = null;
+    let readinessBlockerActive = false;
     let ownActionDepth = 0;
     let replanAfterOwnAction = false;
 
@@ -379,9 +380,14 @@ export function createRoomManagerModule({
                 gameRuntimeStore.setPrePlayTimeoutHold(action.held);
                 return;
             case "set-readiness-blocker":
+                if (readinessBlockerActive === action.active) {
+                    return;
+                }
+
                 runOwnAction(() => {
                     setReadinessBlocker(room, action.active);
                 });
+                readinessBlockerActive = action.active;
                 return;
             case "restore-checkpoint":
                 gameRuntimeStore.restoreCheckpoint(

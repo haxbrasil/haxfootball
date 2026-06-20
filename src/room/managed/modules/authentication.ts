@@ -17,7 +17,7 @@ import type {
     PlayerSession,
     PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
-import { Team } from "@runtime/models";
+import { Team, isFieldTeam } from "@runtime/models";
 
 type PreJoinSession =
     | {
@@ -259,8 +259,46 @@ export function createAuthenticationModule({
                 return false;
             }
 
+            const blockedFieldTarget = getBlockedFieldTarget(
+                state,
+                operation,
+            );
+
+            if (blockedFieldTarget) {
+                room.send({
+                    message: t`🔐 You need to register before you can play. Register in our Discord: ${env.DISCORD_LINK}`,
+                    color: COLOR.SYSTEM,
+                    to: blockedFieldTarget.id,
+                    sound: "notification",
+                });
+
+                return false;
+            }
+
             return true;
         });
+}
+
+function getBlockedFieldTarget(
+    state: AuthenticationState,
+    operation: RoomOperationObject,
+): PlayerObject | null {
+    const movesPlayerToField =
+        operation.kind === "player-team" &&
+        typeof operation.message.team === "number" &&
+        isFieldTeam(operation.message.team);
+    const autoTeamsPlayers = operation.kind === "auto-teams";
+
+    if (!movesPlayerToField && !autoTeamsPlayers) {
+        return null;
+    }
+
+    return (
+        operation.targetPlayers.find((player) => {
+            const session = state.sessionStore.get(player.id);
+            return session?.kind !== "signed-in";
+        }) ?? null
+    );
 }
 
 function handlePendingPlayerChatOperation({
