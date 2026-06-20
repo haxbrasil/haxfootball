@@ -709,6 +709,8 @@ const afkTimerRule: MainRule = {
     when: (ctx) =>
         ctx.snapshot.config.afkActivityDetectionEnabled &&
         ctx.snapshot.game.running &&
+        (ctx.snapshot.game.activeMode === "flag" ||
+            ctx.snapshot.game.activeMode === "classic") &&
         ctx.fieldPlayers.some(
             (player) =>
                 player.playable &&

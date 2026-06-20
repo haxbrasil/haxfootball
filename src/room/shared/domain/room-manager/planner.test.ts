@@ -483,6 +483,48 @@ describe("planRoomManagement", () => {
         expect(decision.state.afkWarningPlayerIds).toEqual([]);
     });
 
+    it("skips automatic AFK timers in Training", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                nowMs: 15_000,
+                players: [createPlayer(1, { team: Team.RED })],
+                game: createGame({
+                    selectedMode: GAME_MODE.TRAINING,
+                    activeMode: GAME_MODE.TRAINING,
+                    running: true,
+                }),
+            }),
+            {
+                ...createState(),
+                activeRoster: {
+                    mode: "training",
+                    startedAtMs: 0,
+                    players: [{ playerId: 1, team: Team.RED, order: 0 }],
+                },
+                lastActivity: [{ playerId: 1, atMs: 0 }],
+            },
+        );
+
+        expect(decision.actions).not.toContainEqual({
+            type: "pause-game",
+            paused: true,
+            reason: "afk-warning",
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "send-message",
+            to: 1,
+            message: { id: "manager.readiness.waiting" },
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "move-player",
+            playerId: 1,
+            team: Team.SPECTATORS,
+            reason: "afk",
+        });
+        expect(decision.state.afkPlayerIds).toEqual([]);
+        expect(decision.state.afkWarningPlayerIds).toEqual([]);
+    });
+
     it("clears readiness without moving inactive players when AFK activity detection is disabled", () => {
         const decision = planRoomManagement(
             createSnapshot({
