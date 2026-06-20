@@ -54,6 +54,8 @@ type AuthenticationState = {
 };
 
 const SIGN_IN_TIMEOUT_MS = 30_000;
+const PASSWORD_MIN_LENGTH = 4;
+const PASSWORD_MAX_LENGTH = 19;
 
 export function createAuthenticationModule({
     roomId,
@@ -444,6 +446,19 @@ function handlePasswordAttempt({
         room.send({
             message: t`🔐 Type your password in chat to sign in.`,
             color: COLOR.SYSTEM,
+            to: player.id,
+            sound: "notification",
+        });
+        return;
+    }
+
+    if (
+        trimmedPassword.length < PASSWORD_MIN_LENGTH ||
+        trimmedPassword.length > PASSWORD_MAX_LENGTH
+    ) {
+        room.send({
+            message: t`❌ Incorrect password. Try again.`,
+            color: COLOR.ERROR,
             to: player.id,
             sound: "notification",
         });
