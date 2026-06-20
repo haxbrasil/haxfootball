@@ -413,15 +413,17 @@ export function Training() {
                 laneState.competitorId = player.id;
                 laneState.competitorTeam = player.team;
                 laneState.inputBlockedUntilTick = null;
+                const announce =
+                    previousCompetitorId === null
+                        ? "assignment"
+                        : "replacement";
+
                 $resetLane({
                     lane,
                     laneIndex,
                     laneState,
                     player,
-                    announce:
-                        previousCompetitorId === null
-                            ? "assignment"
-                            : "replacement",
+                    announce,
                 });
             }
         });

@@ -1,4 +1,5 @@
 import { getConfig } from "@room/shared/domain/config";
+import { env } from "@env/room";
 import { createSharedRoomModules } from "@room/shared/modules";
 import { createRoomSetupModule } from "@room/shared/modules/room-setup";
 import { createPlayerSessionStore } from "@room/shared/domain/player-sessions";
@@ -13,12 +14,17 @@ import {
     createManagedIncidentModule,
     type RoomIncidentReporter,
 } from "./modules/incidents";
-import { createManagedRoomEvents } from "./modules/room-events";
+import {
+    createManagedRoomEvents,
+    createManagedRoomManagerEventSink,
+} from "./modules/room-events";
 
 type ManagedRoomModulesOptions = {
     incidentReporter?: RoomIncidentReporter | undefined;
     publicWebBaseUrl?: string | undefined;
     roomId?: string | undefined;
+    roomManagerAfkActivityDetectionEnabled?: boolean | undefined;
+    roomManagerEnabled?: boolean | undefined;
 };
 
 export { getConfig };
@@ -34,6 +40,9 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         publicWebBaseUrl: options.publicWebBaseUrl,
         sessionStore,
     });
+    const roomManagerLaunchEnabled = options.roomManagerEnabled ?? true;
+    const roomManagerEnabled =
+        env.ROOM_MANAGER_ENABLED ?? roomManagerLaunchEnabled;
     const sharedModules = createSharedRoomModules({
         authorization,
         autoManageNativeAdmins: false,
@@ -41,8 +50,23 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         gameScoreStore,
         getPlayerSession: sessionStore.get,
         matchEvents: matchPersistence.matchEvents,
+        roomManager: {
+            ...(options.roomManagerAfkActivityDetectionEnabled !== undefined
+                ? {
+                      afkActivityDetectionEnabled:
+                          options.roomManagerAfkActivityDetectionEnabled,
+                  }
+                : {}),
+            eventSink: createManagedRoomManagerEventSink({
+                roomId: options.roomId,
+            }),
+            launchEnabled: roomManagerLaunchEnabled,
+            managedRoom: true,
+        },
     });
-    const lifecycle = createManagedLifecycleModule({ gameModeStore });
+    const lifecycle = roomManagerEnabled
+        ? null
+        : createManagedLifecycleModule({ gameModeStore });
     const roomEvents = createManagedRoomEvents({
         roomId: options.roomId,
         sessionStore,
@@ -57,7 +81,7 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         matchPersistence.module,
         ...sharedModules,
         ...(incidents ? [incidents] : []),
-        lifecycle,
+        ...(lifecycle ? [lifecycle] : []),
     ];
 
     return [

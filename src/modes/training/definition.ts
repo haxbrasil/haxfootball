@@ -28,6 +28,9 @@ export const trainingModeDefinition: GameModeDefinition = {
             syncGameScore(_engine, gameScoreStore) {
                 gameScoreStore?.reset();
             },
+            getCompletedResult() {
+                return null;
+            },
             handleGameStop({ gameScoreStore }) {
                 gameScoreStore?.reset();
             },

@@ -20,17 +20,23 @@ import {
     GAME_MODULE_COMMAND_DEFINITIONS,
     handleGameModuleCommand,
 } from "./game-commands";
+import {
+    createIdleGameRuntimeSnapshot,
+    type GameRuntimeStore,
+} from "../domain/game-runtime";
 
 export function createGameModule({
     authorization,
     gameModeStore,
     gameScoreStore,
+    gameRuntimeStore,
     getPlayerSession,
     matchEvents,
 }: {
     authorization: RoomAuthorization;
     gameModeStore: GameModeStore;
     gameScoreStore?: GameScoreStore;
+    gameRuntimeStore?: GameRuntimeStore;
     getPlayerSession: PlayerSessionReader;
     matchEvents?: RuntimeMatchEventSink;
 }): Module {
@@ -79,6 +85,31 @@ export function createGameModule({
         applyGameModeRoomSettings(room, getSelectedModeDefinition());
     };
 
+    const writeGameRuntimeSnapshot = () => {
+        const selectedMode = getSelectedModeDefinition().name;
+
+        if (!engine) {
+            gameRuntimeStore?.set(
+                createIdleGameRuntimeSnapshot(selectedMode, null),
+            );
+            return;
+        }
+
+        gameRuntimeStore?.set({
+            selectedMode,
+            activeMode,
+            running: engine.isRunning(),
+            paused: engine.isPaused(),
+            inspection: engine.getInspection(),
+            diagnosticStateKey: engine.getCurrentStateName(),
+            checkpoints: engine.getCheckpoints(),
+            score: gameScoreStore?.get() ?? null,
+            result: activeMode
+                ? modeRuntimes[activeMode].getCompletedResult()
+                : null,
+        });
+    };
+
     const module = createModule()
         .setCommands({
             spec: { prefix: COMMAND_PREFIX },
@@ -92,6 +123,11 @@ export function createGameModule({
             const modeRuntime = getSelectedRuntime();
             const engineOptionsArgs = matchEvents ? { matchEvents } : {};
 
+            if (engine?.isRunning() && activeMode === mode.name) {
+                writeGameRuntimeSnapshot();
+                return;
+            }
+
             activeMode = mode.name;
             engine = createEngine(
                 room,
@@ -100,7 +136,17 @@ export function createGameModule({
             );
 
             engine.start(mode.start.state, mode.start.params);
+
+            gameRuntimeStore?.setOperations({
+                restoreCheckpoint: (args) => {
+                    engine?.restoreCheckpoint(args);
+                },
+                setPrePlayTimeoutHold: (held) => {
+                    engine?.setPrePlayTimeoutHold(held);
+                },
+            });
             syncGameScore();
+            writeGameRuntimeSnapshot();
         })
         .onGameTick((room) => {
             engine?.tick();
@@ -113,6 +159,8 @@ export function createGameModule({
                     room,
                 });
             }
+
+            writeGameRuntimeSnapshot();
         })
         .onPlayerBallKick((_room, player) => {
             engine?.trackPlayerBallKick(player.id);
@@ -146,6 +194,7 @@ export function createGameModule({
 
             if (handledByEngine) {
                 syncGameScore();
+                writeGameRuntimeSnapshot();
                 return { hideMessage: true };
             }
 
@@ -207,12 +256,18 @@ export function createGameModule({
         .onPlayerTeamChange((_room, changedPlayer, byPlayer) => {
             engine?.handlePlayerTeamChange(changedPlayer, byPlayer);
             syncGameScore();
+            writeGameRuntimeSnapshot();
         })
         .onPlayerLeave((_room, player) => {
             engine?.handlePlayerLeave(player);
             syncGameScore();
+            writeGameRuntimeSnapshot();
         })
         .onGameStop((room) => {
+            const completedResult = activeMode
+                ? modeRuntimes[activeMode].getCompletedResult()
+                : null;
+
             getActiveRuntime().handleGameStop({
                 engine,
                 ...(gameScoreStore ? { gameScoreStore } : {}),
@@ -223,12 +278,20 @@ export function createGameModule({
             engine = null;
             activeMode = null;
             gameScoreStore?.reset();
+            gameRuntimeStore?.reset(
+                createIdleGameRuntimeSnapshot(
+                    getSelectedModeDefinition().name,
+                    completedResult,
+                ),
+            );
         })
         .onGamePause((_room, byPlayer) => {
             engine?.handleGamePause(byPlayer);
+            writeGameRuntimeSnapshot();
         })
         .onGameUnpause((_room, byPlayer) => {
             engine?.handleGameUnpause(byPlayer);
+            writeGameRuntimeSnapshot();
         })
         .onRoomLink((room) => {
             applySelectedModeRoomSettings(room);

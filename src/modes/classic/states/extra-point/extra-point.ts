@@ -44,6 +44,7 @@ import {
     HIKING_DISTANCE_LIMIT,
     MIN_SNAP_DELAY_TICKS,
 } from "@modes/classic/shared/rules/snap";
+import type { GameStateInspection } from "@runtime/inspection";
 
 const LOADING_DURATION = ticks({ seconds: 0.5 });
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
@@ -378,5 +379,13 @@ export function ExtraPoint({
         $handleOffenseCrossedLine(frame);
     }
 
-    return { run, chat, command };
+    function join(_player: GameStatePlayer) {
+        $setInitialPlayerPositions(offensiveTeam, formationBallPos);
+    }
+
+    function inspect(): GameStateInspection {
+        return { continuity: "before-play-start" };
+    }
+
+    return { run, chat, command, join, inspect };
 }

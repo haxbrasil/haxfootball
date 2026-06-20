@@ -3,6 +3,7 @@ import type {
     CommandResponse,
     CommandSpec,
 } from "@core/commands";
+import type { ScoreState } from "@common/game/game";
 import type { Room } from "@core/room";
 import type { StadiumObject } from "@haxball/stadium";
 import type { Engine, EngineOptions, StateRegistry } from "@runtime/engine";
@@ -10,6 +11,7 @@ import type { RuntimeMatchEventSink } from "@runtime/runtime";
 import type { GameScoreStore } from "@room/shared/domain/game-score";
 import type { RoomAuthorization } from "@room/shared/domain/authorization";
 import { GAME_MODE, type GameModeName } from "./game-mode";
+import type { FieldTeam } from "@runtime/models";
 
 export { GAME_MODE };
 export type { GameModeName };
@@ -39,6 +41,17 @@ export type GameModeTickEndContext = {
     room: Room;
 };
 
+export type GameModeCompletedResult = {
+    status: "complete";
+    expectedTimeReached: boolean;
+    overage: boolean;
+    winnerTeam: FieldTeam;
+    loserTeam: FieldTeam;
+    finalScore: ScoreState;
+    reason: string;
+    elapsedSeconds: number;
+};
+
 export type GameModeRuntime = {
     commands: CommandDefinition[];
     createEngineOptions(args: {
@@ -49,6 +62,7 @@ export type GameModeRuntime = {
         engine: Engine<unknown> | null,
         gameScoreStore?: GameScoreStore,
     ): void;
+    getCompletedResult(): GameModeCompletedResult | null;
     handleGameTickEnd?(ctx: GameModeTickEndContext): void;
     handleGameStop(ctx: GameModeStopContext): void;
 };

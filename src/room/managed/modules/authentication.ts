@@ -16,6 +16,7 @@ import type {
     PlayerSession,
     PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
+import { Team } from "@runtime/models";
 
 type PreJoinSession =
     | {
@@ -233,8 +234,14 @@ export function createAuthenticationModule({
                 return false;
             }
 
+            const movesPendingPlayerToSpectators =
+                !actor &&
+                operation.kind === "player-team" &&
+                operation.message.team === Team.SPECTATORS;
+
             if (
                 operation.kind !== "kick-ban" &&
+                !movesPendingPlayerToSpectators &&
                 operation.targetPlayers.some((target) =>
                     isAuthenticationPending(target.id, state),
                 )

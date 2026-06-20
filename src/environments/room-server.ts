@@ -34,6 +34,15 @@ async function bootstrap() {
     const modules = createModules({
         incidentReporter,
         publicWebBaseUrl: env.publicWebBaseUrl,
+        ...(env.roomManagerAfkActivityDetectionEnabled !== undefined
+            ? {
+                  roomManagerAfkActivityDetectionEnabled:
+                      env.roomManagerAfkActivityDetectionEnabled,
+              }
+            : {}),
+        ...(env.roomManagerEnabled !== undefined
+            ? { roomManagerEnabled: env.roomManagerEnabled }
+            : {}),
         roomId: env.apiReadiness?.roomId,
     });
 

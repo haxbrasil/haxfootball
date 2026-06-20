@@ -18,6 +18,7 @@ import {
     type GlobalSchema,
     type GlobalStoreApi,
 } from "@runtime/global";
+import type { GameStateInspection } from "@runtime/inspection";
 
 /**
  * Modes register state factories by string key.
@@ -31,6 +32,7 @@ export interface StateApi {
         player: PlayerObject,
         command: CommandSpec,
     ) => CommandHandleResult | void;
+    inspect?: () => GameStateInspection;
 }
 
 export type StateFactory<SParams = any> = (params: SParams) => StateApi;
@@ -104,6 +106,11 @@ export interface Engine<Cfg = unknown> {
     handlePlayerLeave: (player: PlayerObject) => void;
     getGlobalStateSnapshot: <State = unknown>() => State | null;
     getCurrentStateName: () => string | null;
+    getInspection: () => GameStateInspection | null;
+    getCheckpoints: () => Array<Checkpoint>;
+    restoreCheckpoint: (args?: CheckpointRestoreArgs) => void;
+    setPrePlayTimeoutHold: (held: boolean) => void;
+    isPaused: () => boolean;
     isRunning: () => boolean;
     readonly _configBrand?: Cfg;
 }
@@ -310,6 +317,7 @@ export function createEngine<Cfg>(
     let afterResumeTransition: Transition | null = null;
     let checkpoints: Array<CommittedCheckpoint> = [];
     let pendingCheckpointDrafts: PendingCheckpointDrafts | null = null;
+    let isPrePlayTimeoutHeld = false;
     const globalSchema = opts.globalSchema;
     let globalStore: GlobalStoreApi<any> | null = null;
 
@@ -810,6 +818,7 @@ export function createEngine<Cfg>(
         afterResumeTransition = null;
         checkpoints = [];
         pendingCheckpointDrafts = null;
+        isPrePlayTimeoutHeld = false;
         resetGlobalStore();
 
         const created = createState(name, params, factory);
@@ -845,6 +854,7 @@ export function createEngine<Cfg>(
         afterResumeTransition = null;
         checkpoints = [];
         pendingCheckpointDrafts = null;
+        isPrePlayTimeoutHeld = false;
     }
 
     function tick() {
@@ -922,6 +932,11 @@ export function createEngine<Cfg>(
         sharedTickMutations = createMutationBuffer(room);
 
         try {
+            if (isPaused || isPrePlayTimeoutHeld) {
+                current.stateStartedTick += 1;
+                current.selfStartedTick += 1;
+            }
+
             const currentTickNumber = tickNumber;
 
             const uninstall = installRuntime({
@@ -1135,6 +1150,39 @@ export function createEngine<Cfg>(
         return current?.name ?? null;
     }
 
+    function getInspection(): GameStateInspection | null {
+        if (!current?.api.inspect) return null;
+
+        return current.api.inspect();
+    }
+
+    function getCheckpoints(): Array<Checkpoint> {
+        return listCheckpoints();
+    }
+
+    function restoreCheckpoint(args: CheckpointRestoreArgs = {}): void {
+        const restoredCheckpoint = resolveCheckpoint(args);
+
+        scheduleTransition({
+            ...restoredCheckpoint.transition,
+            isRestore: true,
+            ...(restoredCheckpoint.globalStateSnapshot !== undefined
+                ? {
+                      globalStateSnapshot:
+                          restoredCheckpoint.globalStateSnapshot,
+                  }
+                : {}),
+        });
+    }
+
+    function setPrePlayTimeoutHold(held: boolean): void {
+        isPrePlayTimeoutHeld = held;
+    }
+
+    function getIsPaused(): boolean {
+        return isPaused;
+    }
+
     return {
         start,
         stop,
@@ -1148,6 +1196,11 @@ export function createEngine<Cfg>(
         handlePlayerLeave,
         getGlobalStateSnapshot,
         getCurrentStateName,
+        getInspection,
+        getCheckpoints,
+        restoreCheckpoint,
+        setPrePlayTimeoutHold,
+        isPaused: getIsPaused,
         isRunning,
     };
 }

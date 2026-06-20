@@ -1,4 +1,4 @@
-import type { GameState } from "@runtime/engine";
+import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { $checkpoint, $dispose, $effect, $next, $tick } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { opposite, type FieldPosition } from "@common/game/game";
@@ -33,6 +33,7 @@ import {
     isTooFarFromBall,
     MIN_SNAP_DELAY_TICKS,
 } from "@modes/classic/shared/rules/snap";
+import type { GameStateInspection } from "@runtime/inspection";
 
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
 const EXTRA_POINT_YARD_LINE = 10;
@@ -218,5 +219,13 @@ export function ExtraPointRetry({
         $handleAttemptExpired(frame);
     }
 
-    return { run, chat, command };
+    function join(_player: GameStatePlayer) {
+        $setInitialPlayerPositions(offensiveTeam, formationBallPos);
+    }
+
+    function inspect(): GameStateInspection {
+        return { continuity: "before-play-start" };
+    }
+
+    return { run, chat, command, join, inspect };
 }

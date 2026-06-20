@@ -66,6 +66,9 @@ export const flagModeDefinition: GameModeDefinition = {
 
                 gameScoreStore?.set(snapshot?.scores);
             },
+            getCompletedResult() {
+                return endGame.getCompletedResult();
+            },
             handleGameTickEnd({ engine, gameScoreStore, room }) {
                 const nativeScores = room.getScores();
 

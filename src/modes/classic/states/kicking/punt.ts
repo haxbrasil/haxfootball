@@ -1,4 +1,4 @@
-import type { GameState } from "@runtime/engine";
+import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { Team, type FieldTeam } from "@runtime/models";
 import { distributeOnLine } from "@common/math/geometry";
 import { opposite } from "@common/game/game";
@@ -30,6 +30,7 @@ import type { Config } from "@modes/classic/config";
 import { cn } from "@modes/classic/shared/presentation/message";
 import { PUNT_KICK_TIMEOUT_TICKS } from "@modes/classic/shared/rules/punt";
 import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
+import type { GameStateInspection } from "@runtime/inspection";
 
 const KICKING_TEAM_POSITIONS_OFFSET = {
     start: { x: -50, y: -150 },
@@ -186,5 +187,25 @@ export function Punt({ downState }: { downState: DownState }) {
         });
     }
 
-    return { run, command };
+    function join(player: GameStatePlayer) {
+        if (player.team !== kickingTeam) return;
+
+        $effect(($) => {
+            $.setPlayerDiscProperties(player.id, {
+                x:
+                    ballPos.x +
+                    KICKING_TEAM_POSITIONS_OFFSET.start.x *
+                        (kickingTeam === Team.RED ? 1 : -1),
+                y: 0,
+                xspeed: 0,
+                yspeed: 0,
+            });
+        });
+    }
+
+    function inspect(): GameStateInspection {
+        return { continuity: "before-play-start" };
+    }
+
+    return { run, command, join, inspect };
 }

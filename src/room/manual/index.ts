@@ -10,11 +10,13 @@ import { createGameModeStore } from "@room/shared/domain/game-mode";
 
 type ManualRoomModulesOptions = {
     roomId?: string | undefined;
+    roomManagerAfkActivityDetectionEnabled?: boolean | undefined;
+    roomManagerEnabled?: boolean | undefined;
 };
 
 export { getConfig };
 
-export function createModules(_options: ManualRoomModulesOptions = {}) {
+export function createModules(options: ManualRoomModulesOptions = {}) {
     const sessionStore = createPlayerSessionStore();
     const gameModeStore = createGameModeStore();
     const officialAdmins = createOfficialAdminRegistry();
@@ -35,6 +37,16 @@ export function createModules(_options: ManualRoomModulesOptions = {}) {
             gameModeStore,
             getPlayerSession: sessionStore.get,
             officialAdmins,
+            roomManager: {
+                ...(options.roomManagerAfkActivityDetectionEnabled !== undefined
+                    ? {
+                          afkActivityDetectionEnabled:
+                              options.roomManagerAfkActivityDetectionEnabled,
+                      }
+                    : {}),
+                launchEnabled: options.roomManagerEnabled ?? false,
+                managedRoom: false,
+            },
         }),
     ];
 }

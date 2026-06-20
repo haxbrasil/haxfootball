@@ -36,6 +36,7 @@ import {
     KICKOFF_WARNING_SECONDS_REMAINING,
     KICKOFF_WARNING_TICKS,
 } from "@modes/classic/shared/rules/kickoff";
+import type { GameStateInspection } from "@runtime/inspection";
 
 const KICKOFF_START_LINE = {
     [Team.RED]: {
@@ -226,5 +227,9 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         }
     }
 
-    return { join, run, command };
+    function inspect(): GameStateInspection {
+        return { continuity: "before-play-start" };
+    }
+
+    return { join, run, command, inspect };
 }

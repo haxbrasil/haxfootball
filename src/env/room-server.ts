@@ -14,6 +14,10 @@ const roomServerPropertiesSchema = z.object({
     show_in_room_list: z.boolean(),
     password: z.string().nullable().optional(),
     no_player: z.boolean(),
+    algorithmic_room_management_enabled: z.boolean().optional(),
+    algorithmic_room_management_afk_activity_detection_enabled: z
+        .boolean()
+        .optional(),
 });
 
 const roomServerEnvSchema = {
@@ -78,6 +82,11 @@ export const env = createEnv(
                 seconds: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_SECONDS,
                 maxRecords: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS,
             },
+            roomManagerEnabled:
+                rawEnv.ROOM_PROPERTIES_JSON.algorithmic_room_management_enabled,
+            roomManagerAfkActivityDetectionEnabled:
+                rawEnv.ROOM_PROPERTIES_JSON
+                    .algorithmic_room_management_afk_activity_detection_enabled,
         };
     },
 );

@@ -60,6 +60,7 @@ import {
     HIKE_WARNING_SECONDS_REMAINING,
     HIKE_WARNING_TICKS,
 } from "@modes/flag/shared/rules/snap";
+import type { GameStateInspection } from "@runtime/inspection";
 
 const MIN_DISTANCE = 1;
 const MIN_DOWN = 1;
@@ -581,5 +582,9 @@ export function Presnap({ downState }: { downState: DownState }) {
         }
     }
 
-    return { run, chat, command, join };
+    function inspect(): GameStateInspection {
+        return { continuity: "before-play-start" };
+    }
+
+    return { run, chat, command, join, inspect };
 }

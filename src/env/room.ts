@@ -5,6 +5,8 @@ export const env = createEnv({
     schema: {
         PROXY: z.string().trim().min(1).optional(),
         DEBUG: z.stringbool().default(false),
+        ROOM_MANAGER_ENABLED: z.stringbool().optional(),
+        ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED: z.stringbool().optional(),
         LANGUAGE: z.string().trim().min(1).optional(),
         TUTORIAL_LINK: z
             .string()
