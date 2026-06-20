@@ -7,6 +7,7 @@ import {
 } from "@core/module";
 import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
+import { env } from "@env/room";
 import { t } from "@lingui/core/macro";
 import type {
     ResolveSessionInput,
@@ -698,6 +699,17 @@ function acceptGuest({
     });
 
     releasePlayerJoin(room, playerId, downstreamModules);
+
+    if (!room.getPlayer(playerId)) {
+        return;
+    }
+
+    room.send({
+        message: t`🔐 You need to register before you can play. Register in our Discord: ${env.DISCORD_LINK}`,
+        color: COLOR.SYSTEM,
+        to: playerId,
+        sound: "notification",
+    });
 }
 
 async function acceptSignedIn({

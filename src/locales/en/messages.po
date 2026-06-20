@@ -272,7 +272,7 @@ msgstr "• Disabled: {0}"
 msgid "• Enabled: {0}"
 msgstr "• Enabled: {0}"
 
-#: src/modes/training/states/training.ts:323
+#: src/modes/training/states/training.ts:319
 msgid "↩️ Miss. Your lane reset to 10 targets."
 msgstr "↩️ Miss. Your lane reset to 10 targets."
 
@@ -480,24 +480,24 @@ msgstr "⚠️ Quarterback selection is disabled."
 msgid "⚠️ Select a quarterback with !qb before snapping."
 msgstr "⚠️ Select a quarterback with !qb before snapping."
 
-#: src/room/managed/modules/authentication.ts:582
+#: src/room/managed/modules/authentication.ts:583
 msgid "⚠️ Sign-in is unavailable in this room."
 msgstr "⚠️ Sign-in is unavailable in this room."
 
-#: src/room/managed/modules/authentication.ts:467
-#: src/room/managed/modules/authentication.ts:604
+#: src/room/managed/modules/authentication.ts:468
+#: src/room/managed/modules/authentication.ts:605
 msgid "⚠️ Sign-in is unavailable right now. Try again in a moment."
 msgstr "⚠️ Sign-in is unavailable right now. Try again in a moment."
 
 #. placeholder {0}: ownerModeDefinition.label
 #. placeholder {1}: selectedModeDefinition.label
-#: src/room/shared/modules/game.ts:244
+#: src/room/shared/modules/game.ts:217
 msgid "⚠️ That {0} command is unavailable in {1} mode."
 msgstr "⚠️ That {0} command is unavailable in {1} mode."
 
 #: src/modes/classic/definition/index.ts:305
 #: src/modes/flag/definition/index.ts:308
-#: src/room/shared/modules/game.ts:268
+#: src/room/shared/modules/game.ts:241
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ The game has not been started yet."
 
@@ -542,7 +542,7 @@ msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Usage: !qb [#id|name]."
 
-#: src/room/shared/modules/room-manager.ts:632
+#: src/room/shared/modules/room-manager.ts:594
 msgid "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 msgstr "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 
@@ -600,7 +600,7 @@ msgstr "⚠️ You cannot snap while a teammate is past the LOS."
 
 #: src/modes/classic/definition/index.ts:304
 #: src/modes/flag/definition/index.ts:307
-#: src/room/shared/modules/game.ts:267
+#: src/room/shared/modules/game.ts:240
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ You cannot use that command right now."
 
@@ -631,7 +631,7 @@ msgstr "✅ HaxBall admin mode disabled."
 msgid "✅ HaxBall admin mode enabled."
 msgstr "✅ HaxBall admin mode enabled."
 
-#: src/modes/training/states/training.ts:499
+#: src/modes/training/states/training.ts:484
 msgid "✅ Hit! {clearedTargets}/10 targets cleared."
 msgstr "✅ Hit! {clearedTargets}/10 targets cleared."
 
@@ -644,7 +644,7 @@ msgid "✅ Password updated successfully."
 msgstr "✅ Password updated successfully."
 
 #. placeholder {0}: account.name
-#: src/room/managed/modules/authentication.ts:747
+#: src/room/managed/modules/authentication.ts:759
 msgid "✅ Signed in as {0}."
 msgstr "✅ Signed in as {0}."
 
@@ -712,7 +712,7 @@ msgstr "❌ Illegal touch by {offenderNames} before the kick"
 msgid "❌ Incorrect password."
 msgstr "❌ Incorrect password."
 
-#: src/room/managed/modules/authentication.ts:614
+#: src/room/managed/modules/authentication.ts:615
 msgid "❌ Incorrect password. Try again."
 msgstr "❌ Incorrect password. Try again."
 
@@ -798,11 +798,11 @@ msgid "🎭 {0} sells the fake field goal!"
 msgstr "🎭 {0} sells the fake field goal!"
 
 #. placeholder {0}: player.name
-#: src/modes/training/states/training.ts:315
+#: src/modes/training/states/training.ts:311
 msgid "🎯 {0} enters an open Training lane."
 msgstr "🎯 {0} enters an open Training lane."
 
-#: src/modes/training/states/training.ts:306
+#: src/modes/training/states/training.ts:302
 msgid "🎯 Training lane ready. Clear all 10 targets before everyone else."
 msgstr "🎯 Training lane ready. Clear all 10 targets before everyone else."
 
@@ -833,7 +833,7 @@ msgid "🏃 Quarterback crossed the LOS"
 msgstr "🏃 Quarterback crossed the LOS"
 
 #. placeholder {0}: player.name
-#: src/modes/training/states/training.ts:484
+#: src/modes/training/states/training.ts:469
 msgid "🏆 {0} cleared all 10 Training targets first!"
 msgstr "🏆 {0} cleared all 10 Training targets first!"
 
@@ -958,23 +958,28 @@ msgstr "🔁 Aliases: {formattedAliases}"
 msgid "🔐 Please register and sign in to play. You can stay as a spectator until then."
 msgstr "🔐 Please register and sign in to play. You can stay as a spectator until then."
 
-#: src/room/managed/modules/authentication.ts:168
-#: src/room/managed/modules/authentication.ts:196
-#: src/room/managed/modules/authentication.ts:285
+#: src/room/managed/modules/authentication.ts:169
+#: src/room/managed/modules/authentication.ts:197
+#: src/room/managed/modules/authentication.ts:286
 msgid "🔐 Still checking your account. Please wait a moment."
 msgstr "🔐 Still checking your account. Please wait a moment."
 
-#: src/room/managed/modules/authentication.ts:251
+#: src/room/managed/modules/authentication.ts:252
 msgid "🔐 That player is signing in."
 msgstr "🔐 That player is signing in."
 
-#: src/room/managed/modules/authentication.ts:671
+#: src/room/managed/modules/authentication.ts:672
 msgid "🔐 This name is registered. Type your password in chat to sign in."
 msgstr "🔐 This name is registered. Type your password in chat to sign in."
 
-#: src/room/managed/modules/authentication.ts:444
+#: src/room/managed/modules/authentication.ts:445
 msgid "🔐 Type your password in chat to sign in."
 msgstr "🔐 Type your password in chat to sign in."
+
+#. placeholder {0}: env.DISCORD_LINK
+#: src/room/managed/modules/authentication.ts:708
+msgid "🔐 You need to register before you can play. Register in our Discord: {0}"
+msgstr "🔐 You need to register before you can play. Register in our Discord: {0}"
 
 #. placeholder {0}: formatCommands(adminCommands)
 #: src/room/shared/modules/help.ts:67
@@ -1018,7 +1023,7 @@ msgstr "🧭 Management resumed."
 
 #. placeholder {0}: state.status
 #. placeholder {1}: decision.trace.reason
-#: src/room/shared/modules/room-manager.ts:623
+#: src/room/shared/modules/room-manager.ts:585
 msgid "🧭 Management status: {0}. {1}."
 msgstr "🧭 Management status: {0}. {1}."
 
@@ -1126,7 +1131,7 @@ msgstr "🚪 Punt out of bounds"
 msgid "🚫 Only admins can change the game mode."
 msgstr "🚫 Only admins can change the game mode."
 
-#: src/room/shared/modules/room-manager.ts:565
+#: src/room/shared/modules/room-manager.ts:527
 msgid "🚫 Only admins can use room manager commands."
 msgstr "🚫 Only admins can use room manager commands."
 
@@ -1238,7 +1243,7 @@ msgstr "Blue"
 msgid "Clear all bans"
 msgstr "Clear all bans"
 
-#: src/room/shared/modules/room-manager.ts:681
+#: src/room/shared/modules/room-manager.ts:643
 msgid "Control algorithmic room management"
 msgstr "Control algorithmic room management"
 
@@ -1771,7 +1776,7 @@ msgstr "Show the score"
 msgid "Show the tutorial link"
 msgstr "Show the tutorial link"
 
-#: src/room/managed/modules/authentication.ts:660
+#: src/room/managed/modules/authentication.ts:661
 msgid "Sign-in timed out."
 msgstr "Sign-in timed out."
 
@@ -1784,7 +1789,7 @@ msgstr "their team"
 msgid "Time limit reached with a tied game, overtime is active and the next score wins."
 msgstr "Time limit reached with a tied game, overtime is active and the next score wins."
 
-#: src/room/shared/modules/room-manager.ts:686
+#: src/room/shared/modules/room-manager.ts:648
 msgid "Toggle AFK status"
 msgstr "Toggle AFK status"
 
