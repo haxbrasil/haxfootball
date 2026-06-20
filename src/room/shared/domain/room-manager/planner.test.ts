@@ -522,6 +522,56 @@ describe("planRoomManagement", () => {
         expect(decision.state.readiness).toBeNull();
     });
 
+    it("clears readiness without warning players outside Flag and Classic", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                nowMs: 20_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.TRAINING,
+                    activeMode: GAME_MODE.TRAINING,
+                    running: true,
+                }),
+            }),
+            {
+                ...createState(),
+                readiness: {
+                    matchStartedAtMs: 0,
+                    waitingPlayerIds: [1, 2],
+                    blockerActive: true,
+                    warningSentPlayerIds: [],
+                },
+            },
+        );
+
+        expect(decision.trace.reason).toBe(
+            "readiness cleared outside match mode",
+        );
+        expect(decision.actions).toContainEqual({
+            type: "set-pre-play-timeout-hold",
+            held: false,
+        });
+        expect(decision.actions).toContainEqual({
+            type: "set-readiness-blocker",
+            active: false,
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "send-message",
+            to: 1,
+            message: { id: "manager.readiness.waiting" },
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "move-player",
+            playerId: 1,
+            team: Team.SPECTATORS,
+            reason: "afk",
+        });
+        expect(decision.state.readiness).toBeNull();
+    });
+
     it("replaces a missing active-roster player from the spectator queue", () => {
         const players = Array.from({ length: 8 }, (_, index) =>
             createPlayer(index + 2, {

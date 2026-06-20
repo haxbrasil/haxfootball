@@ -656,6 +656,11 @@ export function createRoomManagerModule({
         .onBeforeOperation((room, operation) => {
             if (ownActionDepth > 0) return true;
 
+            if (operation.kind === "input" && operation.byPlayer) {
+                markActivity(room, operation.byPlayer);
+                return true;
+            }
+
             if (operation.kind === "teams-lock") {
                 teamsLocked = operation.message.locked === true;
 

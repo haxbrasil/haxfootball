@@ -567,6 +567,23 @@ const readinessRule: MainRule = {
             };
         }
 
+        if (
+            ctx.desiredMode !== "flag" &&
+            ctx.desiredMode !== "classic"
+        ) {
+            return {
+                actions: [
+                    { type: "set-pre-play-timeout-hold", held: false },
+                    { type: "set-readiness-blocker", active: false },
+                ],
+                state: {
+                    ...ctx.state,
+                    readiness: null,
+                },
+                reason: "readiness cleared outside match mode",
+            };
+        }
+
         if (!ctx.snapshot.config.afkActivityDetectionEnabled) {
             return {
                 actions: [
