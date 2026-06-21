@@ -39,7 +39,7 @@ type IncidentRecorderOptions = {
     maxRecords?: number;
 };
 
-const DEFAULT_WINDOW_MS = 5_000;
+const DEFAULT_WINDOW_MS = 15_000;
 const DEFAULT_MAX_RECORDS = 2_000;
 const MAX_SANITIZE_DEPTH = 6;
 const SENSITIVE_KEY_PATTERN = /token|jwt|auth|conn|ip|password|secret/i;
@@ -79,6 +79,7 @@ export class IncidentRecorder {
         context: {
             reason?: string;
             playerId?: number;
+            players?: Array<{ id: number; name: string }>;
             tick?: number;
         } = {},
     ): IncidentPayload {

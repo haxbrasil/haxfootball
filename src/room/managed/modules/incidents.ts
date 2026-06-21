@@ -12,6 +12,8 @@ type RoomIncidentReporterOptions = {
     roomId?: string | undefined;
 };
 
+const DESYNC_INCIDENT_GROUP_DELAY_MS = 500;
+
 export type RoomIncidentReporter = {
     captureAndUpload(
         kind: IncidentKind,
@@ -75,12 +77,68 @@ export function createManagedIncidentModule({
     reporter: RoomIncidentReporter;
 }): Module {
     const desyncedPlayers = new Set<number>();
+    const pendingDesyncPlayers = new Map<number, PlayerObject>();
+    const pendingDesyncIncident: {
+        timer: ReturnType<typeof setTimeout> | null;
+    } = {
+        timer: null,
+    };
+
+    function flushPendingDesyncIncident(): void {
+        if (pendingDesyncIncident.timer) {
+            clearTimeout(pendingDesyncIncident.timer);
+            pendingDesyncIncident.timer = null;
+        }
+
+        const players = Array.from(pendingDesyncPlayers.values()).map(
+            (player) => ({
+                id: player.id,
+                name: player.name,
+            }),
+        );
+
+        pendingDesyncPlayers.clear();
+
+        if (players.length === 0) {
+            return;
+        }
+
+        if (players.length === 1) {
+            for (const player of players) {
+                reporter.captureAndUpload("desync", {
+                    playerId: player.id,
+                    players,
+                    reason: `${player.name} reported desync`,
+                });
+            }
+            return;
+        }
+
+        reporter.captureAndUpload("desync", {
+            players,
+            reason: `${players.length} players reported desync together`,
+        });
+    }
+
+    function scheduleDesyncIncident(player: PlayerObject): void {
+        pendingDesyncPlayers.set(player.id, player);
+
+        if (pendingDesyncIncident.timer) {
+            return;
+        }
+
+        pendingDesyncIncident.timer = setTimeout(
+            flushPendingDesyncIncident,
+            DESYNC_INCIDENT_GROUP_DELAY_MS,
+        );
+    }
 
     return createModule()
         .onPlayerLeave((_room, player) => {
             desyncedPlayers.delete(player.id);
         })
         .onGameStop(() => {
+            flushPendingDesyncIncident();
             desyncedPlayers.clear();
         })
         .onPlayerSyncChange((_room, player, desynced) => {
@@ -94,9 +152,6 @@ export function createManagedIncidentModule({
             }
 
             desyncedPlayers.add(player.id);
-            reporter.captureAndUpload("desync", {
-                playerId: player.id,
-                reason: `${player.name} reported desync`,
-            });
+            scheduleDesyncIncident(player);
         });
 }
