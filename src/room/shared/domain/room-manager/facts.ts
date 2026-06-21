@@ -224,7 +224,9 @@ function buildPreservedActiveRoster(
         desiredMode,
         availablePlayers.length,
     );
-    const availablePlayerIds = new Set(availablePlayers.map((player) => player.id));
+    const availablePlayerIds = new Set(
+        availablePlayers.map((player) => player.id),
+    );
     const preservedPlayers = state.activeRoster.players.filter((player) =>
         availablePlayerIds.has(player.playerId),
     );
@@ -319,9 +321,7 @@ export function deriveManagerContext(
         (player) => player.playable,
     );
     const availablePlayers = orderAvailablePlayers(
-        playablePlayers.filter(
-            (player) => !afkPlayerIds.has(player.id),
-        ),
+        playablePlayers.filter((player) => !afkPlayerIds.has(player.id)),
         snapshot,
         state,
     );

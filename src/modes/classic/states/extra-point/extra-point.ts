@@ -66,7 +66,7 @@ function $setInitialPlayerPositions(
 
     $effect(($) => {
         const players = $.getPlayerList().flatMap((player) => {
-            if (!isFieldTeam(player.team)) {
+            if (!isFieldTeam(player.team) || !player.position) {
                 return [];
             }
 

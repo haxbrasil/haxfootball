@@ -3,7 +3,10 @@ import { env } from "@env/room";
 import type { OfficialAdminRegistry } from "../domain/admin-registry";
 import type { RoomAuthorization } from "../domain/authorization";
 import type { GameModeStore } from "../domain/game-mode";
-import type { GameScoreStore } from "../domain/game-score";
+import {
+    createGameScoreStore,
+    type GameScoreStore,
+} from "../domain/game-score";
 import type { PlayerSessionReader } from "../domain/player-sessions";
 import type { RuntimeMatchEventSink } from "@runtime/runtime";
 import type { RoomManagerEventSink } from "../domain/room-manager";
@@ -55,6 +58,7 @@ export function createSharedRoomModules({
         env.ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED ??
         roomManager.afkActivityDetectionEnabled ??
         !env.DEBUG;
+    const effectiveGameScoreStore = gameScoreStore ?? createGameScoreStore();
 
     return [
         createPasswordModule({ authorization }),
@@ -68,7 +72,7 @@ export function createSharedRoomModules({
         createChatLoggingModule(),
         createGameModule({
             authorization,
-            ...(gameScoreStore ? { gameScoreStore } : {}),
+            gameScoreStore: effectiveGameScoreStore,
             gameRuntimeStore,
             gameModeStore,
             getPlayerSession,

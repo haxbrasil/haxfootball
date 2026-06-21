@@ -259,10 +259,7 @@ export function createAuthenticationModule({
                 return false;
             }
 
-            const blockedFieldTarget = getBlockedFieldTarget(
-                state,
-                operation,
-            );
+            const blockedFieldTarget = getBlockedFieldTarget(state, operation);
 
             if (blockedFieldTarget) {
                 room.send({
@@ -854,7 +851,7 @@ function createSessionIdentityFromJoinData(
         roomId,
         roomPlayerId: player.id,
         name: player.name,
-        auth: player.auth,
+        auth: player.auth ?? null,
         conn: player.conn || null,
     };
 }

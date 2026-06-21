@@ -23,7 +23,10 @@ const AFK_EXPIRE_INACTIVE_MS = 20_000;
 type MainRule = {
     name: string;
     when(ctx: ManagerContext): boolean;
-    plan(ctx: ManagerContext, options?: RoomManagementPlanningOptions): RulePlan;
+    plan(
+        ctx: ManagerContext,
+        options?: RoomManagementPlanningOptions,
+    ): RulePlan;
 };
 
 type RulePlan = {
@@ -128,15 +131,15 @@ function getModeSyncActions(
             : [];
 
     if (ctx.desiredMode === "idle") {
-        const stopGameActions: readonly RoomManagementAction[] =
-            ctx.snapshot.game.running
-                ? [
-                      {
-                          type: "stop-game",
-                          reason: "idle",
-                      },
-                  ]
-                : [];
+        const stopGameActions: readonly RoomManagementAction[] = ctx.snapshot
+            .game.running
+            ? [
+                  {
+                      type: "stop-game",
+                      reason: "idle",
+                  },
+              ]
+            : [];
         const spectatorMoveActions = ctx.fieldPlayers.map<RoomManagementAction>(
             (player) => ({
                 type: "move-player",
@@ -265,7 +268,8 @@ function getStateAfterModeSync(ctx: ManagerContext): RoomManagerState {
 function getInvariantActions(
     ctx: ManagerContext,
 ): readonly RoomManagementAction[] {
-    const lockActions: readonly RoomManagementAction[] = ctx.snapshot.teamsLocked
+    const lockActions: readonly RoomManagementAction[] = ctx.snapshot
+        .teamsLocked
         ? []
         : [{ type: "lock-teams" }];
     const ineligiblePlayerActions =
@@ -326,10 +330,7 @@ function getEffectivePlayerInactiveMs(
         playerId,
     );
 
-    if (
-        ctx.state.afkPauseStartedAtMs === null ||
-        baselineInactiveMs === null
-    ) {
+    if (ctx.state.afkPauseStartedAtMs === null || baselineInactiveMs === null) {
         return getPlayerInactiveMs(ctx, playerId);
     }
 
@@ -358,7 +359,10 @@ function clearAfkPauseState(
     state: RoomManagerState,
     nowMs: number,
 ): RoomManagerState {
-    if (state.afkPauseStartedAtMs === null || state.afkPauseBaseline.length === 0) {
+    if (
+        state.afkPauseStartedAtMs === null ||
+        state.afkPauseBaseline.length === 0
+    ) {
         return {
             ...state,
             afkPausedPlayerIds: [],
@@ -656,10 +660,7 @@ const readinessRule: MainRule = {
             };
         }
 
-        if (
-            ctx.desiredMode !== "flag" &&
-            ctx.desiredMode !== "classic"
-        ) {
+        if (ctx.desiredMode !== "flag" && ctx.desiredMode !== "classic") {
             return {
                 actions: [
                     { type: "set-pre-play-timeout-hold", held: false },
@@ -826,7 +827,7 @@ const afkTimerRule: MainRule = {
         const expiredPlayers = inactivePlayers.filter(
             (player) =>
                 getEffectivePlayerInactiveMs(ctx, player.id) >=
-                    AFK_EXPIRE_INACTIVE_MS,
+                AFK_EXPIRE_INACTIVE_MS,
         );
 
         if (expiredPlayers.length > 0) {
@@ -940,24 +941,24 @@ const afkTimerRule: MainRule = {
                         } satisfies RoomManagementAction,
                     ]
                   : [];
-        const publicWarningActions = newlyPausedPlayers.map<
-            RoomManagementAction
-        >((player) => ({
-            type: "send-message",
-            to: "room",
-            message: {
-                id: "manager.afk.public-warning",
-                args: { playerName: player.name },
-            },
-        }));
-        const privateWarningPlayers = prePlay ? reminderPlayers : newWarningPlayers;
-        const privateWarningActions = privateWarningPlayers.map<
-            RoomManagementAction
-        >((player) => ({
-            type: "send-message",
-            to: player.id,
-            message: { id: "manager.afk.warning" },
-        }));
+        const publicWarningActions =
+            newlyPausedPlayers.map<RoomManagementAction>((player) => ({
+                type: "send-message",
+                to: "room",
+                message: {
+                    id: "manager.afk.public-warning",
+                    args: { playerName: player.name },
+                },
+            }));
+        const privateWarningPlayers = prePlay
+            ? reminderPlayers
+            : newWarningPlayers;
+        const privateWarningActions =
+            privateWarningPlayers.map<RoomManagementAction>((player) => ({
+                type: "send-message",
+                to: player.id,
+                message: { id: "manager.afk.warning" },
+            }));
 
         if (
             warningPlayerIds.length === 0 &&
@@ -1000,13 +1001,14 @@ const afkTimerRule: MainRule = {
                           ? ctx.state.afkPauseBaseline
                           : [],
                 afkReminderAt: [
-                    ...ctx.state.afkReminderAt.filter((entry) =>
-                        pausedWarningPlayers.some(
-                            (player) => player.id === entry.playerId,
-                        ) &&
-                        !reminderPlayers.some(
-                            (player) => player.id === entry.playerId,
-                        ),
+                    ...ctx.state.afkReminderAt.filter(
+                        (entry) =>
+                            pausedWarningPlayers.some(
+                                (player) => player.id === entry.playerId,
+                            ) &&
+                            !reminderPlayers.some(
+                                (player) => player.id === entry.playerId,
+                            ),
                     ),
                     ...reminderPlayers.map((player) => ({
                         playerId: player.id,
@@ -1323,7 +1325,9 @@ export function setPlayerAfk(
 ): RoomManagerState {
     const nextManualAfkPlayerIds = afk
         ? Array.from(new Set([...state.manualAfkPlayerIds, playerId]))
-        : state.manualAfkPlayerIds.filter((candidate) => candidate !== playerId);
+        : state.manualAfkPlayerIds.filter(
+              (candidate) => candidate !== playerId,
+          );
 
     return {
         ...state,

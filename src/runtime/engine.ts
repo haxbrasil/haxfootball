@@ -247,10 +247,48 @@ function createGameStatePlayerSnapshot(
     };
 }
 
+function tryCreateGameStatePlayerSnapshot(
+    room: Room,
+    player: PlayerObject,
+    kickerIds: Set<number>,
+): GameStatePlayer | null {
+    if (!isFieldTeam(player.team)) return null;
+
+    const disc = room.getPlayerDiscProperties(player.id);
+    const position = tryResolvePlayerPosition(player, disc);
+    if (!position) return null;
+
+    const radius = disc && typeof disc.radius === "number" ? disc.radius : 0;
+    const team: FieldTeam = player.team === Team.RED ? Team.RED : Team.BLUE;
+
+    return {
+        id: player.id,
+        name: player.name,
+        team,
+        x: position.x,
+        y: position.y,
+        radius,
+        isKickingBall: kickerIds.has(player.id),
+    };
+}
+
 function resolvePlayerPosition(
     player: PlayerObject,
     disc: DiscPropertiesObject | null,
 ): { x: number; y: number } {
+    const position = tryResolvePlayerPosition(player, disc);
+
+    if (position) {
+        return position;
+    }
+
+    throw new Error(`Missing position for player ${player.id}`);
+}
+
+function tryResolvePlayerPosition(
+    player: PlayerObject,
+    disc: DiscPropertiesObject | null,
+): { x: number; y: number } | null {
     if (disc && typeof disc.x === "number" && typeof disc.y === "number") {
         return { x: disc.x, y: disc.y };
     }
@@ -263,7 +301,7 @@ function resolvePlayerPosition(
         return { x: player.position.x, y: player.position.y };
     }
 
-    throw new Error(`Missing position for player ${player.id}`);
+    return null;
 }
 
 function buildGameState(
@@ -310,6 +348,7 @@ export function createEngine<Cfg>(
     let tickNumber = 0;
     let sharedTickMutations: MutationBuffer | null = null;
     let lastGameState: GameState | null = null;
+    let lastStablePlayerSnapshots = new Map<number, GameStatePlayer>();
     let isPaused = false;
     let resumePending = false;
     let isResumeTick = false;
@@ -323,6 +362,44 @@ export function createEngine<Cfg>(
 
     const resetGlobalStore = () => {
         globalStore = globalSchema ? createGlobalStore(globalSchema) : null;
+    };
+
+    const cloneGameStatePlayer = (
+        player: GameStatePlayer,
+    ): GameStatePlayer => ({ ...player });
+
+    const rememberStablePlayerSnapshots = (state: GameState) => {
+        const presentPlayers = room.getPlayerList();
+        const presentIds = new Set(presentPlayers.map((player) => player.id));
+
+        presentPlayers.forEach((player) => {
+            if (!isFieldTeam(player.team)) {
+                lastStablePlayerSnapshots.delete(player.id);
+            }
+        });
+
+        Array.from(lastStablePlayerSnapshots.keys()).forEach((playerId) => {
+            if (!presentIds.has(playerId)) {
+                lastStablePlayerSnapshots.delete(playerId);
+            }
+        });
+
+        state.players.forEach((player) => {
+            lastStablePlayerSnapshots.set(
+                player.id,
+                cloneGameStatePlayer(player),
+            );
+        });
+    };
+
+    const getLastStablePlayerSnapshot = (
+        player: PlayerObject,
+    ): GameStatePlayer | null => {
+        if (!isFieldTeam(player.team)) return null;
+
+        const snapshot = lastStablePlayerSnapshots.get(player.id);
+
+        return snapshot ? cloneGameStatePlayer(snapshot) : null;
     };
 
     function commitCheckpointDrafts(
@@ -811,6 +888,7 @@ export function createEngine<Cfg>(
         pendingTransition = null;
         delayedTransition = null;
         lastGameState = null;
+        lastStablePlayerSnapshots.clear();
         afterResumeDisposers = [];
         resumePending = false;
         isPaused = false;
@@ -847,6 +925,7 @@ export function createEngine<Cfg>(
         pendingTransition = null;
         delayedTransition = null;
         lastGameState = null;
+        lastStablePlayerSnapshots.clear();
         afterResumeDisposers = [];
         resumePending = false;
         isPaused = false;
@@ -996,6 +1075,7 @@ export function createEngine<Cfg>(
             }
 
             lastGameState = gs;
+            rememberStablePlayerSnapshots(gs);
             tickNumber += 1;
         } finally {
             isResumeTick = false;
@@ -1102,7 +1182,16 @@ export function createEngine<Cfg>(
     ) {
         if (!running || !current || !current.api.join) return;
 
-        const snapshot = createGameStatePlayerSnapshot(room, player, kickerSet);
+        if (!isFieldTeam(player.team)) {
+            lastStablePlayerSnapshots.delete(player.id);
+            return;
+        }
+
+        const snapshot = tryCreateGameStatePlayerSnapshot(
+            room,
+            player,
+            kickerSet,
+        );
         if (!snapshot) return;
 
         runOutsideTick(
@@ -1120,20 +1209,35 @@ export function createEngine<Cfg>(
     function handlePlayerLeave(player: PlayerObject) {
         if (!running || !current || !current.api.leave) return;
 
-        const snapshot = createGameStatePlayerSnapshot(room, player, kickerSet);
-        if (!snapshot) return;
+        if (!isFieldTeam(player.team)) {
+            lastStablePlayerSnapshots.delete(player.id);
+            return;
+        }
 
-        runOutsideTick(
-            () => {
-                current!.api.leave!(snapshot);
-            },
-            {
-                allowTransition: true,
-                disposals: current.disposals,
-                checkpointDrafts: current.checkpointDrafts,
-                beforeGameState: lastGameState,
-            },
-        );
+        const snapshot =
+            getLastStablePlayerSnapshot(player) ??
+            tryCreateGameStatePlayerSnapshot(room, player, kickerSet);
+
+        if (!snapshot) {
+            lastStablePlayerSnapshots.delete(player.id);
+            return;
+        }
+
+        try {
+            runOutsideTick(
+                () => {
+                    current!.api.leave!(snapshot);
+                },
+                {
+                    allowTransition: true,
+                    disposals: current.disposals,
+                    checkpointDrafts: current.checkpointDrafts,
+                    beforeGameState: lastGameState,
+                },
+            );
+        } finally {
+            lastStablePlayerSnapshots.delete(player.id);
+        }
     }
 
     function isRunning() {

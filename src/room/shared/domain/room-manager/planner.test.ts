@@ -361,10 +361,7 @@ describe("planRoomManagement", () => {
         const decision = planRoomManagement(
             createSnapshot({
                 visibleActionDelayMs: 0,
-                players: [
-                    createPlayer(1, { team: Team.RED }),
-                    createPlayer(2),
-                ],
+                players: [createPlayer(1, { team: Team.RED }), createPlayer(2)],
                 game: createGame({
                     selectedMode: GAME_MODE.TRAINING,
                     activeMode: GAME_MODE.TRAINING,
@@ -830,9 +827,7 @@ describe("planRoomManagement", () => {
                 afkWarningPlayerIds: [1],
                 afkPausedPlayerIds: [1],
                 afkPauseStartedAtMs: 10_000,
-                afkPauseBaseline: [
-                    { playerId: 2, inactiveMs: 500 },
-                ],
+                afkPauseBaseline: [{ playerId: 2, inactiveMs: 500 }],
                 afkReminderAt: [{ playerId: 1, atMs: 19_000 }],
                 lastActivity: [
                     { playerId: 1, atMs: 19_500 },

@@ -20,8 +20,8 @@ export type PlayerJoinData = {
     name: string;
     flag: string;
     avatar: string;
-    conn: string | null;
-    auth: string | null;
+    conn?: string | null;
+    auth?: string | null;
 };
 
 export type PlayerJoinDataResponse = {

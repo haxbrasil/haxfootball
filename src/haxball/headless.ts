@@ -49,10 +49,10 @@ declare global {
     type RoomGeoLocation = NonNullable<RoomConfig["geo"]>;
     type RoomConfigObject = RoomConfig;
 
-    type PlayerObject = Omit<HaxballRsPlayerObject, "auth"> & {
-        position: Position;
+    type PlayerObject = Omit<HaxballRsPlayerObject, "auth" | "position"> & {
+        position?: Position;
         conn: string;
-        auth?: string | null;
+        auth?: string;
         ip: string;
     };
 
@@ -168,5 +168,6 @@ declare global {
             locked: boolean,
             byPlayer: PlayerObject | null,
         ) => void;
+        setScore(red: number, blue: number): void;
     };
 }

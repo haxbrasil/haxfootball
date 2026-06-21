@@ -63,9 +63,13 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     $setBallUnmoveable();
 
     $effect(($) => {
-        const players = $.getPlayerList()
-            .filter((p) => p.team === forTeam)
-            .map((p) => ({ ...p.position, id: p.id }));
+        const players = $.getPlayerList().flatMap((player) => {
+            if (player.team !== forTeam || !player.position) {
+                return [];
+            }
+
+            return [{ ...player.position, id: player.id }];
+        });
 
         distributeOnLine(players, KICKOFF_START_LINE[forTeam]).forEach(
             ({ id, x, y }) => {

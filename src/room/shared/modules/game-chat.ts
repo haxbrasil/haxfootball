@@ -131,7 +131,7 @@ export function registerGameChatHandlers(
     }: {
         getEngine: () => Engine<unknown> | null;
         getPlayerSession: PlayerSessionReader;
-        syncGameScore(): void;
+        syncGameScore(room: Room): void;
     },
 ): Module {
     return module
@@ -178,7 +178,7 @@ export function registerGameChatHandlers(
                 rawMessage,
                 broadcast,
             );
-            syncGameScore();
+            syncGameScore(room);
 
             if (chatResult.allowBroadcast && !chatResult.sentBeforeHooks) {
                 broadcast();

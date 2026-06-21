@@ -453,6 +453,10 @@ export class Room {
         return this.room.getScores();
     }
 
+    public setScore(red: number, blue: number): void {
+        this.room.setScore(red, blue);
+    }
+
     public setScoreLimit(limit: number): void {
         this.room.setScoreLimit(limit);
     }

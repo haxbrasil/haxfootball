@@ -57,9 +57,14 @@ export function Punt({ downState }: { downState: DownState }) {
 
     $effect(($) => {
         const kickingTeamPlayers = $.getPlayerList()
-            .filter((p) => p.team === kickingTeam)
-            .sort((a, b) => a.position.y - b.position.y)
-            .map((p) => ({ ...p.position, id: p.id }));
+            .flatMap((player) => {
+                if (player.team !== kickingTeam || !player.position) {
+                    return [];
+                }
+
+                return [{ ...player.position, id: player.id }];
+            })
+            .sort((a, b) => a.y - b.y);
 
         distributeOnLine(kickingTeamPlayers, {
             start: {

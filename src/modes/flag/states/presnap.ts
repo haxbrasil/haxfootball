@@ -116,7 +116,7 @@ function $setInitialPlayerPositions({
 
     $effect(($) => {
         const players = $.getPlayerList().flatMap((player) => {
-            if (!isFieldTeam(player.team)) {
+            if (!isFieldTeam(player.team) || !player.position) {
                 return [];
             }
 
@@ -341,7 +341,9 @@ export function Presnap({ downState }: { downState: DownState }) {
                 return;
             }
 
-            const statePlayer = $before().players.find((p) => p.id === player.id);
+            const statePlayer = $before().players.find(
+                (p) => p.id === player.id,
+            );
 
             if (!statePlayer) {
                 return false;

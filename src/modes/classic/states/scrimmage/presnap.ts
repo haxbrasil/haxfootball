@@ -91,7 +91,7 @@ function $setInitialPlayerPositions({
 
     $effect(($) => {
         const players = $.getPlayerList().flatMap((player) => {
-            if (!isFieldTeam(player.team)) {
+            if (!isFieldTeam(player.team) || !player.position) {
                 return [];
             }
 
@@ -143,8 +143,8 @@ export function Presnap({ downState }: { downState: DownState }) {
 
     assert(
         downAndDistance.down >= 1 &&
-        downAndDistance.down <= MAX_DOWNS &&
-        downAndDistance.distance >= 0,
+            downAndDistance.down <= MAX_DOWNS &&
+            downAndDistance.distance >= 0,
         "Invalid down and distance",
     );
 
@@ -168,9 +168,9 @@ export function Presnap({ downState }: { downState: DownState }) {
 
     const initialQuarterbackId = requireQb
         ? $syncPossessionQuarterbackSelection({
-            team: offensiveTeam,
-            players: initialPlayersSnapshot,
-        })
+              team: offensiveTeam,
+              players: initialPlayersSnapshot,
+          })
         : null;
 
     if (requireQb && initialQuarterbackId === null) {
@@ -338,9 +338,9 @@ export function Presnap({ downState }: { downState: DownState }) {
         const state = $before();
         const selectedQuarterbackId = requireQb
             ? $syncPossessionQuarterbackSelection({
-                team: offensiveTeam,
-                players: state.players,
-            })
+                  team: offensiveTeam,
+                  players: state.players,
+              })
             : null;
 
         $setInitialPlayerPositions({
@@ -381,7 +381,9 @@ export function Presnap({ downState }: { downState: DownState }) {
                     ? possessionQuarterback.playerId
                     : null;
 
-            const statePlayer = $before().players.find((p) => p.id === player.id);
+            const statePlayer = $before().players.find(
+                (p) => p.id === player.id,
+            );
 
             if (!statePlayer) {
                 return false;
@@ -806,17 +808,16 @@ export function Presnap({ downState }: { downState: DownState }) {
     function run(state: GameState) {
         const selectedQuarterbackId = requireQb
             ? $syncPossessionQuarterbackSelection({
-                team: offensiveTeam,
-                players: state.players,
-            })
+                  team: offensiveTeam,
+                  players: state.players,
+              })
             : null;
 
         $handleHikeTimeoutWarning(selectedQuarterbackId);
         $handleHikeTimeout();
 
         const kickingQuarterback = state.players.find(
-            (player) =>
-                player.team === offensiveTeam && player.isKickingBall,
+            (player) => player.team === offensiveTeam && player.isKickingBall,
         );
 
         if (kickingQuarterback) {
