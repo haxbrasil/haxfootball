@@ -235,6 +235,82 @@ export function Presnap({ downState }: { downState: DownState }) {
         );
     }
 
+    function $handleSnap(player: GameStatePlayer): false | void {
+        if (player.team !== offensiveTeam) {
+            return;
+        }
+
+        if ($tick().current < MIN_SNAP_DELAY_TICKS) {
+            $effect(($) => {
+                $.send({
+                    message: t`⚠️ Wait a moment before snapping.`,
+                    to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+            });
+
+            return false;
+        }
+
+        if (isTooFarFromBall(player, ballPosWithOffset)) {
+            $effect(($) => {
+                $.send({
+                    message: t`⚠️ You are too far from the ball to snap it.`,
+                    to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+            });
+
+            return false;
+        }
+
+        const offensivePlayersPastLine =
+            getOffensivePlayersBeyondLineOfScrimmage();
+
+        if (offensivePlayersPastLine.length > 0) {
+            $effect(($) => {
+                $.send({
+                    message: t`⚠️ You cannot snap while a teammate is past the LOS.`,
+                    to: player.id,
+                    color: COLOR.CRITICAL,
+                });
+
+                $.send({
+                    message: t`⚠️ You must get back behind the line of scrimmage to allow the snap!`,
+                    to: offensivePlayersPastLine,
+                    sound: "notification",
+                    color: COLOR.CRITICAL,
+                });
+            });
+
+            return false;
+        }
+
+        $effect(($) => {
+            $.send({
+                message: cn(
+                    t`🏈 ${player.name} snaps it`,
+                    t`ball is live`,
+                    t`${BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!`,
+                ),
+                color: COLOR.ACTION,
+            });
+        });
+
+        $global((state) => state.clearSnapProfile());
+        $global((state) =>
+            state.setPossessionQuarterback(player.id, offensiveTeam),
+        );
+
+        $next({
+            to: "SNAP",
+            params: {
+                downState,
+                quarterbackId: player.id,
+            },
+        });
+    }
+
     function join(player: GameStatePlayer) {
         const state = $before();
         const selectedQuarterbackId = getLastQuarterbackId({
@@ -265,75 +341,13 @@ export function Presnap({ downState }: { downState: DownState }) {
                 return;
             }
 
-            if ($tick().current < MIN_SNAP_DELAY_TICKS) {
-                $effect(($) => {
-                    $.send({
-                        message: t`⚠️ Wait a moment before snapping.`,
-                        to: player.id,
-                        color: COLOR.CRITICAL,
-                    });
-                });
+            const statePlayer = $before().players.find((p) => p.id === player.id);
 
+            if (!statePlayer) {
                 return false;
             }
 
-            if (isTooFarFromBall(player.position, ballPosWithOffset)) {
-                $effect(($) => {
-                    $.send({
-                        message: t`⚠️ You are too far from the ball to snap it.`,
-                        to: player.id,
-                        color: COLOR.CRITICAL,
-                    });
-                });
-
-                return false;
-            }
-
-            const offensivePlayersPastLine =
-                getOffensivePlayersBeyondLineOfScrimmage();
-
-            if (offensivePlayersPastLine.length > 0) {
-                $effect(($) => {
-                    $.send({
-                        message: t`⚠️ You cannot snap while a teammate is past the LOS.`,
-                        to: player.id,
-                        color: COLOR.CRITICAL,
-                    });
-
-                    $.send({
-                        message: t`⚠️ You must get back behind the line of scrimmage to allow the snap!`,
-                        to: offensivePlayersPastLine,
-                        sound: "notification",
-                        color: COLOR.CRITICAL,
-                    });
-                });
-
-                return false;
-            }
-
-            $effect(($) => {
-                $.send({
-                    message: cn(
-                        t`🏈 ${player.name} snaps it`,
-                        t`ball is live`,
-                        t`${BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!`,
-                    ),
-                    color: COLOR.ACTION,
-                });
-            });
-
-            $global((state) => state.clearSnapProfile());
-            $global((state) =>
-                state.setPossessionQuarterback(player.id, offensiveTeam),
-            );
-
-            $next({
-                to: "SNAP",
-                params: {
-                    downState,
-                    quarterbackId: player.id,
-                },
-            });
+            return $handleSnap(statePlayer);
         }
     }
 
@@ -578,9 +592,17 @@ export function Presnap({ downState }: { downState: DownState }) {
         });
     }
 
-    function run(_state: GameState) {
+    function run(state: GameState) {
         $handleHikeTimeoutWarning();
         $handleHikeTimeout();
+
+        const kickingQuarterback = state.players.find(
+            (player) => player.team === offensiveTeam && player.isKickingBall,
+        );
+
+        if (kickingQuarterback) {
+            return $handleSnap(kickingQuarterback);
+        }
 
         if (config.flags.losBlocking) {
             $syncLineOfScrimmageBlocking();
