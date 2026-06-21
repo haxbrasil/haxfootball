@@ -78,8 +78,11 @@ export type PlayerActivity = {
 
 export type RoomManagerState = {
     status: RoomManagerStatus;
-    afkPlayerIds: readonly number[];
+    manualAfkPlayerIds: readonly number[];
+    autoAfkPlayerIds: readonly number[];
     afkWarningPlayerIds: readonly number[];
+    afkPausedPlayerIds: readonly number[];
+    afkReminderAt: readonly PlayerActivity[];
     lastActivity: readonly PlayerActivity[];
     activeRoster: ActiveRoster | null;
     lastCompletedResultKey: string | null;
@@ -102,6 +105,10 @@ export type RoomManagementMessage = {
         | "manager.status.resumed"
         | "manager.status.suspended"
         | "manager.afk.marked"
+        | "manager.afk.enabled"
+        | "manager.afk.disabled"
+        | "manager.afk.warning"
+        | "manager.afk.public-warning"
         | "manager.afk.unavailable"
         | "manager.readiness.waiting"
         | "manager.shortage.replaced"
@@ -176,8 +183,11 @@ export const ROOM_MANAGER_DEFAULT_VISIBLE_ACTION_DELAY_MS = 1_000;
 
 export const DEFAULT_ROOM_MANAGER_STATE: RoomManagerState = {
     status: "active",
-    afkPlayerIds: [],
+    manualAfkPlayerIds: [],
+    autoAfkPlayerIds: [],
     afkWarningPlayerIds: [],
+    afkPausedPlayerIds: [],
+    afkReminderAt: [],
     lastActivity: [],
     activeRoster: null,
     lastCompletedResultKey: null,

@@ -326,7 +326,7 @@ export const {
                     radius: 1,
                     invMass: 1,
                     pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_INNER,
+                    color: "transparent",
                     cGroup: [],
                 },
             },

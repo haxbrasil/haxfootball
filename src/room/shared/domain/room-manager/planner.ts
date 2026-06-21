@@ -2,6 +2,7 @@ import { Team, isFieldTeam } from "@runtime/models";
 import {
     deriveManagerContext,
     getCompletedResultKey,
+    isBeforePlayStart,
     needsModeSync,
     type ManagerContext,
 } from "./facts";
@@ -15,6 +16,9 @@ import type {
     RoomManagementSnapshot,
     RoomManagerState,
 } from "./types";
+
+const AFK_WARNING_INACTIVE_MS = 10_000;
+const AFK_EXPIRE_INACTIVE_MS = 20_000;
 
 type MainRule = {
     name: string;
@@ -300,6 +304,17 @@ function getPlayerInactiveMs(ctx: ManagerContext, playerId: number): number {
         ctx.snapshot.nowMs;
 
     return ctx.snapshot.nowMs - lastActivityAt;
+}
+
+function getLastAfkReminderAt(
+    state: RoomManagerState,
+    playerId: number,
+): number | null {
+    const reminder = state.afkReminderAt.find(
+        (entry) => entry.playerId === playerId,
+    );
+
+    return reminder?.atMs ?? null;
 }
 
 const disabledRule: MainRule = {
@@ -638,11 +653,15 @@ const readinessRule: MainRule = {
             (playerId) => !readiness.warningSentPlayerIds.includes(playerId),
         );
         const warningActions =
-            unwarnedPlayerIds.map<RoomManagementAction>((playerId) => ({
-                type: "send-message",
-                to: playerId,
-                message: { id: "manager.readiness.waiting" },
-            }));
+            unwarnedPlayerIds.length > 0
+                ? [
+                      {
+                          type: "send-message",
+                          to: "room",
+                          message: { id: "manager.readiness.waiting" },
+                      } satisfies RoomManagementAction,
+                  ]
+                : [];
         const waitingActions = [...blockerActions, ...warningActions];
 
         if (ctx.snapshot.nowMs - readiness.matchStartedAtMs < 10_000) {
@@ -694,8 +713,11 @@ const readinessRule: MainRule = {
             ],
             state: {
                 ...ctx.state,
-                afkPlayerIds: Array.from(
-                    new Set([...ctx.state.afkPlayerIds, ...waitingPlayerIds]),
+                autoAfkPlayerIds: Array.from(
+                    new Set([
+                        ...ctx.state.autoAfkPlayerIds,
+                        ...waitingPlayerIds,
+                    ]),
                 ),
                 readiness: null,
                 pendingVisibleAction: null,
@@ -716,28 +738,26 @@ const afkTimerRule: MainRule = {
             (player) =>
                 player.playable &&
                 !ctx.afkPlayerIds.has(player.id) &&
-                getPlayerInactiveMs(ctx, player.id) >= 5_000,
+                getPlayerInactiveMs(ctx, player.id) >= AFK_WARNING_INACTIVE_MS,
         ),
     plan: (ctx) => {
+        const prePlay = isBeforePlayStart(ctx.snapshot);
         const inactivePlayers = ctx.fieldPlayers.filter(
             (player) =>
                 player.playable &&
                 !ctx.afkPlayerIds.has(player.id) &&
-                getPlayerInactiveMs(ctx, player.id) >= 5_000,
+                getPlayerInactiveMs(ctx, player.id) >= AFK_WARNING_INACTIVE_MS,
         );
         const expiredPlayers = inactivePlayers.filter(
-            (player) => getPlayerInactiveMs(ctx, player.id) >= 15_000,
+            (player) =>
+                getPlayerInactiveMs(ctx, player.id) >= AFK_EXPIRE_INACTIVE_MS,
         );
 
         if (expiredPlayers.length > 0) {
             const expiredPlayerIds = expiredPlayers.map((player) => player.id);
-            const pauseActions: readonly RoomManagementAction[] = [
-                {
-                    type: "pause-game",
-                    paused: false,
-                    reason: "afk-expired",
-                },
-            ];
+            const remainingWarningPlayerIds = inactivePlayers
+                .map((player) => player.id)
+                .filter((playerId) => !expiredPlayerIds.includes(playerId));
             const expiredPlayerActions =
                 expiredPlayers.flatMap<RoomManagementAction>((player) => [
                     {
@@ -760,19 +780,43 @@ const afkTimerRule: MainRule = {
                         },
                     },
                 ]);
+            const pauseActions =
+                !prePlay && ctx.state.afkPausedPlayerIds.length > 0
+                    ? [
+                          {
+                              type: "pause-game",
+                              paused: false,
+                              reason: "afk-warning-cleared",
+                          } satisfies RoomManagementAction,
+                      ]
+                    : prePlay || ctx.state.afkPausedPlayerIds.length === 0
+                      ? []
+                      : remainingWarningPlayerIds.length === 0
+                        ? [
+                              {
+                                  type: "pause-game",
+                                  paused: false,
+                                  reason: "afk-warning-cleared",
+                              } satisfies RoomManagementAction,
+                          ]
+                        : [];
 
             return {
                 actions: [...pauseActions, ...expiredPlayerActions],
                 state: {
                     ...ctx.state,
-                    afkPlayerIds: Array.from(
+                    autoAfkPlayerIds: Array.from(
                         new Set([
-                            ...ctx.state.afkPlayerIds,
+                            ...ctx.state.autoAfkPlayerIds,
                             ...expiredPlayerIds,
                         ]),
                     ),
-                    afkWarningPlayerIds: ctx.state.afkWarningPlayerIds.filter(
-                        (playerId) => !expiredPlayerIds.includes(playerId),
+                    afkWarningPlayerIds: remainingWarningPlayerIds,
+                    afkPausedPlayerIds: prePlay ? remainingWarningPlayerIds : [],
+                    afkReminderAt: ctx.state.afkReminderAt.filter(
+                        (entry) =>
+                            prePlay &&
+                            remainingWarningPlayerIds.includes(entry.playerId),
                     ),
                     pendingVisibleAction: null,
                 },
@@ -780,13 +824,66 @@ const afkTimerRule: MainRule = {
             };
         }
 
-        const warningPlayerIds = inactivePlayers
-            .map((player) => player.id)
-            .filter(
-                (playerId) => !ctx.state.afkWarningPlayerIds.includes(playerId),
-            );
+        const warningPlayers = inactivePlayers;
+        const warningPlayerIds = warningPlayers.map((player) => player.id);
+        const newWarningPlayers = warningPlayers.filter(
+            (player) => !ctx.state.afkWarningPlayerIds.includes(player.id),
+        );
+        const pausedWarningPlayers = prePlay ? warningPlayers : [];
+        const newlyPausedPlayers = pausedWarningPlayers.filter(
+            (player) => !ctx.state.afkPausedPlayerIds.includes(player.id),
+        );
+        const reminderPlayers = pausedWarningPlayers.filter((player) => {
+            const lastReminderAt = getLastAfkReminderAt(ctx.state, player.id);
 
-        if (warningPlayerIds.length === 0) {
+            return (
+                lastReminderAt === null ||
+                ctx.snapshot.nowMs - lastReminderAt >= 1_000
+            );
+        });
+        const pauseActions =
+            prePlay && newlyPausedPlayers.length > 0
+                ? [
+                      {
+                          type: "pause-game",
+                          paused: true,
+                          reason: "afk-warning",
+                      } satisfies RoomManagementAction,
+                  ]
+                : !prePlay && ctx.state.afkPausedPlayerIds.length > 0
+                  ? [
+                        {
+                            type: "pause-game",
+                            paused: false,
+                            reason: "afk-warning-cleared",
+                        } satisfies RoomManagementAction,
+                    ]
+                  : [];
+        const publicWarningActions = newlyPausedPlayers.map<
+            RoomManagementAction
+        >((player) => ({
+            type: "send-message",
+            to: "room",
+            message: {
+                id: "manager.afk.public-warning",
+                args: { playerName: player.name },
+            },
+        }));
+        const privateWarningPlayers = prePlay ? reminderPlayers : newWarningPlayers;
+        const privateWarningActions = privateWarningPlayers.map<
+            RoomManagementAction
+        >((player) => ({
+            type: "send-message",
+            to: player.id,
+            message: { id: "manager.afk.warning" },
+        }));
+
+        if (
+            warningPlayerIds.length === 0 &&
+            pauseActions.length === 0 &&
+            publicWarningActions.length === 0 &&
+            privateWarningActions.length === 0
+        ) {
             return {
                 actions: [],
                 state: ctx.state,
@@ -796,25 +893,30 @@ const afkTimerRule: MainRule = {
 
         return {
             actions: [
-                {
-                    type: "pause-game",
-                    paused: true,
-                    reason: "afk-warning",
-                },
-                ...warningPlayerIds.map<RoomManagementAction>((playerId) => ({
-                    type: "send-message",
-                    to: playerId,
-                    message: { id: "manager.readiness.waiting" },
-                })),
+                ...pauseActions,
+                ...publicWarningActions,
+                ...privateWarningActions,
             ],
             state: {
                 ...ctx.state,
-                afkWarningPlayerIds: Array.from(
-                    new Set([
-                        ...ctx.state.afkWarningPlayerIds,
-                        ...warningPlayerIds,
-                    ]),
+                afkWarningPlayerIds: warningPlayerIds,
+                afkPausedPlayerIds: pausedWarningPlayers.map(
+                    (player) => player.id,
                 ),
+                afkReminderAt: [
+                    ...ctx.state.afkReminderAt.filter((entry) =>
+                        pausedWarningPlayers.some(
+                            (player) => player.id === entry.playerId,
+                        ) &&
+                        !reminderPlayers.some(
+                            (player) => player.id === entry.playerId,
+                        ),
+                    ),
+                    ...reminderPlayers.map((player) => ({
+                        playerId: player.id,
+                        atMs: ctx.snapshot.nowMs,
+                    })),
+                ],
             },
             reason: "afk warning sent",
         };
@@ -830,19 +932,25 @@ const afkWarningClearRule: MainRule = {
             ctx.fieldPlayers.every(
                 (player) =>
                     !ctx.state.afkWarningPlayerIds.includes(player.id) ||
-                    getPlayerInactiveMs(ctx, player.id) < 5_000,
+                    getPlayerInactiveMs(ctx, player.id) <
+                        AFK_WARNING_INACTIVE_MS,
             )),
     plan: (ctx) => ({
-        actions: [
-            {
-                type: "pause-game",
-                paused: false,
-                reason: "afk-warning-cleared",
-            },
-        ],
+        actions:
+            ctx.state.afkPausedPlayerIds.length > 0
+                ? [
+                      {
+                          type: "pause-game",
+                          paused: false,
+                          reason: "afk-warning-cleared",
+                      } satisfies RoomManagementAction,
+                  ]
+                : [],
         state: {
             ...ctx.state,
             afkWarningPlayerIds: [],
+            afkPausedPlayerIds: [],
+            afkReminderAt: [],
         },
         reason: "afk warning cleared",
     }),
@@ -1069,6 +1177,18 @@ export function recordPlayerActivity(
 ): RoomManagerState {
     return {
         ...state,
+        autoAfkPlayerIds: state.autoAfkPlayerIds.filter(
+            (candidate) => candidate !== playerId,
+        ),
+        afkWarningPlayerIds: state.afkWarningPlayerIds.filter(
+            (candidate) => candidate !== playerId,
+        ),
+        afkPausedPlayerIds: state.afkPausedPlayerIds.filter(
+            (candidate) => candidate !== playerId,
+        ),
+        afkReminderAt: state.afkReminderAt.filter(
+            (entry) => entry.playerId !== playerId,
+        ),
         lastActivity: [
             ...state.lastActivity.filter(
                 (entry) => entry.playerId !== playerId,
@@ -1096,15 +1216,24 @@ export function setPlayerAfk(
     playerId: number,
     afk: boolean,
 ): RoomManagerState {
-    const nextAfkPlayerIds = afk
-        ? Array.from(new Set([...state.afkPlayerIds, playerId]))
-        : state.afkPlayerIds.filter((candidate) => candidate !== playerId);
+    const nextManualAfkPlayerIds = afk
+        ? Array.from(new Set([...state.manualAfkPlayerIds, playerId]))
+        : state.manualAfkPlayerIds.filter((candidate) => candidate !== playerId);
 
     return {
         ...state,
-        afkPlayerIds: nextAfkPlayerIds,
+        manualAfkPlayerIds: nextManualAfkPlayerIds,
+        autoAfkPlayerIds: state.autoAfkPlayerIds.filter(
+            (candidate) => candidate !== playerId,
+        ),
         afkWarningPlayerIds: state.afkWarningPlayerIds.filter(
             (candidate) => candidate !== playerId,
+        ),
+        afkPausedPlayerIds: state.afkPausedPlayerIds.filter(
+            (candidate) => candidate !== playerId,
+        ),
+        afkReminderAt: state.afkReminderAt.filter(
+            (entry) => entry.playerId !== playerId,
         ),
         pendingVisibleAction: null,
     };

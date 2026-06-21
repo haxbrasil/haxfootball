@@ -77,6 +77,13 @@ export function buildDesiredRoster(
     );
     if (rotatedRoster) return rotatedRoster;
 
+    const preservedActiveRoster = buildPreservedActiveRoster(
+        desiredMode,
+        availablePlayers,
+        state,
+    );
+    if (preservedActiveRoster) return preservedActiveRoster;
+
     const rosterSize = getDesiredRosterSize(
         desiredMode,
         availablePlayers.length,
@@ -84,11 +91,39 @@ export function buildDesiredRoster(
     const selectedPlayers = availablePlayers.slice(0, rosterSize);
 
     if (desiredMode === "training") {
-        return selectedPlayers.map((player, index) => ({
-            playerId: player.id,
-            team: index % 2 === 0 ? Team.RED : Team.BLUE,
-            order: index,
-        }));
+        const currentFieldPlayers = selectedPlayers.reduce<
+            Array<{ playerId: number; team: FieldTeam }>
+        >((players, player) => {
+            if (!isFieldTeam(player.team)) return players;
+
+            return [
+                ...players,
+                {
+                    playerId: player.id,
+                    team: player.team === Team.RED ? Team.RED : Team.BLUE,
+                },
+            ];
+        }, []);
+        const spectatorPlayers = selectedPlayers.filter(
+            (player) => !isFieldTeam(player.team),
+        );
+
+        return [
+            ...currentFieldPlayers.map((player, index) => ({
+                playerId: player.playerId,
+                team: player.team,
+                order: index,
+            })),
+            ...spectatorPlayers.map((player, index) => {
+                const order = currentFieldPlayers.length + index;
+
+                return {
+                    playerId: player.id,
+                    team: getTrainingTeam(order),
+                    order,
+                };
+            }),
+        ];
     }
 
     return selectedPlayers.map((player, index) => ({
@@ -177,8 +212,60 @@ function buildCompletedResultRoster(
     ];
 }
 
+function buildPreservedActiveRoster(
+    desiredMode: DesiredRoomMode,
+    availablePlayers: readonly RoomManagementPlayer[],
+    state?: RoomManagerState,
+): readonly RoomRosterPlayer[] | null {
+    if (!state?.activeRoster) return null;
+    if (state.activeRoster.mode !== desiredMode) return null;
+
+    const rosterSize = getDesiredRosterSize(
+        desiredMode,
+        availablePlayers.length,
+    );
+    const availablePlayerIds = new Set(availablePlayers.map((player) => player.id));
+    const preservedPlayers = state.activeRoster.players.filter((player) =>
+        availablePlayerIds.has(player.playerId),
+    );
+
+    if (preservedPlayers.length !== rosterSize) return null;
+
+    return preservedPlayers;
+}
+
 export function getSnakeTeam(index: number): FieldTeam {
     return index % 4 === 0 || index % 4 === 3 ? Team.RED : Team.BLUE;
+}
+
+function getTrainingTeam(index: number): FieldTeam {
+    return index % 2 === 0 ? Team.RED : Team.BLUE;
+}
+
+function orderAvailablePlayers(
+    availablePlayers: readonly RoomManagementPlayer[],
+    snapshot: RoomManagementSnapshot,
+    state: RoomManagerState,
+): readonly RoomManagementPlayer[] {
+    const availablePlayersById = new Map(
+        availablePlayers.map((player) => [player.id, player]),
+    );
+    const activeRosterPlayers =
+        state.activeRoster?.players.flatMap((rosterPlayer) => {
+            const player = availablePlayersById.get(rosterPlayer.playerId);
+
+            return player ? [player] : [];
+        }) ?? [];
+    const activeRosterPlayerIds = new Set(
+        activeRosterPlayers.map((player) => player.id),
+    );
+    const remainingPlayers = snapshot.players.filter(
+        (player) =>
+            availablePlayersById.has(player.id) &&
+            !activeRosterPlayerIds.has(player.id),
+    );
+
+    return [...activeRosterPlayers, ...remainingPlayers];
 }
 
 export function isBeforePlayStart(snapshot: RoomManagementSnapshot): boolean {
@@ -224,12 +311,19 @@ export function deriveManagerContext(
     snapshot: RoomManagementSnapshot,
     state: RoomManagerState,
 ): ManagerContext {
-    const afkPlayerIds = new Set(state.afkPlayerIds);
+    const afkPlayerIds = new Set([
+        ...state.manualAfkPlayerIds,
+        ...state.autoAfkPlayerIds,
+    ]);
     const playablePlayers = snapshot.players.filter(
         (player) => player.playable,
     );
-    const availablePlayers = playablePlayers.filter(
-        (player) => !afkPlayerIds.has(player.id),
+    const availablePlayers = orderAvailablePlayers(
+        playablePlayers.filter(
+            (player) => !afkPlayerIds.has(player.id),
+        ),
+        snapshot,
+        state,
     );
     const fieldPlayers = snapshot.players.filter((player) =>
         isFieldTeam(player.team),

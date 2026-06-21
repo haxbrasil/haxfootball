@@ -1,9 +1,9 @@
-import { i18n } from "@lingui/core";
 import { plural, t } from "@lingui/core/macro";
 import { DownState } from "@modes/flag/shared/rules/down";
 import { FieldPosition, type ScoreState } from "@common/game/game";
 import { FieldTeam, Team } from "@runtime/models";
 import { RED_ZONE_FOUL_LIMIT } from "@modes/flag/shared/rules/penalty";
+export { formatNames } from "@common/presentation/format-names";
 
 export const DIV = t`•`;
 
@@ -21,42 +21,6 @@ export function stringifyRedZoneFouls(redZoneFouls: number): string {
         one: "foul",
         other: "fouls",
     })} for automatic touchdown`;
-}
-
-type ObjectWithName = { name: string };
-
-type ListFormatCtor = new (
-    locales?: string | string[],
-    options?: {
-        localeMatcher?: "lookup" | "best fit";
-        type?: "conjunction" | "disjunction" | "unit";
-        style?: "long" | "short" | "narrow";
-    },
-) => { format: (list: string[]) => string };
-
-export function formatNames(players: ObjectWithName[]): string {
-    const names = players.map((player) => player.name).filter((name) => name);
-
-    if (names.length === 0) return "";
-
-    const ListFormat = (Intl as unknown as { ListFormat?: ListFormatCtor })
-        .ListFormat;
-
-    if (ListFormat) {
-        try {
-            return new ListFormat(i18n.locale, {
-                style: "long",
-                type: "conjunction",
-            }).format(names);
-        } catch {
-            // Fall back to a simple English list below.
-        }
-    }
-
-    if (names.length === 1) return names[0] ?? "";
-    if (names.length === 2) return t`${names[0]!} and ${names[1]!}`;
-
-    return t`${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]!}`;
 }
 
 export function stringifyDownState(downState: DownState): string {

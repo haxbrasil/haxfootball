@@ -137,10 +137,24 @@ function formatManagerMessage(message: RoomManagementMessage): string {
             return t`🧭 Management suspended after manual admin control.`;
         case "manager.afk.marked":
             return t`🧭 You were marked AFK.`;
+        case "manager.afk.enabled":
+            return t`🧭 You are now AFK.`;
+        case "manager.afk.disabled":
+            return t`🧭 You are no longer AFK.`;
+        case "manager.afk.warning":
+            return t`⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators.`;
+        case "manager.afk.public-warning": {
+            const playerName =
+                typeof message.args?.["playerName"] === "string"
+                    ? message.args["playerName"]
+                    : t`A player`;
+
+            return t`⚠️ ${playerName} is AFK. The game is paused until they show activity.`;
+        }
         case "manager.afk.unavailable":
             return t`⚠️ You can only use !afk before the play starts.`;
         case "manager.readiness.waiting":
-            return t`🧭 Waiting for player activity before the first play.`;
+            return t`🧭 Waiting for everyone to demonstrate presence before the first play.`;
         case "manager.shortage.replaced": {
             const missingPlayer = formatPlayerName(
                 message.args?.["missingPlayerName"],
@@ -617,6 +631,8 @@ export function createRoomManagerModule({
         const snapshot = gameRuntimeStore.get();
         const canUseAfk =
             player.team === 0 ||
+            snapshot.activeMode === GAME_MODE.TRAINING ||
+            snapshot.selectedMode === GAME_MODE.TRAINING ||
             snapshot.inspection?.continuity === "before-play-start";
 
         if (!canUseAfk) {
@@ -624,7 +640,7 @@ export function createRoomManagerModule({
             return { hideMessage: true };
         }
 
-        const isAfk = state.afkPlayerIds.includes(player.id);
+        const isAfk = state.manualAfkPlayerIds.includes(player.id);
         state = setPlayerAfk(state, player.id, !isAfk);
         state = recordPlayerActivity(state, player.id, Date.now());
         void eventSink?.({
@@ -633,6 +649,9 @@ export function createRoomManagerModule({
                 playerId: player.id,
                 afk: !isAfk,
             },
+        });
+        sendMessage(room, player.id, {
+            id: !isAfk ? "manager.afk.enabled" : "manager.afk.disabled",
         });
 
         if (!isAfk && player.team !== 0) {
@@ -715,7 +734,10 @@ export function createRoomManagerModule({
                               originalReturnExpiresAtMs: nowMs + 30_000,
                           }
                         : state.shortage,
-                afkPlayerIds: state.afkPlayerIds.filter(
+                manualAfkPlayerIds: state.manualAfkPlayerIds.filter(
+                    (playerId) => playerId !== player.id,
+                ),
+                autoAfkPlayerIds: state.autoAfkPlayerIds.filter(
                     (playerId) => playerId !== player.id,
                 ),
                 afkWarningPlayerIds: state.afkWarningPlayerIds.filter(

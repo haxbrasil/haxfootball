@@ -5,6 +5,7 @@ import type { GameRuntimeSnapshot } from "../game-runtime";
 import {
     DEFAULT_ROOM_MANAGER_STATE,
     planRoomManagement,
+    recordPlayerActivity,
     type RoomManagementPlayer,
     type RoomManagementSnapshot,
     type RoomManagerState,
@@ -12,7 +13,8 @@ import {
 
 const createState = (): RoomManagerState => ({
     ...DEFAULT_ROOM_MANAGER_STATE,
-    afkPlayerIds: [],
+    manualAfkPlayerIds: [],
+    autoAfkPlayerIds: [],
     lastActivity: [],
 });
 
@@ -276,6 +278,85 @@ describe("planRoomManagement", () => {
         });
     });
 
+    it("does not reorganize existing Training teams when a spectator joins", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                visibleActionDelayMs: 0,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                    createPlayer(3),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.TRAINING,
+                    activeMode: GAME_MODE.TRAINING,
+                    running: true,
+                }),
+            }),
+            createState(),
+        );
+
+        expect(decision.actions).toContainEqual({
+            type: "move-player",
+            playerId: 3,
+            team: Team.RED,
+            reason: "mode-roster",
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "move-player",
+            playerId: 1,
+            team: Team.BLUE,
+            reason: "mode-roster",
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "move-player",
+            playerId: 2,
+            team: Team.RED,
+            reason: "mode-roster",
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: { id: "manager.mode.training" },
+        });
+    });
+
+    it("does not reshuffle a stable Flag roster when player list order changes", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                visibleActionDelayMs: 0,
+                players: [
+                    createPlayer(3, { team: Team.RED }),
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(4, { team: Team.BLUE }),
+                    createPlayer(2, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.FLAG,
+                    activeMode: GAME_MODE.FLAG,
+                    running: true,
+                    inspection: { continuity: "before-play-start" },
+                }),
+            }),
+            {
+                ...createState(),
+                activeRoster: {
+                    mode: "flag",
+                    startedAtMs: 0,
+                    players: [
+                        { playerId: 1, team: Team.RED, order: 0 },
+                        { playerId: 2, team: Team.BLUE, order: 1 },
+                        { playerId: 3, team: Team.RED, order: 2 },
+                        { playerId: 4, team: Team.BLUE, order: 3 },
+                    ],
+                },
+            },
+        );
+
+        expect(decision.actions).toEqual([]);
+        expect(decision.trace.reason).toBe("no action");
+    });
+
     it("does not announce the mode again for a Training roster-only sync", () => {
         const decision = planRoomManagement(
             createSnapshot({
@@ -427,10 +508,10 @@ describe("planRoomManagement", () => {
         });
     });
 
-    it("pauses and warns once when an active player is inactive for five seconds", () => {
+    it("warns once when an active player is inactive for ten seconds", () => {
         const decision = planRoomManagement(
             createSnapshot({
-                nowMs: 5_000,
+                nowMs: 10_000,
                 players: [createPlayer(1, { team: Team.RED })],
                 game: createGame({
                     selectedMode: GAME_MODE.CLASSIC,
@@ -451,17 +532,30 @@ describe("planRoomManagement", () => {
         );
 
         expect(decision.actions).toContainEqual({
+            type: "send-message",
+            to: 1,
+            message: { id: "manager.afk.warning" },
+        });
+        expect(decision.actions).toContainEqual({
             type: "pause-game",
             paused: true,
             reason: "afk-warning",
         });
+        expect(decision.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: {
+                id: "manager.afk.public-warning",
+                args: { playerName: "Player 1" },
+            },
+        });
         expect(decision.state.afkWarningPlayerIds).toEqual([1]);
     });
 
-    it("moves and marks AFK when inactivity reaches fifteen seconds", () => {
+    it("moves and marks AFK when inactivity reaches twenty seconds", () => {
         const decision = planRoomManagement(
             createSnapshot({
-                nowMs: 15_000,
+                nowMs: 20_000,
                 players: [createPlayer(1, { team: Team.RED })],
                 game: createGame({
                     selectedMode: GAME_MODE.CLASSIC,
@@ -488,13 +582,13 @@ describe("planRoomManagement", () => {
             team: Team.SPECTATORS,
             reason: "afk",
         });
-        expect(decision.state.afkPlayerIds).toEqual([1]);
+        expect(decision.state.autoAfkPlayerIds).toEqual([1]);
     });
 
     it("skips automatic AFK timers when AFK activity detection is disabled", () => {
         const decision = planRoomManagement(
             createSnapshot({
-                nowMs: 15_000,
+                nowMs: 20_000,
                 afkActivityDetectionEnabled: false,
                 players: [createPlayer(1, { team: Team.RED })],
                 game: createGame({
@@ -516,24 +610,19 @@ describe("planRoomManagement", () => {
         );
 
         expect(decision.actions).not.toContainEqual({
-            type: "pause-game",
-            paused: true,
-            reason: "afk-warning",
-        });
-        expect(decision.actions).not.toContainEqual({
             type: "move-player",
             playerId: 1,
             team: Team.SPECTATORS,
             reason: "afk",
         });
-        expect(decision.state.afkPlayerIds).toEqual([]);
+        expect(decision.state.autoAfkPlayerIds).toEqual([]);
         expect(decision.state.afkWarningPlayerIds).toEqual([]);
     });
 
     it("skips automatic AFK timers in Training", () => {
         const decision = planRoomManagement(
             createSnapshot({
-                nowMs: 15_000,
+                nowMs: 20_000,
                 players: [createPlayer(1, { team: Team.RED })],
                 game: createGame({
                     selectedMode: GAME_MODE.TRAINING,
@@ -553,14 +642,9 @@ describe("planRoomManagement", () => {
         );
 
         expect(decision.actions).not.toContainEqual({
-            type: "pause-game",
-            paused: true,
-            reason: "afk-warning",
-        });
-        expect(decision.actions).not.toContainEqual({
             type: "send-message",
             to: 1,
-            message: { id: "manager.readiness.waiting" },
+            message: { id: "manager.afk.warning" },
         });
         expect(decision.actions).not.toContainEqual({
             type: "move-player",
@@ -568,7 +652,40 @@ describe("planRoomManagement", () => {
             team: Team.SPECTATORS,
             reason: "afk",
         });
-        expect(decision.state.afkPlayerIds).toEqual([]);
+        expect(decision.state.autoAfkPlayerIds).toEqual([]);
+        expect(decision.state.afkWarningPlayerIds).toEqual([]);
+    });
+
+    it("clears warning and auto-afk when the player becomes active again", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                nowMs: 21_000,
+                players: [createPlayer(1, { team: Team.RED })],
+                game: createGame({
+                    selectedMode: GAME_MODE.CLASSIC,
+                    activeMode: GAME_MODE.CLASSIC,
+                    running: true,
+                    inspection: { continuity: "play-started" },
+                }),
+            }),
+            recordPlayerActivity(
+                {
+                    ...createState(),
+                    autoAfkPlayerIds: [1],
+                    afkWarningPlayerIds: [1],
+                    activeRoster: {
+                        mode: "classic",
+                        startedAtMs: 0,
+                        players: [{ playerId: 1, team: Team.RED, order: 0 }],
+                    },
+                    lastActivity: [{ playerId: 1, atMs: 0 }],
+                },
+                1,
+                21_000,
+            ),
+        );
+
+        expect(decision.state.autoAfkPlayerIds).toEqual([]);
         expect(decision.state.afkWarningPlayerIds).toEqual([]);
     });
 
@@ -649,7 +766,7 @@ describe("planRoomManagement", () => {
         });
         expect(decision.actions).not.toContainEqual({
             type: "send-message",
-            to: 1,
+            to: "room",
             message: { id: "manager.readiness.waiting" },
         });
         expect(decision.actions).not.toContainEqual({
