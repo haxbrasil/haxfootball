@@ -306,6 +306,43 @@ function getPlayerInactiveMs(ctx: ManagerContext, playerId: number): number {
     return ctx.snapshot.nowMs - lastActivityAt;
 }
 
+function getAfkPauseBaselineInactiveMs(
+    state: RoomManagerState,
+    playerId: number,
+): number | null {
+    const baseline = state.afkPauseBaseline.find(
+        (entry) => entry.playerId === playerId,
+    );
+
+    return baseline?.inactiveMs ?? null;
+}
+
+function getEffectivePlayerInactiveMs(
+    ctx: ManagerContext,
+    playerId: number,
+): number {
+    const baselineInactiveMs = getAfkPauseBaselineInactiveMs(
+        ctx.state,
+        playerId,
+    );
+
+    if (
+        ctx.state.afkPauseStartedAtMs === null ||
+        baselineInactiveMs === null
+    ) {
+        return getPlayerInactiveMs(ctx, playerId);
+    }
+
+    if (baselineInactiveMs < 1_000) {
+        return baselineInactiveMs;
+    }
+
+    return (
+        baselineInactiveMs +
+        (ctx.snapshot.nowMs - ctx.state.afkPauseStartedAtMs)
+    );
+}
+
 function getLastAfkReminderAt(
     state: RoomManagerState,
     playerId: number,
@@ -315,6 +352,42 @@ function getLastAfkReminderAt(
     );
 
     return reminder?.atMs ?? null;
+}
+
+function clearAfkPauseState(
+    state: RoomManagerState,
+    nowMs: number,
+): RoomManagerState {
+    if (state.afkPauseStartedAtMs === null || state.afkPauseBaseline.length === 0) {
+        return {
+            ...state,
+            afkPausedPlayerIds: [],
+            afkPauseStartedAtMs: null,
+            afkPauseBaseline: [],
+        };
+    }
+
+    return {
+        ...state,
+        afkPausedPlayerIds: [],
+        afkPauseStartedAtMs: null,
+        afkPauseBaseline: [],
+        lastActivity: state.lastActivity.map((activity) => {
+            const baselineInactiveMs = getAfkPauseBaselineInactiveMs(
+                state,
+                activity.playerId,
+            );
+
+            if (baselineInactiveMs === null || baselineInactiveMs >= 1_000) {
+                return activity;
+            }
+
+            return {
+                ...activity,
+                atMs: nowMs - baselineInactiveMs,
+            };
+        }),
+    };
 }
 
 const disabledRule: MainRule = {
@@ -738,7 +811,8 @@ const afkTimerRule: MainRule = {
             (player) =>
                 player.playable &&
                 !ctx.afkPlayerIds.has(player.id) &&
-                getPlayerInactiveMs(ctx, player.id) >= AFK_WARNING_INACTIVE_MS,
+                getEffectivePlayerInactiveMs(ctx, player.id) >=
+                    AFK_WARNING_INACTIVE_MS,
         ),
     plan: (ctx) => {
         const prePlay = isBeforePlayStart(ctx.snapshot);
@@ -746,11 +820,13 @@ const afkTimerRule: MainRule = {
             (player) =>
                 player.playable &&
                 !ctx.afkPlayerIds.has(player.id) &&
-                getPlayerInactiveMs(ctx, player.id) >= AFK_WARNING_INACTIVE_MS,
+                getEffectivePlayerInactiveMs(ctx, player.id) >=
+                    AFK_WARNING_INACTIVE_MS,
         );
         const expiredPlayers = inactivePlayers.filter(
             (player) =>
-                getPlayerInactiveMs(ctx, player.id) >= AFK_EXPIRE_INACTIVE_MS,
+                getEffectivePlayerInactiveMs(ctx, player.id) >=
+                    AFK_EXPIRE_INACTIVE_MS,
         );
 
         if (expiredPlayers.length > 0) {
@@ -800,20 +876,25 @@ const afkTimerRule: MainRule = {
                               } satisfies RoomManagementAction,
                           ]
                         : [];
+            const nextState = prePlay
+                ? {
+                      ...ctx.state,
+                      afkPausedPlayerIds: remainingWarningPlayerIds,
+                  }
+                : clearAfkPauseState(ctx.state, ctx.snapshot.nowMs);
 
             return {
                 actions: [...pauseActions, ...expiredPlayerActions],
                 state: {
-                    ...ctx.state,
+                    ...nextState,
                     autoAfkPlayerIds: Array.from(
                         new Set([
-                            ...ctx.state.autoAfkPlayerIds,
+                            ...nextState.autoAfkPlayerIds,
                             ...expiredPlayerIds,
                         ]),
                     ),
                     afkWarningPlayerIds: remainingWarningPlayerIds,
-                    afkPausedPlayerIds: prePlay ? remainingWarningPlayerIds : [],
-                    afkReminderAt: ctx.state.afkReminderAt.filter(
+                    afkReminderAt: nextState.afkReminderAt.filter(
                         (entry) =>
                             prePlay &&
                             remainingWarningPlayerIds.includes(entry.playerId),
@@ -903,6 +984,21 @@ const afkTimerRule: MainRule = {
                 afkPausedPlayerIds: pausedWarningPlayers.map(
                     (player) => player.id,
                 ),
+                afkPauseStartedAtMs:
+                    prePlay && ctx.state.afkPauseStartedAtMs === null
+                        ? ctx.snapshot.nowMs
+                        : prePlay
+                          ? ctx.state.afkPauseStartedAtMs
+                          : null,
+                afkPauseBaseline:
+                    prePlay && ctx.state.afkPauseStartedAtMs === null
+                        ? ctx.fieldPlayers.map((player) => ({
+                              playerId: player.id,
+                              inactiveMs: getPlayerInactiveMs(ctx, player.id),
+                          }))
+                        : prePlay
+                          ? ctx.state.afkPauseBaseline
+                          : [],
                 afkReminderAt: [
                     ...ctx.state.afkReminderAt.filter((entry) =>
                         pausedWarningPlayers.some(
@@ -932,28 +1028,34 @@ const afkWarningClearRule: MainRule = {
             ctx.fieldPlayers.every(
                 (player) =>
                     !ctx.state.afkWarningPlayerIds.includes(player.id) ||
-                    getPlayerInactiveMs(ctx, player.id) <
+                    getEffectivePlayerInactiveMs(ctx, player.id) <
                         AFK_WARNING_INACTIVE_MS,
             )),
-    plan: (ctx) => ({
-        actions:
-            ctx.state.afkPausedPlayerIds.length > 0
-                ? [
-                      {
-                          type: "pause-game",
-                          paused: false,
-                          reason: "afk-warning-cleared",
-                      } satisfies RoomManagementAction,
-                  ]
-                : [],
-        state: {
-            ...ctx.state,
-            afkWarningPlayerIds: [],
-            afkPausedPlayerIds: [],
-            afkReminderAt: [],
-        },
-        reason: "afk warning cleared",
-    }),
+    plan: (ctx) => {
+        const nextState = clearAfkPauseState(
+            {
+                ...ctx.state,
+                afkWarningPlayerIds: [],
+                afkReminderAt: [],
+            },
+            ctx.snapshot.nowMs,
+        );
+
+        return {
+            actions:
+                ctx.state.afkPausedPlayerIds.length > 0
+                    ? [
+                          {
+                              type: "pause-game",
+                              paused: false,
+                              reason: "afk-warning-cleared",
+                          } satisfies RoomManagementAction,
+                      ]
+                    : [],
+            state: nextState,
+            reason: "afk warning cleared",
+        };
+    },
 };
 
 const pendingVisibleActionRule: MainRule = {
@@ -1186,6 +1288,9 @@ export function recordPlayerActivity(
         afkPausedPlayerIds: state.afkPausedPlayerIds.filter(
             (candidate) => candidate !== playerId,
         ),
+        afkPauseBaseline: state.afkPauseBaseline.filter(
+            (entry) => entry.playerId !== playerId,
+        ),
         afkReminderAt: state.afkReminderAt.filter(
             (entry) => entry.playerId !== playerId,
         ),
@@ -1231,6 +1336,9 @@ export function setPlayerAfk(
         ),
         afkPausedPlayerIds: state.afkPausedPlayerIds.filter(
             (candidate) => candidate !== playerId,
+        ),
+        afkPauseBaseline: state.afkPauseBaseline.filter(
+            (entry) => entry.playerId !== playerId,
         ),
         afkReminderAt: state.afkReminderAt.filter(
             (entry) => entry.playerId !== playerId,

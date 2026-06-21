@@ -585,6 +585,118 @@ describe("planRoomManagement", () => {
         expect(decision.state.autoAfkPlayerIds).toEqual([1]);
     });
 
+    it("does not grow AFK inactivity from pause for players below one second", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                nowMs: 19_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.CLASSIC,
+                    activeMode: GAME_MODE.CLASSIC,
+                    running: true,
+                    paused: true,
+                    inspection: { continuity: "before-play-start" },
+                }),
+            }),
+            {
+                ...createState(),
+                activeRoster: {
+                    mode: "classic",
+                    startedAtMs: 0,
+                    players: [
+                        { playerId: 1, team: Team.RED, order: 0 },
+                        { playerId: 2, team: Team.BLUE, order: 1 },
+                    ],
+                },
+                afkWarningPlayerIds: [1],
+                afkPausedPlayerIds: [1],
+                afkPauseStartedAtMs: 10_000,
+                afkPauseBaseline: [
+                    { playerId: 1, inactiveMs: 10_000 },
+                    { playerId: 2, inactiveMs: 500 },
+                ],
+                lastActivity: [
+                    { playerId: 1, atMs: 0 },
+                    { playerId: 2, atMs: 9_500 },
+                ],
+            },
+        );
+
+        expect(decision.state.afkWarningPlayerIds).toEqual([1]);
+        expect(decision.actions).not.toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: {
+                id: "manager.afk.public-warning",
+                args: { playerName: "Player 2" },
+            },
+        });
+        expect(decision.actions).not.toContainEqual({
+            type: "send-message",
+            to: 2,
+            message: { id: "manager.afk.warning" },
+        });
+    });
+
+    it("keeps AFK inactivity progressing from pause for players at one second or more", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                nowMs: 19_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.CLASSIC,
+                    activeMode: GAME_MODE.CLASSIC,
+                    running: true,
+                    paused: true,
+                    inspection: { continuity: "before-play-start" },
+                }),
+            }),
+            {
+                ...createState(),
+                activeRoster: {
+                    mode: "classic",
+                    startedAtMs: 0,
+                    players: [
+                        { playerId: 1, team: Team.RED, order: 0 },
+                        { playerId: 2, team: Team.BLUE, order: 1 },
+                    ],
+                },
+                afkWarningPlayerIds: [1],
+                afkPausedPlayerIds: [1],
+                afkPauseStartedAtMs: 10_000,
+                afkPauseBaseline: [
+                    { playerId: 1, inactiveMs: 10_000 },
+                    { playerId: 2, inactiveMs: 1_000 },
+                ],
+                lastActivity: [
+                    { playerId: 1, atMs: 0 },
+                    { playerId: 2, atMs: 9_000 },
+                ],
+            },
+        );
+
+        expect(decision.state.afkWarningPlayerIds).toEqual([1, 2]);
+        expect(decision.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: {
+                id: "manager.afk.public-warning",
+                args: { playerName: "Player 2" },
+            },
+        });
+        expect(decision.actions).toContainEqual({
+            type: "send-message",
+            to: 2,
+            message: { id: "manager.afk.warning" },
+        });
+    });
+
     it("skips automatic AFK timers when AFK activity detection is disabled", () => {
         const decision = planRoomManagement(
             createSnapshot({
@@ -687,6 +799,59 @@ describe("planRoomManagement", () => {
 
         expect(decision.state.autoAfkPlayerIds).toEqual([]);
         expect(decision.state.afkWarningPlayerIds).toEqual([]);
+    });
+
+    it("preserves frozen inactivity when an AFK pause is cleared", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                nowMs: 20_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.CLASSIC,
+                    activeMode: GAME_MODE.CLASSIC,
+                    running: true,
+                    paused: true,
+                    inspection: { continuity: "before-play-start" },
+                }),
+            }),
+            {
+                ...createState(),
+                activeRoster: {
+                    mode: "classic",
+                    startedAtMs: 0,
+                    players: [
+                        { playerId: 1, team: Team.RED, order: 0 },
+                        { playerId: 2, team: Team.BLUE, order: 1 },
+                    ],
+                },
+                afkWarningPlayerIds: [1],
+                afkPausedPlayerIds: [1],
+                afkPauseStartedAtMs: 10_000,
+                afkPauseBaseline: [
+                    { playerId: 2, inactiveMs: 500 },
+                ],
+                afkReminderAt: [{ playerId: 1, atMs: 19_000 }],
+                lastActivity: [
+                    { playerId: 1, atMs: 19_500 },
+                    { playerId: 2, atMs: 9_500 },
+                ],
+            },
+        );
+
+        expect(decision.actions).toContainEqual({
+            type: "pause-game",
+            paused: false,
+            reason: "afk-warning-cleared",
+        });
+        expect(decision.state.afkPauseStartedAtMs).toBeNull();
+        expect(decision.state.afkPauseBaseline).toEqual([]);
+        expect(decision.state.lastActivity).toContainEqual({
+            playerId: 2,
+            atMs: 19_500,
+        });
     });
 
     it("clears readiness without moving inactive players when AFK activity detection is disabled", () => {

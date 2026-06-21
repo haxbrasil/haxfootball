@@ -35,9 +35,6 @@ const COLOR_SCHEMA_RAW = {
     },
 } as const;
 
-const FIELD_SCALE = 0.7;
-const scale = (value: number): number => value * FIELD_SCALE;
-
 export const COLOR_SCHEMA = mapNestedRecordValues(
     COLOR_SCHEMA_RAW,
     (color: string) => color.slice(1, 7),
@@ -65,25 +62,25 @@ export const {
 } = buildStadium({
     measures: {
         name: "Flag",
-        size: { width: scale(1090), height: scale(395) },
-        field: { width: scale(1860), height: scale(532) },
-        endZones: { depth: scale(155) },
-        goal: { width: scale(120) },
+        size: { width: 610.4, height: 276.5 },
+        field: { width: 1041.6, height: 372.4 },
+        endZones: { depth: 86.8 },
+        goal: { width: 67.2 },
         yard: {
-            length: scale(15.5),
+            length: 8.68,
             lines: {
                 intervalYards: 10,
                 redZoneYards: 20,
             },
         },
         hashMarks: {
-            bandTopY: scale(-80),
-            bandBottomY: scale(80),
-            markHeight: scale(20),
+            bandTopY: -56,
+            bandBottomY: 56,
+            markHeight: 14,
             subdivisionYards: 2,
         },
         ticks: {
-            height: scale(25),
+            height: 17.5,
             offsetYards: 5,
             greenTopYards: [65, 85],
             greenBottomYards: [95],
@@ -102,10 +99,10 @@ export const {
     },
     features: {
         collisionSidelines: {
-            leftX: scale(-775),
-            rightX: scale(775),
-            topY: scale(-375),
-            bottomY: scale(375),
+            leftX: -434,
+            rightX: 434,
+            topY: -262.5,
+            bottomY: 262.5,
             segment: {
                 vis: false,
                 color: COLOR_SCHEMA.GOAL_POSTS.SEGMENT,
@@ -116,10 +113,10 @@ export const {
             vertex: { cMask: [] },
         },
         ballBoundaries: {
-            leftX: scale(-1005),
-            rightX: scale(1005),
-            topY: scale(360),
-            bottomY: scale(-360),
+            leftX: -562.8,
+            rightX: 562.8,
+            topY: 252,
+            bottomY: -252,
             leftSegment: {
                 vis: false,
                 color: COLOR_SCHEMA.BOUNDARIES.LEFT,
@@ -134,8 +131,8 @@ export const {
         planes: [
             {
                 rect: {
-                    x: [scale(-1065), scale(1065)],
-                    y: [scale(-350), scale(350)],
+                    x: [-596.4, 596.4],
+                    y: [-245, 245],
                 },
                 side: "outside",
                 props: { cMask: ["ball"], bCoef: 1.5 },
@@ -143,8 +140,8 @@ export const {
             },
             {
                 rect: {
-                    x: [scale(-1090), scale(1090)],
-                    y: [scale(-375), scale(375)],
+                    x: [-610.4, 610.4],
+                    y: [-262.5, 262.5],
                 },
                 side: "outside",
                 props: { bCoef: 0.9 },
@@ -191,7 +188,7 @@ export const {
             color: BALL_COLOR,
             cGroup: ["ball", "kick", "score"],
         },
-        spawnDistance: scale(980),
+        spawnDistance: 548.8,
         traits: {},
         redSpawnPoints: [],
         blueSpawnPoints: [],

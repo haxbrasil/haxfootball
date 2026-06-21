@@ -213,14 +213,15 @@ const getFieldYards = (
 ): number => {
     const span = goalLines.rightX - goalLines.leftX;
     const yards = span / yardLength;
+    const roundedYards = Math.round(yards);
 
-    if (!Number.isInteger(yards)) {
+    if (Math.abs(yards - roundedYards) > 1e-9) {
         throw new Error(
             `Goal line span (${span}) is not divisible by yard length (${yardLength}).`,
         );
     }
 
-    return yards;
+    return roundedYards;
 };
 
 const buildYardLines = (

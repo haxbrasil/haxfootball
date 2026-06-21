@@ -1,5 +1,12 @@
 import type { GameState, GameStatePlayer } from "@runtime/engine";
-import { $checkpoint, $dispose, $effect, $next, $tick } from "@runtime/runtime";
+import {
+    $checkpoint,
+    $dispose,
+    $effect,
+    $isGamePaused,
+    $next,
+    $tick,
+} from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { opposite, type FieldPosition } from "@common/game/game";
 import { type FieldTeam, isFieldTeam } from "@runtime/models";
@@ -136,6 +143,7 @@ export function ExtraPointRetry({
         const isHikeCommand = normalizedMessage.includes("hike");
 
         if (!isHikeCommand || player.team !== offensiveTeam) return;
+        if ($isGamePaused()) return;
 
         if ($tick().current < MIN_SNAP_DELAY_TICKS) {
             $effect(($) => {

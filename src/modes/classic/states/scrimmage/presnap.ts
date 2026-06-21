@@ -16,6 +16,7 @@ import {
     $config,
     $dispose,
     $effect,
+    $isGamePaused,
     $next,
     $tick,
 } from "@runtime/runtime";
@@ -257,6 +258,10 @@ export function Presnap({ downState }: { downState: DownState }) {
         const isHikeCommand = normalizedMessage === "hike";
 
         if (isHikeCommand) {
+            if ($isGamePaused()) {
+                return false;
+            }
+
             if (player.team !== offensiveTeam) {
                 return;
             }

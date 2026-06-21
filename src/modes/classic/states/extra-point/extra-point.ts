@@ -4,6 +4,7 @@ import {
     $checkpoint,
     $dispose,
     $effect,
+    $isGamePaused,
     $next,
     $tick,
 } from "@runtime/runtime";
@@ -156,6 +157,7 @@ export function ExtraPoint({
         const isHikeCommand = normalizedMessage.includes("hike");
 
         if (!isHikeCommand || player.team !== offensiveTeam) return;
+        if ($isGamePaused()) return;
 
         if ($tick().current < MIN_SNAP_DELAY_TICKS) {
             $effect(($) => {

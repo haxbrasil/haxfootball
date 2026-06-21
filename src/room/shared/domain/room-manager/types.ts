@@ -76,12 +76,19 @@ export type PlayerActivity = {
     atMs: number;
 };
 
+export type PlayerInactivity = {
+    playerId: number;
+    inactiveMs: number;
+};
+
 export type RoomManagerState = {
     status: RoomManagerStatus;
     manualAfkPlayerIds: readonly number[];
     autoAfkPlayerIds: readonly number[];
     afkWarningPlayerIds: readonly number[];
     afkPausedPlayerIds: readonly number[];
+    afkPauseStartedAtMs: number | null;
+    afkPauseBaseline: readonly PlayerInactivity[];
     afkReminderAt: readonly PlayerActivity[];
     lastActivity: readonly PlayerActivity[];
     activeRoster: ActiveRoster | null;
@@ -107,6 +114,7 @@ export type RoomManagementMessage = {
         | "manager.afk.marked"
         | "manager.afk.enabled"
         | "manager.afk.disabled"
+        | "manager.afk.resumed"
         | "manager.afk.warning"
         | "manager.afk.public-warning"
         | "manager.afk.unavailable"
@@ -187,6 +195,8 @@ export const DEFAULT_ROOM_MANAGER_STATE: RoomManagerState = {
     autoAfkPlayerIds: [],
     afkWarningPlayerIds: [],
     afkPausedPlayerIds: [],
+    afkPauseStartedAtMs: null,
+    afkPauseBaseline: [],
     afkReminderAt: [],
     lastActivity: [],
     activeRoster: null,

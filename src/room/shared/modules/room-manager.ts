@@ -141,6 +141,8 @@ function formatManagerMessage(message: RoomManagementMessage): string {
             return t`🧭 You are now AFK.`;
         case "manager.afk.disabled":
             return t`🧭 You are no longer AFK.`;
+        case "manager.afk.resumed":
+            return t`🧭 You are active again.`;
         case "manager.afk.warning":
             return t`⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators.`;
         case "manager.afk.public-warning": {
@@ -508,7 +510,16 @@ export function createRoomManagerModule({
     }
 
     const markActivity = (room: Room, player: PlayerObject) => {
+        const wasInactive =
+            state.autoAfkPlayerIds.includes(player.id) ||
+            state.afkWarningPlayerIds.includes(player.id);
+
         state = recordPlayerActivity(state, player.id, Date.now());
+
+        if (wasInactive) {
+            sendMessage(room, player.id, { id: "manager.afk.resumed" });
+        }
+
         planAndExecute(room);
     };
 
@@ -742,6 +753,12 @@ export function createRoomManagerModule({
                 ),
                 afkWarningPlayerIds: state.afkWarningPlayerIds.filter(
                     (playerId) => playerId !== player.id,
+                ),
+                afkPausedPlayerIds: state.afkPausedPlayerIds.filter(
+                    (playerId) => playerId !== player.id,
+                ),
+                afkPauseBaseline: state.afkPauseBaseline.filter(
+                    (entry) => entry.playerId !== player.id,
                 ),
                 lastActivity: state.lastActivity.filter(
                     (activity) => activity.playerId !== player.id,
