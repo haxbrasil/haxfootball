@@ -109,6 +109,45 @@ const moveActions = (actions: readonly RoomManagementAction[]) =>
     actions.filter((action) => action.type === "move-player");
 
 describe("planRoomManagement", () => {
+    it("adds every available player to Training even when Training is already running", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                visibleActionDelayMs: 0,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2),
+                    createPlayer(3),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.TRAINING,
+                    activeMode: GAME_MODE.TRAINING,
+                    running: true,
+                }),
+            }),
+            createState(),
+        );
+
+        expect(decision.state.activeRoster?.players).toEqual([
+            { playerId: 1, team: Team.RED, order: 0 },
+            { playerId: 2, team: Team.BLUE, order: 1 },
+            { playerId: 3, team: Team.RED, order: 2 },
+        ]);
+        expect(moveActions(decision.actions)).toEqual([
+            {
+                type: "move-player",
+                playerId: 2,
+                team: Team.BLUE,
+                reason: "mode-roster",
+            },
+            {
+                type: "move-player",
+                playerId: 3,
+                team: Team.RED,
+                reason: "mode-roster",
+            },
+        ]);
+    });
+
     it("switches from Training to Flag by building a fresh 2v2 roster", () => {
         const scheduled = planRoomManagement(
             createSnapshot({

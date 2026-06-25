@@ -137,7 +137,10 @@ export function buildDesiredRoster(
     );
     if (rotatedRoster) return rotatedRoster;
 
-    if (isSameModeSelected(desiredMode, snapshot)) {
+    if (
+        desiredMode !== "training" &&
+        isSameModeSelected(desiredMode, snapshot)
+    ) {
         const currentFieldRoster = buildCurrentFieldRoster(availablePlayers);
         if (currentFieldRoster.length > 0) return currentFieldRoster;
     }
