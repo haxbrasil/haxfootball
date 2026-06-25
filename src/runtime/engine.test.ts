@@ -5,7 +5,7 @@ import {
     type GameStatePlayer,
     type StateRegistry,
 } from "./engine";
-import { $tick } from "./runtime";
+import { $effect, $tick } from "./runtime";
 import { Team } from "@runtime/models";
 import type { Room } from "@core/room";
 
@@ -14,6 +14,11 @@ type RoomStubOptions = {
     getBallPosition?: () => Position | null;
     getDiscProperties?: (discIndex: number) => DiscPropertiesObject | null;
     getPlayerDiscProperties?: (playerId: number) => DiscPropertiesObject | null;
+    setPlayerDiscProperties?: (
+        playerId: number,
+        properties: DiscPropertiesObject,
+    ) => void;
+    stopGame?: () => void;
     invalidateCaches?: () => void;
 };
 
@@ -29,12 +34,15 @@ type PlayerStub = {
 
 function createRoomStub(options: RoomStubOptions = {}): Room {
     return {
-        invalidateCaches: options.invalidateCaches ?? (() => {}),
+        invalidateCaches: options.invalidateCaches ?? (() => { }),
         getPlayerList: options.getPlayerList ?? (() => []),
         getBallPosition: options.getBallPosition ?? (() => ({ x: 0, y: 0 })),
         getDiscProperties: options.getDiscProperties ?? (() => null),
         getPlayerDiscProperties:
             options.getPlayerDiscProperties ?? (() => null),
+        setPlayerDiscProperties:
+            options.setPlayerDiscProperties ?? (() => undefined),
+        stopGame: options.stopGame ?? (() => undefined),
     } as unknown as Room;
 }
 
@@ -88,7 +96,7 @@ describe("createEngine", () => {
         });
         const registry: StateRegistry = {
             TEST: () => ({
-                run() {},
+                run() { },
             }),
         };
         const engine = createEngine(
@@ -121,7 +129,7 @@ describe("createEngine", () => {
         };
         const registry: StateRegistry = {
             TEST: () => ({
-                run() {},
+                run() { },
                 leave,
             }),
         };
@@ -167,7 +175,7 @@ describe("createEngine", () => {
         });
         const registry: StateRegistry = {
             TEST: () => ({
-                run() {},
+                run() { },
                 leave,
             }),
         };
@@ -196,5 +204,61 @@ describe("createEngine", () => {
         );
 
         expect(leave).not.toHaveBeenCalled();
+    });
+
+    it("flushes queued player mutations before stopping the native game", () => {
+        const calls: string[] = [];
+        const player = createPlayerStub({
+            id: 3,
+            name: "Starco",
+            team: Team.RED,
+            position: { x: 10, y: 20 },
+        });
+        const registry: StateRegistry = {
+            TEST: () => ({
+                run() {
+                    $effect(($) => {
+                        $.setPlayerDiscProperties(3, {
+                            xspeed: 0,
+                            yspeed: 0,
+                        });
+                        $.stopGame();
+                    });
+                },
+            }),
+        };
+        const engine = createEngine(
+            createRoomStub({
+                getPlayerList: () => [player],
+                getPlayerDiscProperties: () => {
+                    calls.push("get-player-disc");
+                    return {
+                        x: 10,
+                        y: 20,
+                        radius: 15,
+                        xspeed: 1,
+                        yspeed: 1,
+                    };
+                },
+                setPlayerDiscProperties: () => {
+                    calls.push("set-player-disc");
+                },
+                stopGame: () => {
+                    calls.push("stop-game");
+                },
+            }),
+            registry,
+            { config: {} },
+        );
+
+        engine.start("TEST");
+        engine.tick();
+
+        expect(calls).toEqual([
+            "get-player-disc",
+            "get-player-disc",
+            "set-player-disc",
+            "stop-game",
+        ]);
     });
 });

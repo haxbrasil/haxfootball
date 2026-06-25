@@ -1015,6 +1015,7 @@ export function createEngine<Cfg>(
 
         room.invalidateCaches();
         sharedTickMutations = createMutationBuffer(room);
+        let stopRequestedAfterMutationFlush = false;
 
         try {
             if (isPaused || isPrePlayTimeoutHeld) {
@@ -1076,6 +1077,7 @@ export function createEngine<Cfg>(
                 delayedTransition = null;
                 disableStateExecution = true;
                 running = false;
+                stopRequestedAfterMutationFlush = true;
             } else if (flushed && flushed.transition) {
                 scheduleTransition(flushed.transition);
             }
@@ -1088,6 +1090,9 @@ export function createEngine<Cfg>(
             if (sharedTickMutations) {
                 sharedTickMutations.flush();
                 sharedTickMutations = null;
+            }
+            if (stopRequestedAfterMutationFlush) {
+                room.stopGame();
             }
         }
     }

@@ -592,7 +592,6 @@ export function flushRuntime(): {
             mutations.queueAdmin(player, admin),
         stopGame: () => {
             RUNTIME!.stopRequested = true;
-            room.stopGame();
         },
         getTickNumber: () => RUNTIME!.tickNumber,
         CollisionFlags: cf,
@@ -609,6 +608,10 @@ export function flushRuntime(): {
 
     if (RUNTIME.ownsMutations) {
         mutations.flush();
+
+        if (RUNTIME.stopRequested) {
+            room.stopGame();
+        }
     }
 
     const tr = RUNTIME.transition;
