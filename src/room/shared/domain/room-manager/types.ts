@@ -52,7 +52,14 @@ export type ShortageState = {
 export type ReadinessState = {
     matchStartedAtMs: number;
     waitingPlayerIds: readonly number[];
-    blockerActive: boolean;
+    warningSentPlayerIds: readonly number[];
+};
+
+export type PrePlayAfkCheckState = {
+    instanceKey: string;
+    kind: "first-play" | "normal";
+    playerIds: readonly number[];
+    startedAtMs: number;
     warningSentPlayerIds: readonly number[];
 };
 
@@ -89,6 +96,8 @@ export type RoomManagerState = {
     afkPausedPlayerIds: readonly number[];
     afkPauseStartedAtMs: number | null;
     afkPauseBaseline: readonly PlayerInactivity[];
+    afkCheck: PrePlayAfkCheckState | null;
+    checkedPrePlayInstanceKeys: readonly string[];
     afkReminderAt: readonly PlayerActivity[];
     lastActivity: readonly PlayerActivity[];
     activeRoster: ActiveRoster | null;
@@ -144,7 +153,6 @@ export type RoomManagementAction =
     | { type: "stop-game"; reason: string }
     | { type: "pause-game"; paused: boolean; reason: string }
     | { type: "set-pre-play-timeout-hold"; held: boolean }
-    | { type: "set-readiness-blocker"; active: boolean }
     | {
           type: "restore-checkpoint";
           checkpointId?: string;
@@ -197,6 +205,8 @@ export const DEFAULT_ROOM_MANAGER_STATE: RoomManagerState = {
     afkPausedPlayerIds: [],
     afkPauseStartedAtMs: null,
     afkPauseBaseline: [],
+    afkCheck: null,
+    checkedPrePlayInstanceKeys: [],
     afkReminderAt: [],
     lastActivity: [],
     activeRoster: null,

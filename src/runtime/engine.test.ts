@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEngine, type GameState, type StateRegistry } from "./engine";
+import {
+    createEngine,
+    type GameState,
+    type GameStatePlayer,
+    type StateRegistry,
+} from "./engine";
 import { $tick } from "./runtime";
 import { Team } from "@runtime/models";
 import type { Room } from "@core/room";
@@ -101,7 +106,7 @@ describe("createEngine", () => {
     });
 
     it("uses the last stable player snapshot for leave when the player no longer has a position", () => {
-        const leave = vi.fn();
+        const leave = vi.fn<(player: GameStatePlayer) => void>();
         const stablePlayer = createPlayerStub({
             id: 4,
             name: "Dragon",
@@ -153,7 +158,7 @@ describe("createEngine", () => {
     });
 
     it("does not call leave for a spectator even if a previous field snapshot exists", () => {
-        const leave = vi.fn();
+        const leave = vi.fn<(player: GameStatePlayer) => void>();
         const fieldPlayer = createPlayerStub({
             id: 4,
             name: "Dragon",

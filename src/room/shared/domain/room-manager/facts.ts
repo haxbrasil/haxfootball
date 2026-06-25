@@ -19,6 +19,8 @@ export type ManagerContext = {
     desiredMode: DesiredRoomMode;
     desiredGameMode: GameModeName | null;
     desiredRoster: readonly RoomRosterPlayer[];
+    currentFieldRoster: readonly RoomRosterPlayer[];
+    standardCurrentRoster: readonly RoomRosterPlayer[] | null;
     waitingPlayerIds: readonly number[];
     modeSyncSnapshotKey: string;
     canApplyVisibleGameChange: boolean;
@@ -63,6 +65,64 @@ export function getDesiredRosterSize(
     }
 }
 
+function buildCurrentFieldRoster(
+    players: readonly RoomManagementPlayer[],
+): readonly RoomRosterPlayer[] {
+    return players.flatMap<RoomRosterPlayer>((player, order) =>
+        isFieldTeam(player.team)
+            ? [
+                {
+                    playerId: player.id,
+                    team: player.team,
+                    order,
+                },
+            ]
+            : [],
+    );
+}
+
+function isSameModeSelected(
+    desiredMode: DesiredRoomMode,
+    snapshot?: RoomManagementSnapshot,
+): boolean {
+    const desiredGameMode = getGameModeForDesired(desiredMode);
+    if (!snapshot || !desiredGameMode) return false;
+
+    return (
+        snapshot.game.selectedMode === desiredGameMode &&
+        (snapshot.game.activeMode === null ||
+            snapshot.game.activeMode === desiredGameMode)
+    );
+}
+
+export function buildStandardCurrentRoster(
+    desiredMode: DesiredRoomMode,
+    availablePlayers: readonly RoomManagementPlayer[],
+): readonly RoomRosterPlayer[] | null {
+    if (desiredMode !== "flag" && desiredMode !== "classic") return null;
+
+    const currentRoster = buildCurrentFieldRoster(availablePlayers);
+    const redCount = currentRoster.filter(
+        (player) => player.team === Team.RED,
+    ).length;
+    const blueCount = currentRoster.filter(
+        (player) => player.team === Team.BLUE,
+    ).length;
+    const fieldCount = redCount + blueCount;
+
+    if (redCount !== blueCount) return null;
+
+    if (desiredMode === "flag" && (fieldCount === 4 || fieldCount === 6)) {
+        return currentRoster;
+    }
+
+    if (desiredMode === "classic" && fieldCount === 8) {
+        return currentRoster;
+    }
+
+    return null;
+}
+
 export function buildDesiredRoster(
     desiredMode: DesiredRoomMode,
     availablePlayers: readonly RoomManagementPlayer[],
@@ -76,6 +136,11 @@ export function buildDesiredRoster(
         state,
     );
     if (rotatedRoster) return rotatedRoster;
+
+    if (isSameModeSelected(desiredMode, snapshot)) {
+        const currentFieldRoster = buildCurrentFieldRoster(availablePlayers);
+        if (currentFieldRoster.length > 0) return currentFieldRoster;
+    }
 
     const preservedActiveRoster = buildPreservedActiveRoster(
         desiredMode,
@@ -157,9 +222,7 @@ function buildCompletedResultRoster(
     const result = snapshot?.game.result ?? null;
     const resultKey = getCompletedResultKey(result);
     if (!result || !resultKey) return null;
-    if (!state?.activeRoster) return null;
-    if (state.activeRoster.mode !== desiredMode) return null;
-    if (state.lastCompletedResultKey === resultKey) return null;
+    if (state?.lastCompletedResultKey === resultKey) return null;
     if (desiredMode !== "flag" && desiredMode !== "classic") return null;
 
     const rosterSize = getDesiredRosterSize(
@@ -168,18 +231,23 @@ function buildCompletedResultRoster(
     );
     const teamSize = rosterSize / 2;
     const availableById = new Set(availablePlayers.map((player) => player.id));
+    const previousRoster =
+        state?.activeRoster?.mode === desiredMode
+            ? state.activeRoster.players
+            : buildCurrentFieldRoster(availablePlayers);
+
+    if (previousRoster.length === 0) return null;
+
     const activeRosterIds = new Set(
-        state.activeRoster.players.map((player) => player.playerId),
+        previousRoster.map((player) => player.playerId),
     );
-    const winners = state.activeRoster.players
-        .filter(
-            (player) =>
-                player.team === result.winnerTeam &&
-                availableById.has(player.playerId),
-        )
-        .slice(0, teamSize);
+    const winners = previousRoster.filter(
+        (player) =>
+            player.team === result.winnerTeam &&
+            availableById.has(player.playerId),
+    );
     const loserPlayerIds = new Set(
-        state.activeRoster.players
+        previousRoster
             .filter((player) => player.team === result.loserTeam)
             .map((player) => player.playerId),
     );
@@ -189,17 +257,51 @@ function buildCompletedResultRoster(
     const loserPlayers = availablePlayers.filter((player) =>
         loserPlayerIds.has(player.id),
     );
+
+    if (desiredMode === "classic") {
+        const stayingWinners = winners.slice(0, teamSize);
+        const surplusWinnerIds = new Set(
+            winners.slice(teamSize).map((player) => player.playerId),
+        );
+        const surplusWinners = availablePlayers.filter((player) =>
+            surplusWinnerIds.has(player.id),
+        );
+        const replacementPlayers = [
+            ...surplusWinners,
+            ...waitingPlayers,
+            ...loserPlayers,
+        ].slice(0, teamSize);
+
+        if (stayingWinners.length + replacementPlayers.length < rosterSize) {
+            return null;
+        }
+
+        return [
+            ...stayingWinners.map((player, order) => ({
+                playerId: player.playerId,
+                team: result.winnerTeam,
+                order,
+            })),
+            ...replacementPlayers.map((player, index) => ({
+                playerId: player.id,
+                team: result.loserTeam,
+                order: stayingWinners.length + index,
+            })),
+        ];
+    }
+
+    const stayingWinners = winners.slice(0, teamSize);
     const replacementPlayers = [...waitingPlayers, ...loserPlayers].slice(
         0,
         teamSize,
     );
 
-    if (winners.length + replacementPlayers.length < rosterSize) {
+    if (stayingWinners.length + replacementPlayers.length < rosterSize) {
         return null;
     }
 
     return [
-        ...winners.map((player, order) => ({
+        ...stayingWinners.map((player, order) => ({
             playerId: player.playerId,
             team: result.winnerTeam,
             order,
@@ -207,7 +309,7 @@ function buildCompletedResultRoster(
         ...replacementPlayers.map((player, index) => ({
             playerId: player.id,
             team: result.loserTeam,
-            order: winners.length + index,
+            order: stayingWinners.length + index,
         })),
     ];
 }
@@ -339,6 +441,11 @@ export function deriveManagerContext(
         snapshot,
         state,
     );
+    const currentFieldRoster = buildCurrentFieldRoster(availablePlayers);
+    const standardCurrentRoster = buildStandardCurrentRoster(
+        desiredMode,
+        availablePlayers,
+    );
     const desiredRosterIds = new Set(
         desiredRoster.map((player) => player.playerId),
     );
@@ -364,6 +471,8 @@ export function deriveManagerContext(
         desiredMode,
         desiredGameMode,
         desiredRoster,
+        currentFieldRoster,
+        standardCurrentRoster,
         waitingPlayerIds,
         modeSyncSnapshotKey,
         canApplyVisibleGameChange: canApplyVisibleGameChange(snapshot),

@@ -1,10 +1,7 @@
 import { COLOR } from "@common/general/color";
-import { SPECIAL_HIDDEN_DISC_POSITION } from "@common/stadium-builder/consts";
 import { COMMAND_PREFIX, type CommandSpec } from "@core/commands";
 import { createModule, type Module } from "@core/module";
 import type { Room } from "@core/room";
-import { index as classicStadiumIndex } from "@modes/classic/stadium";
-import { index as flagStadiumIndex } from "@modes/flag/stadium";
 import { getGameModeDefinition } from "@modes/registry";
 import { GAME_MODE, type GameModeName } from "@modes/types";
 import { Team, isFieldTeam } from "@runtime/models";
@@ -35,25 +32,6 @@ const ROOM_MANAGER_COMMAND = {
     MANAGER: "manager",
     AFK: "afk",
 } as const;
-
-const BALL_DISC_ID = 0;
-const READINESS_BLOCKER_DISC_NAME = "innerCrowdingCorner3";
-const READINESS_BLOCKER_RADIUS_BUFFER = 5;
-const READINESS_BLOCKER_CGROUP_WALL = 32;
-const READINESS_BLOCKER_CMASK_PLAYERS = 2 | 4;
-
-const MANUAL_OPERATION_KINDS = new Set<RoomOperationKind>([
-    "player-team",
-    "teams-lock",
-    "start-game",
-    "stop-game",
-    "pause-game",
-    "stadium",
-    "score-limit",
-    "time-limit",
-    "auto-teams",
-    "reorder-players",
-]);
 
 type RoomManagerModuleOptions = {
     authorization: RoomAuthorization;
@@ -234,7 +212,6 @@ export function createRoomManagerModule({
     };
     let teamsLocked = true;
     let pendingTimer: ReturnType<typeof setTimeout> | null = null;
-    let readinessBlockerActive = false;
     let ownActionDepth = 0;
     let replanAfterOwnAction = false;
 
@@ -311,50 +288,6 @@ export function createRoomManagerModule({
         applyGameModeRoomSettings(room, getGameModeDefinition(mode));
     };
 
-    const getReadinessBlockerDiscId = (): number | null => {
-        const game = gameRuntimeStore.get();
-        const mode = game.activeMode ?? game.selectedMode;
-
-        switch (mode) {
-            case GAME_MODE.CLASSIC:
-                return classicStadiumIndex(READINESS_BLOCKER_DISC_NAME);
-            case GAME_MODE.FLAG:
-                return flagStadiumIndex(READINESS_BLOCKER_DISC_NAME);
-            case GAME_MODE.TRAINING:
-                return null;
-        }
-    };
-
-    const setReadinessBlocker = (room: Room, active: boolean) => {
-        const blockerDiscId = getReadinessBlockerDiscId();
-        if (blockerDiscId === null) return;
-
-        if (!active) {
-            room.setDiscProperties(blockerDiscId, {
-                ...SPECIAL_HIDDEN_DISC_POSITION,
-                radius: 0,
-                cGroup: 0,
-                cMask: 0,
-            });
-            return;
-        }
-
-        const ball = room.getDiscProperties(BALL_DISC_ID);
-        const ballPosition = room.getBallPosition();
-        if (!ballPosition) return;
-
-        room.setDiscProperties(blockerDiscId, {
-            x: ballPosition.x,
-            y: ballPosition.y,
-            radius:
-                (typeof ball?.radius === "number" ? ball.radius : 7) +
-                READINESS_BLOCKER_RADIUS_BUFFER,
-            invMass: 0,
-            cGroup: READINESS_BLOCKER_CGROUP_WALL,
-            cMask: READINESS_BLOCKER_CMASK_PLAYERS,
-        });
-    };
-
     const executeAction = (room: Room, action: RoomManagementAction) => {
         switch (action.type) {
             case "lock-teams":
@@ -397,16 +330,6 @@ export function createRoomManagerModule({
                 return;
             case "set-pre-play-timeout-hold":
                 gameRuntimeStore.setPrePlayTimeoutHold(action.held);
-                return;
-            case "set-readiness-blocker":
-                if (readinessBlockerActive === action.active) {
-                    return;
-                }
-
-                runOwnAction(() => {
-                    setReadinessBlocker(room, action.active);
-                });
-                readinessBlockerActive = action.active;
                 return;
             case "restore-checkpoint":
                 gameRuntimeStore.restoreCheckpoint(
@@ -453,23 +376,6 @@ export function createRoomManagerModule({
                 return;
             }
 
-            if (
-                state.status === "suspended" &&
-                state.suspension &&
-                Date.now() - state.suspension.atMs >= 300_000
-            ) {
-                state = setManagerStatus(state, "active");
-                sendMessage(room, "room", { id: "manager.status.resumed" });
-                void eventSink?.({
-                    type: "manager-state-change",
-                    payload: {
-                        status: "active",
-                        reason: "admin-idle-timeout",
-                        byPlayerId: null,
-                    },
-                });
-            }
-
             const snapshot = buildSnapshot(room);
             const decision = planRoomManagement(snapshot, state, options);
 
@@ -484,21 +390,6 @@ export function createRoomManagerModule({
         } catch (error) {
             console.error("Room management failed:", error);
             clearPendingTimer();
-            state = {
-                ...state,
-                status: "suspended",
-                pendingVisibleAction: null,
-                suspension: {
-                    reason: "manager-error",
-                    byPlayerId: null,
-                    atMs: Date.now(),
-                },
-            };
-            runOwnAction(() => {
-                room.lockTeams();
-                teamsLocked = true;
-            });
-            sendMessage(room, "room", { id: "manager.status.suspended" });
             void eventSink?.({
                 type: "manager-error",
                 payload: {
@@ -521,37 +412,6 @@ export function createRoomManagerModule({
         }
 
         planAndExecute(room);
-    };
-
-    const suspendForManualOperation = (
-        room: Room,
-        operation: RoomOperationObject,
-    ) => {
-        if (state.status !== "active") return;
-        if (operation.byPlayer === null) return;
-
-        state = {
-            ...state,
-            status: "suspended",
-            pendingVisibleAction: null,
-            suspension: {
-                reason: "native-admin-operation",
-                byPlayerId: operation.byPlayer.id,
-                atMs: Date.now(),
-            },
-        };
-
-        sendMessage(room, "room", { id: "manager.status.suspended" });
-        void eventSink?.({
-            type: "manager-state-change",
-            payload: {
-                status: "suspended",
-                reason: "native-admin-operation",
-                byPlayerId: operation.byPlayer.id,
-                operation: operation.kind,
-            },
-        });
-        clearPendingTimer();
     };
 
     const handleManagerCommand = (
@@ -715,10 +575,6 @@ export function createRoomManagerModule({
                 return true;
             }
 
-            if (MANUAL_OPERATION_KINDS.has(operation.kind)) {
-                suspendForManualOperation(room, operation);
-            }
-
             return true;
         })
         .onPlayerJoin((room, player) => {
@@ -760,6 +616,18 @@ export function createRoomManagerModule({
                 afkPauseBaseline: state.afkPauseBaseline.filter(
                     (entry) => entry.playerId !== player.id,
                 ),
+                afkCheck: state.afkCheck
+                    ? {
+                          ...state.afkCheck,
+                          playerIds: state.afkCheck.playerIds.filter(
+                              (playerId) => playerId !== player.id,
+                          ),
+                          warningSentPlayerIds:
+                              state.afkCheck.warningSentPlayerIds.filter(
+                                  (playerId) => playerId !== player.id,
+                              ),
+                      }
+                    : null,
                 lastActivity: state.lastActivity.filter(
                     (activity) => activity.playerId !== player.id,
                 ),

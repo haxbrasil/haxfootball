@@ -122,6 +122,7 @@ type StateInstance = {
     checkpointDrafts: Array<CheckpointDraft>;
     stateStartedTick: number;
     selfStartedTick: number;
+    instanceKey: string;
 };
 
 type DelayedTransition = {
@@ -340,6 +341,7 @@ export function createEngine<Cfg>(
     opts: EngineOptions<Cfg>,
 ): Engine<Cfg> {
     let current: StateInstance | null = null;
+    let nextStateInstanceId = 0;
     let pendingTransition: Transition | null = null;
     let delayedTransition: DelayedTransition | null = null;
     let kickerSet: Set<number> = new Set();
@@ -662,6 +664,7 @@ export function createEngine<Cfg>(
             checkpointDrafts,
             stateStartedTick,
             selfStartedTick,
+            instanceKey: `${name}:${nextStateInstanceId++}`,
         };
     }
 
@@ -758,6 +761,7 @@ export function createEngine<Cfg>(
             previous.checkpointDrafts = created.checkpointDrafts;
             previous.stateStartedTick = created.stateStartedTick;
             previous.selfStartedTick = created.selfStartedTick;
+            previous.instanceKey = created.instanceKey;
             return;
         }
 
@@ -797,6 +801,7 @@ export function createEngine<Cfg>(
             checkpointDrafts: created.checkpointDrafts,
             stateStartedTick: created.stateStartedTick,
             selfStartedTick: created.selfStartedTick,
+            instanceKey: created.instanceKey,
         };
 
         if (!isRestoreTransition && previous && previous.name !== next.to) {
@@ -908,6 +913,7 @@ export function createEngine<Cfg>(
             checkpointDrafts: created.checkpointDrafts,
             stateStartedTick: created.stateStartedTick,
             selfStartedTick: created.selfStartedTick,
+            instanceKey: created.instanceKey,
         };
 
         running = true;
@@ -1257,7 +1263,10 @@ export function createEngine<Cfg>(
     function getInspection(): GameStateInspection | null {
         if (!current?.api.inspect) return null;
 
-        return current.api.inspect();
+        return {
+            ...current.api.inspect(),
+            instanceKey: current.instanceKey,
+        };
     }
 
     function getCheckpoints(): Array<Checkpoint> {

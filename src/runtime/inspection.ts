@@ -4,4 +4,5 @@ export type GameStateInspection = {
         | "play-starting"
         | "play-started"
         | "play-ending";
+    instanceKey?: string;
 };
