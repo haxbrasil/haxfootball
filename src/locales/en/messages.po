@@ -126,8 +126,8 @@ msgstr "{0}-yard penalty."
 msgid "{0}, and {1}"
 msgstr "{0}, and {1}"
 
-#: src/modes/classic/states/scrimmage/presnap.ts:360
-#: src/modes/flag/states/presnap.ts:319
+#: src/modes/classic/states/scrimmage/presnap.ts:320
+#: src/modes/flag/states/presnap.ts:294
 msgid "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 msgstr "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 
@@ -280,12 +280,12 @@ msgstr "↩️ Miss. Your lane reset to 10 targets."
 msgid "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgstr "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:782
-#: src/modes/flag/states/presnap.ts:571
+#: src/modes/classic/states/scrimmage/presnap.ts:800
+#: src/modes/flag/states/presnap.ts:587
 msgid "⏱️ {HIKE_WARNING_SECONDS_REMAINING}s left to hike."
 msgstr "⏱️ {HIKE_WARNING_SECONDS_REMAINING}s left to hike."
 
-#: src/modes/classic/states/kicking/kickoff.ts:164
+#: src/modes/classic/states/kicking/kickoff.ts:168
 msgid "⏱️ {KICKOFF_WARNING_SECONDS_REMAINING}s left to kick off."
 msgstr "⏱️ {KICKOFF_WARNING_SECONDS_REMAINING}s left to kick off."
 
@@ -327,8 +327,8 @@ msgid "⚙️ {0} is now the quarterback."
 msgstr "⚙️ {0} is now the quarterback."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:531
-#: src/modes/flag/states/presnap.ts:441
+#: src/modes/classic/states/scrimmage/presnap.ts:549
+#: src/modes/flag/states/presnap.ts:457
 msgid "⚙️ {0} moved LOS to {sideName} {yards}."
 msgstr "⚙️ {0} moved LOS to {sideName} {yards}."
 
@@ -345,13 +345,13 @@ msgid "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 msgstr "⚙️ {0} set {requestedFlagName} to {newFlagState}."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:424
+#: src/modes/classic/states/scrimmage/presnap.ts:442
 msgid "⚙️ {0} set distance to {distance}."
 msgstr "⚙️ {0} set distance to {distance}."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:476
-#: src/modes/flag/states/presnap.ts:386
+#: src/modes/classic/states/scrimmage/presnap.ts:494
+#: src/modes/flag/states/presnap.ts:402
 msgid "⚙️ {0} set down to {down}."
 msgstr "⚙️ {0} set down to {down}."
 
@@ -371,11 +371,11 @@ msgstr "⚙️ Available flags:"
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Available flags: {0}."
 
-#: src/room/shared/modules/room-manager.ts:154
+#: src/room/shared/modules/room-manager.ts:132
 msgid "⚠️ {playerName} is AFK. The game is paused until they show activity."
 msgstr "⚠️ {playerName} is AFK. The game is paused until they show activity."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:558
+#: src/modes/classic/states/scrimmage/presnap.ts:576
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal is only available from the defensive side of the field."
 
@@ -419,16 +419,16 @@ msgstr "⚠️ Only admins can assign quarterback targets."
 msgid "⚠️ Only admins can call for an undo."
 msgstr "⚠️ Only admins can call for an undo."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:666
-#: src/modes/flag/states/presnap.ts:456
+#: src/modes/classic/states/scrimmage/presnap.ts:684
+#: src/modes/flag/states/presnap.ts:472
 msgid "⚠️ Only admins can call for repositioning."
 msgstr "⚠️ Only admins can call for repositioning."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:387
-#: src/modes/classic/states/scrimmage/presnap.ts:439
-#: src/modes/classic/states/scrimmage/presnap.ts:491
-#: src/modes/flag/states/presnap.ts:349
-#: src/modes/flag/states/presnap.ts:401
+#: src/modes/classic/states/scrimmage/presnap.ts:405
+#: src/modes/classic/states/scrimmage/presnap.ts:457
+#: src/modes/classic/states/scrimmage/presnap.ts:509
+#: src/modes/flag/states/presnap.ts:365
+#: src/modes/flag/states/presnap.ts:417
 msgid "⚠️ Only admins can change game positioning."
 msgstr "⚠️ Only admins can change game positioning."
 
@@ -441,15 +441,15 @@ msgstr "⚠️ Only admins can modify flags."
 msgid "⚠️ Only the eligible team can pick the quarterback right now."
 msgstr "⚠️ Only the eligible team can pick the quarterback right now."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:546
+#: src/modes/classic/states/scrimmage/presnap.ts:564
 msgid "⚠️ Only the offense may call for a field goal."
 msgstr "⚠️ Only the offense may call for a field goal."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:598
+#: src/modes/classic/states/scrimmage/presnap.ts:616
 msgid "⚠️ Only the offense may punt."
 msgstr "⚠️ Only the offense may punt."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:299
+#: src/modes/classic/states/scrimmage/presnap.ts:260
 msgid "⚠️ Only the selected quarterback can snap."
 msgstr "⚠️ Only the selected quarterback can snap."
 
@@ -478,28 +478,28 @@ msgstr "⚠️ Quarterback position is vacant. Use !qb to become the quarterback
 msgid "⚠️ Quarterback selection is disabled."
 msgstr "⚠️ Quarterback selection is disabled."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:287
+#: src/modes/classic/states/scrimmage/presnap.ts:248
 msgid "⚠️ Select a quarterback with !qb before snapping."
 msgstr "⚠️ Select a quarterback with !qb before snapping."
 
-#: src/room/managed/modules/authentication.ts:621
+#: src/room/managed/modules/authentication.ts:618
 msgid "⚠️ Sign-in is unavailable in this room."
 msgstr "⚠️ Sign-in is unavailable in this room."
 
-#: src/room/managed/modules/authentication.ts:506
-#: src/room/managed/modules/authentication.ts:643
+#: src/room/managed/modules/authentication.ts:503
+#: src/room/managed/modules/authentication.ts:640
 msgid "⚠️ Sign-in is unavailable right now. Try again in a moment."
 msgstr "⚠️ Sign-in is unavailable right now. Try again in a moment."
 
 #. placeholder {0}: ownerModeDefinition.label
 #. placeholder {1}: selectedModeDefinition.label
-#: src/room/shared/modules/game.ts:217
+#: src/room/shared/modules/game.ts:279
 msgid "⚠️ That {0} command is unavailable in {1} mode."
 msgstr "⚠️ That {0} command is unavailable in {1} mode."
 
 #: src/modes/classic/definition/index.ts:305
 #: src/modes/flag/definition/index.ts:308
-#: src/room/shared/modules/game.ts:241
+#: src/room/shared/modules/game.ts:303
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ The game has not been started yet."
 
@@ -521,12 +521,15 @@ msgstr "⚠️ Unknown flag. Use !flags to list available flags."
 msgid "⚠️ Unknown game mode. Use {0}."
 msgstr "⚠️ Unknown game mode. Use {0}."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:405
+#: src/modes/classic/states/scrimmage/presnap.ts:423
 msgid "⚠️ Usage: !distance <1-20>."
 msgstr "⚠️ Usage: !distance <1-20>."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:457
-#: src/modes/flag/states/presnap.ts:367
+#: src/modes/flag/states/presnap.ts:383
+msgid "⚠️ Usage: !down <1-10>."
+msgstr "⚠️ Usage: !down <1-10>."
+
+#: src/modes/classic/states/scrimmage/presnap.ts:475
 msgid "⚠️ Usage: !down <1-4>."
 msgstr "⚠️ Usage: !down <1-4>."
 
@@ -535,8 +538,8 @@ msgstr "⚠️ Usage: !down <1-4>."
 msgid "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 msgstr "⚠️ Usage: !flag <FLAG_NAME> [VALUE]."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:510
-#: src/modes/flag/states/presnap.ts:420
+#: src/modes/classic/states/scrimmage/presnap.ts:528
+#: src/modes/flag/states/presnap.ts:436
 msgid "⚠️ Usage: !los <red/blue> <1-50>."
 msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 
@@ -544,33 +547,33 @@ msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Usage: !qb [#id|name]."
 
-#: src/room/shared/modules/room-manager.ts:631
+#: src/room/shared/modules/room-manager.ts:491
 msgid "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 msgstr "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:151
 #: src/modes/classic/states/extra-point/extra-point.ts:165
-#: src/modes/classic/states/scrimmage/presnap.ts:312
-#: src/modes/flag/states/presnap.ts:271
+#: src/modes/classic/states/scrimmage/presnap.ts:272
+#: src/modes/flag/states/presnap.ts:246
 msgid "⚠️ Wait a moment before snapping."
 msgstr "⚠️ Wait a moment before snapping."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:570
+#: src/modes/classic/states/scrimmage/presnap.ts:588
 msgid "⚠️ You are too far from the ball to attempt the field goal."
 msgstr "⚠️ You are too far from the ball to attempt the field goal."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:610
+#: src/modes/classic/states/scrimmage/presnap.ts:628
 msgid "⚠️ You are too far from the ball to punt."
 msgstr "⚠️ You are too far from the ball to punt."
 
 #: src/modes/classic/states/extra-point/extra-point-retry.ts:163
 #: src/modes/classic/states/extra-point/extra-point.ts:192
-#: src/modes/classic/states/scrimmage/presnap.ts:324
-#: src/modes/flag/states/presnap.ts:283
+#: src/modes/classic/states/scrimmage/presnap.ts:284
+#: src/modes/flag/states/presnap.ts:258
 msgid "⚠️ You are too far from the ball to snap it."
 msgstr "⚠️ You are too far from the ball to snap it."
 
-#: src/room/shared/modules/room-manager.ts:157
+#: src/room/shared/modules/room-manager.ts:135
 msgid "⚠️ You can only use !afk before the play starts."
 msgstr "⚠️ You can only use !afk before the play starts."
 
@@ -582,40 +585,40 @@ msgstr "⚠️ You cannot ban this player."
 msgid "⚠️ You cannot kick this player."
 msgstr "⚠️ You cannot kick this player."
 
-#: src/modes/classic/states/kicking/punt.ts:168
-#: src/modes/classic/states/kicking/safety.ts:173
+#: src/modes/classic/states/kicking/punt.ts:173
+#: src/modes/classic/states/kicking/safety.ts:178
 msgid "⚠️ You cannot kick while a teammate is past the ball line."
 msgstr "⚠️ You cannot kick while a teammate is past the ball line."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:622
+#: src/modes/classic/states/scrimmage/presnap.ts:640
 msgid "⚠️ You cannot punt from the opponent red zone."
 msgstr "⚠️ You cannot punt from the opponent red zone."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:637
+#: src/modes/classic/states/scrimmage/presnap.ts:655
 msgid "⚠️ You cannot punt while a teammate is past the LOS."
 msgstr "⚠️ You cannot punt while a teammate is past the LOS."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:339
-#: src/modes/flag/states/presnap.ts:298
+#: src/modes/classic/states/scrimmage/presnap.ts:299
+#: src/modes/flag/states/presnap.ts:273
 msgid "⚠️ You cannot snap while a teammate is past the LOS."
 msgstr "⚠️ You cannot snap while a teammate is past the LOS."
 
 #: src/modes/classic/definition/index.ts:304
 #: src/modes/flag/definition/index.ts:307
-#: src/room/shared/modules/game.ts:240
+#: src/room/shared/modules/game.ts:302
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ You cannot use that command right now."
 
-#: src/modes/classic/states/kicking/punt.ts:174
+#: src/modes/classic/states/kicking/punt.ts:179
 msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ You must get back behind the ball line to allow the punt!"
 
-#: src/modes/classic/states/scrimmage/presnap.ts:345
-#: src/modes/flag/states/presnap.ts:304
+#: src/modes/classic/states/scrimmage/presnap.ts:305
+#: src/modes/flag/states/presnap.ts:279
 msgid "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 msgstr "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 
-#: src/room/shared/modules/room-manager.ts:147
+#: src/room/shared/modules/room-manager.ts:125
 msgid "⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators."
 msgstr "⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators."
 
@@ -650,7 +653,7 @@ msgid "✅ Password updated successfully."
 msgstr "✅ Password updated successfully."
 
 #. placeholder {0}: account.name
-#: src/room/managed/modules/authentication.ts:797
+#: src/room/managed/modules/authentication.ts:794
 msgid "✅ Signed in as {0}."
 msgstr "✅ Signed in as {0}."
 
@@ -718,7 +721,7 @@ msgstr "❌ Illegal touch by {offenderNames} before the kick"
 msgid "❌ Incorrect password."
 msgstr "❌ Incorrect password."
 
-#: src/room/managed/modules/authentication.ts:653
+#: src/room/managed/modules/authentication.ts:650
 msgid "❌ Incorrect password. Try again."
 msgstr "❌ Incorrect password. Try again."
 
@@ -849,8 +852,8 @@ msgid "🏈 {0} loses it on contact by {catcherNames}"
 msgstr "🏈 {0} loses it on contact by {catcherNames}"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:358
-#: src/modes/flag/states/presnap.ts:317
+#: src/modes/classic/states/scrimmage/presnap.ts:318
+#: src/modes/flag/states/presnap.ts:292
 msgid "🏈 {0} snaps it"
 msgstr "🏈 {0} snaps it"
 
@@ -867,12 +870,12 @@ msgstr "🏈 HaxFootball - American Football 🏈"
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
-#: src/modes/classic/states/kicking/kickoff.ts:96
-#: src/modes/classic/states/kicking/kickoff.ts:104
+#: src/modes/classic/states/kicking/kickoff.ts:100
+#: src/modes/classic/states/kicking/kickoff.ts:108
 msgid "🏈 Kickoff for {kickingTeamName}."
 msgstr "🏈 Kickoff for {kickingTeamName}."
 
-#: src/modes/classic/states/kicking/kickoff.ts:91
+#: src/modes/classic/states/kicking/kickoff.ts:95
 msgid "🏈 Kickoff for {kickingTeamName}. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 msgstr "🏈 Kickoff for {kickingTeamName}. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 
@@ -940,8 +943,8 @@ msgid "📋 Available commands:"
 msgstr "📋 Available commands:"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:677
-#: src/modes/flag/states/presnap.ts:467
+#: src/modes/classic/states/scrimmage/presnap.ts:695
+#: src/modes/flag/states/presnap.ts:483
 msgid "📍 {0} repositions the players and ball."
 msgstr "📍 {0} repositions the players and ball."
 
@@ -960,13 +963,13 @@ msgstr "📘 {COMMAND_PREFIX}{0}: No description available."
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Aliases: {formattedAliases}"
 
-#: src/room/shared/modules/room-manager.ts:129
+#: src/room/shared/modules/room-manager.ts:107
 msgid "🔐 Please register and sign in to play. You can stay as a spectator until then."
 msgstr "🔐 Please register and sign in to play. You can stay as a spectator until then."
 
 #: src/room/managed/modules/authentication.ts:169
 #: src/room/managed/modules/authentication.ts:197
-#: src/room/managed/modules/authentication.ts:324
+#: src/room/managed/modules/authentication.ts:321
 msgid "🔐 Still checking your account. Please wait a moment."
 msgstr "🔐 Still checking your account. Please wait a moment."
 
@@ -974,17 +977,17 @@ msgstr "🔐 Still checking your account. Please wait a moment."
 msgid "🔐 That player is signing in."
 msgstr "🔐 That player is signing in."
 
-#: src/room/managed/modules/authentication.ts:710
+#: src/room/managed/modules/authentication.ts:707
 msgid "🔐 This name is registered. Type your password in chat to sign in."
 msgstr "🔐 This name is registered. Type your password in chat to sign in."
 
-#: src/room/managed/modules/authentication.ts:483
+#: src/room/managed/modules/authentication.ts:480
 msgid "🔐 Type your password in chat to sign in."
 msgstr "🔐 Type your password in chat to sign in."
 
 #. placeholder {0}: env.DISCORD_LINK
-#: src/room/managed/modules/authentication.ts:269
-#: src/room/managed/modules/authentication.ts:746
+#: src/room/managed/modules/authentication.ts:266
+#: src/room/managed/modules/authentication.ts:743
 msgid "🔐 You need to register before you can play. Register in our Discord: {0}"
 msgstr "🔐 You need to register before you can play. Register in our Discord: {0}"
 
@@ -994,7 +997,7 @@ msgid "🔒 Admin: {0}"
 msgstr "🔒 Admin: {0}"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:581
+#: src/modes/classic/states/scrimmage/presnap.ts:599
 msgid "🥅 {0} sets up for the field goal!"
 msgstr "🥅 {0} sets up for the field goal!"
 
@@ -1003,62 +1006,62 @@ msgstr "🥅 {0} sets up for the field goal!"
 #~ msgstr "🦵 {0} punts it away!"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:650
+#: src/modes/classic/states/scrimmage/presnap.ts:668
 msgid "🦵 {0} sets up to punt."
 msgstr "🦵 {0} sets up to punt."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/scrimmage/presnap.ts:649
+#: src/modes/classic/states/scrimmage/presnap.ts:667
 msgid "🦵 {0} sets up to punt. Kick within {PUNT_KICK_TIMEOUT_SECONDS}s."
 msgstr "🦵 {0} sets up to punt. Kick within {PUNT_KICK_TIMEOUT_SECONDS}s."
 
-#: src/room/shared/modules/room-manager.ts:173
+#: src/room/shared/modules/room-manager.ts:151
 msgid "🧭 {missingPlayer} left, so {replacementPlayer} took their spot on {replacementTeam}."
 msgstr "🧭 {missingPlayer} left, so {replacementPlayer} took their spot on {replacementTeam}."
 
-#: src/room/shared/modules/room-manager.ts:133
+#: src/room/shared/modules/room-manager.ts:111
 msgid "🧭 Management disabled. Teams remain locked."
 msgstr "🧭 Management disabled. Teams remain locked."
 
-#: src/room/shared/modules/room-manager.ts:131
+#: src/room/shared/modules/room-manager.ts:109
 msgid "🧭 Management enabled."
 msgstr "🧭 Management enabled."
 
-#: src/room/shared/modules/room-manager.ts:135
+#: src/room/shared/modules/room-manager.ts:113
 msgid "🧭 Management resumed."
 msgstr "🧭 Management resumed."
 
 #. placeholder {0}: state.status
 #. placeholder {1}: decision.trace.reason
-#: src/room/shared/modules/room-manager.ts:622
+#: src/room/shared/modules/room-manager.ts:482
 msgid "🧭 Management status: {0}. {1}."
 msgstr "🧭 Management status: {0}. {1}."
 
-#: src/room/shared/modules/room-manager.ts:137
+#: src/room/shared/modules/room-manager.ts:115
 msgid "🧭 Management suspended after manual admin control."
 msgstr "🧭 Management suspended after manual admin control."
 
-#: src/room/shared/modules/room-manager.ts:121
+#: src/room/shared/modules/room-manager.ts:99
 msgid "🧭 Moved everyone to spectators."
 msgstr "🧭 Moved everyone to spectators."
 
-#: src/room/shared/modules/room-manager.ts:127
+#: src/room/shared/modules/room-manager.ts:105
 msgid "🧭 Switched to Classic."
 msgstr "🧭 Switched to Classic."
 
-#: src/room/shared/modules/room-manager.ts:125
+#: src/room/shared/modules/room-manager.ts:103
 msgid "🧭 Switched to Flag."
 msgstr "🧭 Switched to Flag."
 
-#: src/room/shared/modules/room-manager.ts:123
+#: src/room/shared/modules/room-manager.ts:101
 msgid "🧭 Switched to Training."
 msgstr "🧭 Switched to Training."
 
-#: src/room/shared/modules/room-manager.ts:181
+#: src/room/shared/modules/room-manager.ts:159
 msgid "🧭 Teams were rebuilt after {missingPlayer} left."
 msgstr "🧭 Teams were rebuilt after {missingPlayer} left."
 
-#: src/room/shared/modules/room-manager.ts:159
+#: src/room/shared/modules/room-manager.ts:137
 msgid "🧭 Waiting for everyone to demonstrate presence before the first play."
 msgstr "🧭 Waiting for everyone to demonstrate presence before the first play."
 
@@ -1066,19 +1069,19 @@ msgstr "🧭 Waiting for everyone to demonstrate presence before the first play.
 #~ msgid "🧭 Waiting for player activity before the first play."
 #~ msgstr "🧭 Waiting for player activity before the first play."
 
-#: src/room/shared/modules/room-manager.ts:145
+#: src/room/shared/modules/room-manager.ts:123
 msgid "🧭 You are active again."
 msgstr "🧭 You are active again."
 
-#: src/room/shared/modules/room-manager.ts:143
+#: src/room/shared/modules/room-manager.ts:121
 msgid "🧭 You are no longer AFK."
 msgstr "🧭 You are no longer AFK."
 
-#: src/room/shared/modules/room-manager.ts:141
+#: src/room/shared/modules/room-manager.ts:119
 msgid "🧭 You are now AFK."
 msgstr "🧭 You are now AFK."
 
-#: src/room/shared/modules/room-manager.ts:139
+#: src/room/shared/modules/room-manager.ts:117
 msgid "🧭 You were marked AFK."
 msgstr "🧭 You were marked AFK."
 
@@ -1154,7 +1157,7 @@ msgstr "🚪 Punt out of bounds"
 msgid "🚫 Only admins can change the game mode."
 msgstr "🚫 Only admins can change the game mode."
 
-#: src/room/shared/modules/room-manager.ts:564
+#: src/room/shared/modules/room-manager.ts:424
 msgid "🚫 Only admins can use room manager commands."
 msgstr "🚫 Only admins can use room manager commands."
 
@@ -1195,7 +1198,7 @@ msgstr "🛑 {0} is down in the end zone"
 msgid "🛡️ INTERCEPTION by {0}!"
 msgstr "🛡️ INTERCEPTION by {0}!"
 
-#: src/room/shared/modules/room-manager.ts:152
+#: src/room/shared/modules/room-manager.ts:130
 msgid "A player"
 msgstr "A player"
 
@@ -1223,8 +1226,8 @@ msgstr "automatic first down."
 msgid "automatic touchdown."
 msgstr "automatic touchdown."
 
-#: src/modes/classic/states/scrimmage/presnap.ts:359
-#: src/modes/flag/states/presnap.ts:318
+#: src/modes/classic/states/scrimmage/presnap.ts:319
+#: src/modes/flag/states/presnap.ts:293
 msgid "ball is live"
 msgstr "ball is live"
 
@@ -1259,10 +1262,10 @@ msgid "Blocks player crossings over the LOS during presnap positioning."
 msgstr "Blocks player crossings over the LOS during presnap positioning."
 
 #: src/modes/classic/shared/presentation/message.ts:11
-#: src/modes/classic/states/scrimmage/presnap.ts:527
+#: src/modes/classic/states/scrimmage/presnap.ts:545
 #: src/modes/flag/shared/presentation/message.ts:11
-#: src/modes/flag/states/presnap.ts:437
-#: src/room/shared/modules/room-manager.ts:112
+#: src/modes/flag/states/presnap.ts:453
+#: src/room/shared/modules/room-manager.ts:90
 msgid "Blue"
 msgstr "Blue"
 
@@ -1270,7 +1273,7 @@ msgstr "Blue"
 msgid "Clear all bans"
 msgstr "Clear all bans"
 
-#: src/room/shared/modules/room-manager.ts:685
+#: src/room/shared/modules/room-manager.ts:547
 msgid "Control algorithmic room management"
 msgstr "Control algorithmic room management"
 
@@ -1370,10 +1373,10 @@ msgstr "FIRST DOWN!"
 msgid "Game ended in a tie!"
 msgstr "Game ended in a tie!"
 
-#: src/modes/classic/states/scrimmage/presnap.ts:744
-#: src/modes/classic/states/scrimmage/presnap.ts:757
-#: src/modes/flag/states/presnap.ts:533
-#: src/modes/flag/states/presnap.ts:546
+#: src/modes/classic/states/scrimmage/presnap.ts:762
+#: src/modes/classic/states/scrimmage/presnap.ts:775
+#: src/modes/flag/states/presnap.ts:549
+#: src/modes/flag/states/presnap.ts:562
 msgid "hike clock expired"
 msgstr "hike clock expired"
 
@@ -1422,12 +1425,12 @@ msgstr "Interception"
 msgid "kick the PAT."
 msgstr "kick the PAT."
 
-#: src/modes/classic/states/kicking/punt.ts:131
-#: src/modes/classic/states/kicking/safety.ts:136
+#: src/modes/classic/states/kicking/punt.ts:136
+#: src/modes/classic/states/kicking/safety.ts:141
 msgid "kicking team loses possession."
 msgstr "kicking team loses possession."
 
-#: src/modes/classic/states/kicking/kickoff.ts:146
+#: src/modes/classic/states/kicking/kickoff.ts:150
 msgid "Kickoff"
 msgstr "Kickoff"
 
@@ -1435,7 +1438,7 @@ msgstr "Kickoff"
 #~ msgid "kickoff caught first by the kicking team ({0})."
 #~ msgstr "kickoff caught first by the kicking team ({0})."
 
-#: src/modes/classic/states/kicking/kickoff.ts:192
+#: src/modes/classic/states/kicking/kickoff.ts:196
 msgid "kickoff clock expired"
 msgstr "kickoff clock expired"
 
@@ -1573,8 +1576,8 @@ msgstr "no gain."
 msgid "none"
 msgstr "none"
 
-#: src/modes/classic/states/scrimmage/presnap.ts:745
-#: src/modes/flag/states/presnap.ts:534
+#: src/modes/classic/states/scrimmage/presnap.ts:763
+#: src/modes/flag/states/presnap.ts:550
 msgid "offense loses a down."
 msgstr "offense loses a down."
 
@@ -1609,7 +1612,7 @@ msgstr "PICK-SIX by {0}!"
 #~ msgid "punt caught first by the kicking team ({0})."
 #~ msgstr "punt caught first by the kicking team ({0})."
 
-#: src/modes/classic/states/kicking/punt.ts:130
+#: src/modes/classic/states/kicking/punt.ts:135
 msgid "punt clock expired"
 msgstr "punt clock expired"
 
@@ -1674,15 +1677,15 @@ msgstr "Quarterback {0} went out in the end zone"
 msgid "quarterback run is live."
 msgstr "quarterback run is live."
 
-#: src/modes/classic/states/kicking/kickoff.ts:193
+#: src/modes/classic/states/kicking/kickoff.ts:197
 msgid "receiving team gets the ball at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 msgstr "receiving team gets the ball at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 
 #: src/modes/classic/shared/presentation/message.ts:11
-#: src/modes/classic/states/scrimmage/presnap.ts:527
+#: src/modes/classic/states/scrimmage/presnap.ts:545
 #: src/modes/flag/shared/presentation/message.ts:11
-#: src/modes/flag/states/presnap.ts:437
-#: src/room/shared/modules/room-manager.ts:110
+#: src/modes/flag/states/presnap.ts:453
+#: src/room/shared/modules/room-manager.ts:88
 msgid "Red"
 msgstr "Red"
 
@@ -1708,7 +1711,7 @@ msgstr "Reposition players"
 msgid "Requires a selected quarterback before the offense can snap."
 msgstr "Requires a selected quarterback before the offense can snap."
 
-#: src/modes/classic/states/kicking/safety.ts:105
+#: src/modes/classic/states/kicking/safety.ts:110
 msgid "Safety"
 msgstr "Safety"
 
@@ -1729,7 +1732,7 @@ msgstr "Safety kick return"
 msgid "safety kick touched first by {0} from the kicking team."
 msgstr "safety kick touched first by {0} from the kicking team."
 
-#: src/modes/classic/states/kicking/safety.ts:135
+#: src/modes/classic/states/kicking/safety.ts:140
 msgid "safety-kick clock expired"
 msgstr "safety-kick clock expired"
 
@@ -1803,11 +1806,11 @@ msgstr "Show the score"
 msgid "Show the tutorial link"
 msgstr "Show the tutorial link"
 
-#: src/room/managed/modules/authentication.ts:699
+#: src/room/managed/modules/authentication.ts:696
 msgid "Sign-in timed out."
 msgstr "Sign-in timed out."
 
-#: src/room/shared/modules/room-manager.ts:114
+#: src/room/shared/modules/room-manager.ts:92
 msgid "their team"
 msgstr "their team"
 
@@ -1816,7 +1819,7 @@ msgstr "their team"
 msgid "Time limit reached with a tied game, overtime is active and the next score wins."
 msgstr "Time limit reached with a tied game, overtime is active and the next score wins."
 
-#: src/room/shared/modules/room-manager.ts:690
+#: src/room/shared/modules/room-manager.ts:552
 msgid "Toggle AFK status"
 msgstr "Toggle AFK status"
 
@@ -1857,7 +1860,7 @@ msgstr "turnover at the {0}-yard line!"
 #: src/modes/classic/states/scrimmage/blocked-pass.ts:109
 #: src/modes/classic/states/scrimmage/live-ball.ts:493
 #: src/modes/classic/states/scrimmage/live-ball.ts:699
-#: src/modes/classic/states/scrimmage/presnap.ts:758
+#: src/modes/classic/states/scrimmage/presnap.ts:776
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:252
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:429
 #: src/modes/classic/states/scrimmage/run.ts:252
@@ -1871,7 +1874,7 @@ msgstr "turnover at the {0}-yard line!"
 #: src/modes/flag/states/blocked-pass.ts:105
 #: src/modes/flag/states/live-ball.ts:319
 #: src/modes/flag/states/live-ball.ts:513
-#: src/modes/flag/states/presnap.ts:547
+#: src/modes/flag/states/presnap.ts:563
 #: src/modes/flag/states/quarterback-run.ts:233
 #: src/modes/flag/states/quarterback-run.ts:398
 #: src/modes/flag/states/snap-in-flight.ts:134

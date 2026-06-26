@@ -34,7 +34,7 @@ export type NextDownStateIncrement = {
 };
 
 export const FLAG_START_YARD_LINE = 25;
-export const MAX_DOWNS = 4;
+export const MAX_DOWNS = 10;
 export const FIRST_DOWN = 1;
 
 export const INITIAL_DOWN_AND_DISTANCE: DownAndDistance = {

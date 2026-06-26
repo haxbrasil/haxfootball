@@ -320,7 +320,7 @@ export function createRoomManagerModule({
                 return;
             case "stop-game":
                 runOwnAction(() => {
-                    room.stopGame();
+                    gameRuntimeStore.stopGame();
                 });
                 return;
             case "pause-game":
@@ -511,7 +511,9 @@ export function createRoomManagerModule({
             return { hideMessage: true };
         }
 
-        const isAfk = state.manualAfkPlayerIds.includes(player.id);
+        const isAfk =
+            state.manualAfkPlayerIds.includes(player.id) ||
+            state.autoAfkPlayerIds.includes(player.id);
         state = setPlayerAfk(state, player.id, !isAfk);
         state = recordPlayerActivity(state, player.id, Date.now());
         void eventSink?.({

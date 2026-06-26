@@ -18,6 +18,7 @@ export type GameRuntimeSnapshot = {
 export type GameRuntimeOperations = {
     restoreCheckpoint(args?: CheckpointRestoreArgs): void;
     setPrePlayTimeoutHold(held: boolean): void;
+    stopGame(): void;
 };
 
 export type GameRuntimeStore = {
@@ -27,6 +28,7 @@ export type GameRuntimeStore = {
     setOperations(operations: GameRuntimeOperations | null): void;
     restoreCheckpoint(args?: CheckpointRestoreArgs): void;
     setPrePlayTimeoutHold(held: boolean): void;
+    stopGame(): void;
 };
 
 export function createIdleGameRuntimeSnapshot(
@@ -69,6 +71,9 @@ export function createGameRuntimeStore(
         },
         setPrePlayTimeoutHold: (held) => {
             operations?.setPrePlayTimeoutHold(held);
+        },
+        stopGame: () => {
+            operations?.stopGame();
         },
     };
 }

@@ -139,6 +139,34 @@ export function createGameModule({
         });
     };
 
+    const stopLocalGame = (room: Room) => {
+        if (!engine) {
+            return;
+        }
+
+        const completedResult = activeMode
+            ? modeRuntimes[activeMode].getCompletedResult()
+            : null;
+
+        getActiveRuntime().handleGameStop({
+            engine,
+            ...(gameScoreStore ? { gameScoreStore } : {}),
+            room,
+        });
+
+        engine.stop();
+        engine = null;
+        activeMode = null;
+        gameScoreStore?.reset();
+        visualScore.lastSent = null;
+        gameRuntimeStore?.reset(
+            createIdleGameRuntimeSnapshot(
+                getSelectedModeDefinition().name,
+                completedResult,
+            ),
+        );
+    };
+
     const module = createModule()
         .setCommands({
             spec: { prefix: COMMAND_PREFIX },
@@ -173,6 +201,9 @@ export function createGameModule({
                 },
                 setPrePlayTimeoutHold: (held) => {
                     engine?.setPrePlayTimeoutHold(held);
+                },
+                stopGame: () => {
+                    room.stopGame();
                 },
             });
             syncScores(room);
@@ -293,28 +324,11 @@ export function createGameModule({
             syncScores(room);
             writeGameRuntimeSnapshot();
         })
+        .onBeforeGameStop((room) => {
+            stopLocalGame(room);
+        })
         .onGameStop((room) => {
-            const completedResult = activeMode
-                ? modeRuntimes[activeMode].getCompletedResult()
-                : null;
-
-            getActiveRuntime().handleGameStop({
-                engine,
-                ...(gameScoreStore ? { gameScoreStore } : {}),
-                room,
-            });
-
-            engine?.stop();
-            engine = null;
-            activeMode = null;
-            gameScoreStore?.reset();
-            visualScore.lastSent = null;
-            gameRuntimeStore?.reset(
-                createIdleGameRuntimeSnapshot(
-                    getSelectedModeDefinition().name,
-                    completedResult,
-                ),
-            );
+            stopLocalGame(room);
         })
         .onGamePause((_room, byPlayer) => {
             engine?.handleGamePause(byPlayer);

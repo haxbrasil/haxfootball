@@ -380,7 +380,7 @@ export function Presnap({ downState }: { downState: DownState }) {
                 if (down === null) {
                     $effect(($) => {
                         $.send({
-                            message: t`⚠️ Usage: !down <1-4>.`,
+                            message: t`⚠️ Usage: !down <1-10>.`,
                             to: player.id,
                             color: COLOR.CRITICAL,
                         });

@@ -645,4 +645,59 @@ describe("planRoomManagement", () => {
         expect(decision.state.autoAfkPlayerIds).toEqual([]);
         expect(decision.state.afkWarningPlayerIds).toEqual([]);
     });
+
+    it("removes field players that become AFK from the active layout", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                visibleActionDelayMs: 0,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                    createPlayer(3, { team: Team.RED }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.TRAINING,
+                    activeMode: GAME_MODE.TRAINING,
+                    running: true,
+                }),
+            }),
+            {
+                ...createState(),
+                manualAfkPlayerIds: [2],
+            },
+        );
+
+        expect(moveActions(decision.actions)).toContainEqual({
+            type: "move-player",
+            playerId: 2,
+            team: Team.SPECTATORS,
+            reason: "mode-roster",
+        });
+    });
+
+    it("adds players back to Training when they leave AFK", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                visibleActionDelayMs: 0,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2),
+                    createPlayer(3, { team: Team.RED }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.TRAINING,
+                    activeMode: GAME_MODE.TRAINING,
+                    running: true,
+                }),
+            }),
+            createState(),
+        );
+
+        expect(moveActions(decision.actions)).toContainEqual({
+            type: "move-player",
+            playerId: 2,
+            team: Team.RED,
+            reason: "mode-roster",
+        });
+    });
 });

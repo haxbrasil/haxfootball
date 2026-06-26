@@ -139,6 +139,16 @@ export class Module {
         return this;
     }
 
+    onBeforeGameStop(
+        handler: (
+            room: Room,
+            operation: Extract<RoomOperationObject, { kind: "stop-game" }>,
+        ) => boolean | void,
+    ): this {
+        this.events.push(["onBeforeGameStop", handler]);
+        return this;
+    }
+
     onPlayerAdminChange(
         handler: (
             room: Room,
@@ -589,6 +599,7 @@ export function updateRoomModules(
     roomObject.onPlayerBallKick = emit("onPlayerBallKick");
     roomObject.onTeamGoal = emit("onTeamGoal");
     roomObject.onGameStart = emit("onGameStart");
+    roomObject.onBeforeGameStop = emit("onBeforeGameStop");
     roomObject.onGameStop = emit("onGameStop");
     roomObject.onPlayerAdminChange = emit("onPlayerAdminChange");
     roomObject.onPlayerTeamChange = emit("onPlayerTeamChange");

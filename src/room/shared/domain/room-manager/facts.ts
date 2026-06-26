@@ -407,6 +407,13 @@ export function needsModeSync(ctx: ManagerContext): boolean {
     const currentFieldById = new Map(
         ctx.fieldPlayers.map((player) => [player.id, player.team]),
     );
+    const desiredRosterIds = new Set(
+        ctx.desiredRoster.map((player) => player.playerId),
+    );
+
+    if (ctx.fieldPlayers.some((player) => !desiredRosterIds.has(player.id))) {
+        return true;
+    }
 
     return ctx.desiredRoster.some(
         (rosterPlayer) =>
