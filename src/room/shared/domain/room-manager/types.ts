@@ -109,29 +109,48 @@ export type RoomManagerState = {
     ownActionUntilMs: number;
 };
 
-export type RoomManagementMessage = {
-    id:
-        | "manager.mode.training"
-        | "manager.mode.flag"
-        | "manager.mode.classic"
-        | "manager.mode.idle"
-        | "manager.eligibility.register"
-        | "manager.status.enabled"
-        | "manager.status.disabled"
-        | "manager.status.resumed"
-        | "manager.status.suspended"
-        | "manager.afk.marked"
-        | "manager.afk.enabled"
-        | "manager.afk.disabled"
-        | "manager.afk.resumed"
-        | "manager.afk.warning"
-        | "manager.afk.public-warning"
-        | "manager.afk.unavailable"
-        | "manager.readiness.waiting"
-        | "manager.shortage.replaced"
-        | "manager.shortage.rebuild";
-    args?: Record<string, number | string | boolean>;
-};
+type RoomManagementPlayerReference = Pick<RoomManagementPlayer, "id" | "name">;
+
+export type RoomManagementMessage =
+    | {
+          id:
+              | "manager.mode.training"
+              | "manager.mode.flag"
+              | "manager.mode.classic"
+              | "manager.mode.idle"
+              | "manager.eligibility.register"
+              | "manager.status.enabled"
+              | "manager.status.disabled"
+              | "manager.status.resumed"
+              | "manager.status.suspended"
+              | "manager.afk.marked"
+              | "manager.afk.enabled"
+              | "manager.afk.disabled"
+              | "manager.afk.resumed"
+              | "manager.afk.warning"
+              | "manager.afk.pause-ended"
+              | "manager.afk.unavailable"
+              | "manager.readiness.waiting"
+              | "manager.readiness.pause-ended";
+      }
+    | {
+          id: "manager.afk.public-warning";
+          player: RoomManagementPlayerReference;
+      }
+    | {
+          id: "manager.afk.public-marked" | "manager.readiness.public-marked";
+          players: readonly RoomManagementPlayerReference[];
+      }
+    | {
+          id: "manager.shortage.replaced";
+          missingPlayer: RoomManagementPlayerReference;
+          replacementPlayer: RoomManagementPlayerReference;
+          replacementTeam: FieldTeam;
+      }
+    | {
+          id: "manager.shortage.rebuild";
+          missingPlayer: RoomManagementPlayerReference;
+      };
 
 export type RoomManagementAction =
     | { type: "lock-teams" }

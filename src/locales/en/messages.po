@@ -371,7 +371,7 @@ msgstr "⚙️ Available flags:"
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Available flags: {0}."
 
-#: src/room/shared/modules/room-manager.ts:132
+#: src/room/shared/modules/room-manager.ts:127
 msgid "⚠️ {playerName} is AFK. The game is paused until they show activity."
 msgstr "⚠️ {playerName} is AFK. The game is paused until they show activity."
 
@@ -493,13 +493,13 @@ msgstr "⚠️ Sign-in is unavailable right now. Try again in a moment."
 
 #. placeholder {0}: ownerModeDefinition.label
 #. placeholder {1}: selectedModeDefinition.label
-#: src/room/shared/modules/game.ts:279
+#: src/room/shared/modules/game.ts:278
 msgid "⚠️ That {0} command is unavailable in {1} mode."
 msgstr "⚠️ That {0} command is unavailable in {1} mode."
 
 #: src/modes/classic/definition/index.ts:305
 #: src/modes/flag/definition/index.ts:308
-#: src/room/shared/modules/game.ts:303
+#: src/room/shared/modules/game.ts:302
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ The game has not been started yet."
 
@@ -547,7 +547,7 @@ msgstr "⚠️ Usage: !los <red/blue> <1-50>."
 msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Usage: !qb [#id|name]."
 
-#: src/room/shared/modules/room-manager.ts:491
+#: src/room/shared/modules/room-manager.ts:497
 msgid "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 msgstr "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 
@@ -573,7 +573,7 @@ msgstr "⚠️ You are too far from the ball to punt."
 msgid "⚠️ You are too far from the ball to snap it."
 msgstr "⚠️ You are too far from the ball to snap it."
 
-#: src/room/shared/modules/room-manager.ts:135
+#: src/room/shared/modules/room-manager.ts:140
 msgid "⚠️ You can only use !afk before the play starts."
 msgstr "⚠️ You can only use !afk before the play starts."
 
@@ -605,7 +605,7 @@ msgstr "⚠️ You cannot snap while a teammate is past the LOS."
 
 #: src/modes/classic/definition/index.ts:304
 #: src/modes/flag/definition/index.ts:307
-#: src/room/shared/modules/game.ts:302
+#: src/room/shared/modules/game.ts:301
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ You cannot use that command right now."
 
@@ -618,7 +618,7 @@ msgstr "⚠️ You must get back behind the ball line to allow the punt!"
 msgid "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 msgstr "⚠️ You must get back behind the line of scrimmage to allow the snap!"
 
-#: src/room/shared/modules/room-manager.ts:125
+#: src/room/shared/modules/room-manager.ts:123
 msgid "⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators."
 msgstr "⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators."
 
@@ -627,6 +627,10 @@ msgstr "⚠️ You were marked inactive. Move or press a key now to avoid being 
 #: src/modes/flag/states/snap.ts:984
 msgid "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 msgstr "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
+
+#: src/room/shared/modules/room-manager.ts:138
+msgid "✅ AFK pause ended. Resuming play."
+msgstr "✅ AFK pause ended. Resuming play."
 
 #: src/room/shared/modules/player-access.ts:58
 msgid "✅ All bans cleared successfully."
@@ -651,6 +655,10 @@ msgstr "✅ Password cleared successfully."
 #: src/room/shared/modules/password.ts:54
 msgid "✅ Password updated successfully."
 msgstr "✅ Password updated successfully."
+
+#: src/room/shared/modules/room-manager.ts:152
+msgid "✅ Presence check ended. Resuming play."
+msgstr "✅ Presence check ended. Resuming play."
 
 #. placeholder {0}: account.name
 #: src/room/managed/modules/authentication.ts:794
@@ -963,7 +971,7 @@ msgstr "📘 {COMMAND_PREFIX}{0}: No description available."
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Aliases: {formattedAliases}"
 
-#: src/room/shared/modules/room-manager.ts:107
+#: src/room/shared/modules/room-manager.ts:105
 msgid "🔐 Please register and sign in to play. You can stay as a spectator until then."
 msgstr "🔐 Please register and sign in to play. You can stay as a spectator until then."
 
@@ -1015,53 +1023,61 @@ msgstr "🦵 {0} sets up to punt."
 msgid "🦵 {0} sets up to punt. Kick within {PUNT_KICK_TIMEOUT_SECONDS}s."
 msgstr "🦵 {0} sets up to punt. Kick within {PUNT_KICK_TIMEOUT_SECONDS}s."
 
-#: src/room/shared/modules/room-manager.ts:151
+#: src/room/shared/modules/room-manager.ts:160
 msgid "🧭 {missingPlayer} left, so {replacementPlayer} took their spot on {replacementTeam}."
 msgstr "🧭 {missingPlayer} left, so {replacementPlayer} took their spot on {replacementTeam}."
 
-#: src/room/shared/modules/room-manager.ts:111
+#: src/room/shared/modules/room-manager.ts:135
+msgid "🧭 {playerNames} moved to spectators for inactivity."
+msgstr "🧭 {playerNames} moved to spectators for inactivity."
+
+#: src/room/shared/modules/room-manager.ts:149
+msgid "🧭 {playerNames} moved to spectators for not showing presence."
+msgstr "🧭 {playerNames} moved to spectators for not showing presence."
+
+#: src/room/shared/modules/room-manager.ts:109
 msgid "🧭 Management disabled. Teams remain locked."
 msgstr "🧭 Management disabled. Teams remain locked."
 
-#: src/room/shared/modules/room-manager.ts:109
+#: src/room/shared/modules/room-manager.ts:107
 msgid "🧭 Management enabled."
 msgstr "🧭 Management enabled."
 
-#: src/room/shared/modules/room-manager.ts:113
+#: src/room/shared/modules/room-manager.ts:111
 msgid "🧭 Management resumed."
 msgstr "🧭 Management resumed."
 
 #. placeholder {0}: state.status
 #. placeholder {1}: decision.trace.reason
-#: src/room/shared/modules/room-manager.ts:482
+#: src/room/shared/modules/room-manager.ts:488
 msgid "🧭 Management status: {0}. {1}."
 msgstr "🧭 Management status: {0}. {1}."
 
-#: src/room/shared/modules/room-manager.ts:115
+#: src/room/shared/modules/room-manager.ts:113
 msgid "🧭 Management suspended after manual admin control."
 msgstr "🧭 Management suspended after manual admin control."
 
-#: src/room/shared/modules/room-manager.ts:99
+#: src/room/shared/modules/room-manager.ts:97
 msgid "🧭 Moved everyone to spectators."
 msgstr "🧭 Moved everyone to spectators."
 
-#: src/room/shared/modules/room-manager.ts:105
+#: src/room/shared/modules/room-manager.ts:103
 msgid "🧭 Switched to Classic."
 msgstr "🧭 Switched to Classic."
 
-#: src/room/shared/modules/room-manager.ts:103
+#: src/room/shared/modules/room-manager.ts:101
 msgid "🧭 Switched to Flag."
 msgstr "🧭 Switched to Flag."
 
-#: src/room/shared/modules/room-manager.ts:101
+#: src/room/shared/modules/room-manager.ts:99
 msgid "🧭 Switched to Training."
 msgstr "🧭 Switched to Training."
 
-#: src/room/shared/modules/room-manager.ts:159
+#: src/room/shared/modules/room-manager.ts:165
 msgid "🧭 Teams were rebuilt after {missingPlayer} left."
 msgstr "🧭 Teams were rebuilt after {missingPlayer} left."
 
-#: src/room/shared/modules/room-manager.ts:137
+#: src/room/shared/modules/room-manager.ts:142
 msgid "🧭 Waiting for everyone to demonstrate presence before the first play."
 msgstr "🧭 Waiting for everyone to demonstrate presence before the first play."
 
@@ -1069,19 +1085,19 @@ msgstr "🧭 Waiting for everyone to demonstrate presence before the first play.
 #~ msgid "🧭 Waiting for player activity before the first play."
 #~ msgstr "🧭 Waiting for player activity before the first play."
 
-#: src/room/shared/modules/room-manager.ts:123
+#: src/room/shared/modules/room-manager.ts:121
 msgid "🧭 You are active again."
 msgstr "🧭 You are active again."
 
-#: src/room/shared/modules/room-manager.ts:121
+#: src/room/shared/modules/room-manager.ts:119
 msgid "🧭 You are no longer AFK."
 msgstr "🧭 You are no longer AFK."
 
-#: src/room/shared/modules/room-manager.ts:119
+#: src/room/shared/modules/room-manager.ts:117
 msgid "🧭 You are now AFK."
 msgstr "🧭 You are now AFK."
 
-#: src/room/shared/modules/room-manager.ts:117
+#: src/room/shared/modules/room-manager.ts:115
 msgid "🧭 You were marked AFK."
 msgstr "🧭 You were marked AFK."
 
@@ -1157,7 +1173,7 @@ msgstr "🚪 Punt out of bounds"
 msgid "🚫 Only admins can change the game mode."
 msgstr "🚫 Only admins can change the game mode."
 
-#: src/room/shared/modules/room-manager.ts:424
+#: src/room/shared/modules/room-manager.ts:430
 msgid "🚫 Only admins can use room manager commands."
 msgstr "🚫 Only admins can use room manager commands."
 
@@ -1198,7 +1214,8 @@ msgstr "🛑 {0} is down in the end zone"
 msgid "🛡️ INTERCEPTION by {0}!"
 msgstr "🛡️ INTERCEPTION by {0}!"
 
-#: src/room/shared/modules/room-manager.ts:130
+#: src/room/shared/modules/room-manager.ts:133
+#: src/room/shared/modules/room-manager.ts:147
 msgid "A player"
 msgstr "A player"
 
@@ -1265,7 +1282,7 @@ msgstr "Blocks player crossings over the LOS during presnap positioning."
 #: src/modes/classic/states/scrimmage/presnap.ts:545
 #: src/modes/flag/shared/presentation/message.ts:11
 #: src/modes/flag/states/presnap.ts:453
-#: src/room/shared/modules/room-manager.ts:90
+#: src/room/shared/modules/room-manager.ts:88
 msgid "Blue"
 msgstr "Blue"
 
@@ -1273,7 +1290,7 @@ msgstr "Blue"
 msgid "Clear all bans"
 msgstr "Clear all bans"
 
-#: src/room/shared/modules/room-manager.ts:547
+#: src/room/shared/modules/room-manager.ts:553
 msgid "Control algorithmic room management"
 msgstr "Control algorithmic room management"
 
@@ -1685,7 +1702,7 @@ msgstr "receiving team gets the ball at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-ya
 #: src/modes/classic/states/scrimmage/presnap.ts:545
 #: src/modes/flag/shared/presentation/message.ts:11
 #: src/modes/flag/states/presnap.ts:453
-#: src/room/shared/modules/room-manager.ts:88
+#: src/room/shared/modules/room-manager.ts:86
 msgid "Red"
 msgstr "Red"
 
@@ -1810,7 +1827,7 @@ msgstr "Show the tutorial link"
 msgid "Sign-in timed out."
 msgstr "Sign-in timed out."
 
-#: src/room/shared/modules/room-manager.ts:92
+#: src/room/shared/modules/room-manager.ts:90
 msgid "their team"
 msgstr "their team"
 
@@ -1819,7 +1836,7 @@ msgstr "their team"
 msgid "Time limit reached with a tied game, overtime is active and the next score wins."
 msgstr "Time limit reached with a tied game, overtime is active and the next score wins."
 
-#: src/room/shared/modules/room-manager.ts:552
+#: src/room/shared/modules/room-manager.ts:558
 msgid "Toggle AFK status"
 msgstr "Toggle AFK status"
 

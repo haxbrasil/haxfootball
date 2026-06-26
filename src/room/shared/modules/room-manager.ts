@@ -1,4 +1,5 @@
 import { COLOR } from "@common/general/color";
+import { formatNames } from "@common/presentation/format-names";
 import { COMMAND_PREFIX, type CommandSpec } from "@core/commands";
 import { createModule, type Module } from "@core/module";
 import type { Room } from "@core/room";
@@ -73,17 +74,14 @@ function getPlayerEligibility({
     }
 }
 
-function formatPlayerName(nameArg: unknown, idArg: unknown): string {
-    const providedName =
-        typeof nameArg === "string" && nameArg.length > 0 ? nameArg : null;
-    const fallbackName =
-        typeof idArg === "number" ? `Player ${idArg}` : "the player";
-
-    return providedName ?? fallbackName;
+function formatPlayerName(
+    player: Pick<RoomManagementPlayer, "id" | "name">,
+): string {
+    return player.name.length > 0 ? player.name : `Player ${player.id}`;
 }
 
-function formatTeamName(teamArg: unknown): string {
-    switch (teamArg) {
+function formatTeamName(team: TeamID): string {
+    switch (team) {
         case Team.RED:
             return t`Red`;
         case Team.BLUE:
@@ -124,37 +122,45 @@ function formatManagerMessage(message: RoomManagementMessage): string {
         case "manager.afk.warning":
             return t`⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators.`;
         case "manager.afk.public-warning": {
-            const playerName =
-                typeof message.args?.["playerName"] === "string"
-                    ? message.args["playerName"]
-                    : t`A player`;
+            const playerName = formatPlayerName(message.player);
 
             return t`⚠️ ${playerName} is AFK. The game is paused until they show activity.`;
         }
+        case "manager.afk.public-marked": {
+            const playerNames =
+                message.players.length > 0
+                    ? formatNames(message.players)
+                    : t`A player`;
+
+            return t`🧭 ${playerNames} moved to spectators for inactivity.`;
+        }
+        case "manager.afk.pause-ended":
+            return t`✅ AFK pause ended. Resuming play.`;
         case "manager.afk.unavailable":
             return t`⚠️ You can only use !afk before the play starts.`;
         case "manager.readiness.waiting":
             return t`🧭 Waiting for everyone to demonstrate presence before the first play.`;
+        case "manager.readiness.public-marked": {
+            const playerNames =
+                message.players.length > 0
+                    ? formatNames(message.players)
+                    : t`A player`;
+
+            return t`🧭 ${playerNames} moved to spectators for not showing presence.`;
+        }
+        case "manager.readiness.pause-ended":
+            return t`✅ Presence check ended. Resuming play.`;
         case "manager.shortage.replaced": {
-            const missingPlayer = formatPlayerName(
-                message.args?.["missingPlayerName"],
-                message.args?.["missingPlayerId"],
-            );
+            const missingPlayer = formatPlayerName(message.missingPlayer);
             const replacementPlayer = formatPlayerName(
-                message.args?.["replacementPlayerName"],
-                message.args?.["replacementPlayerId"],
+                message.replacementPlayer,
             );
-            const replacementTeam = formatTeamName(
-                message.args?.["replacementTeam"],
-            );
+            const replacementTeam = formatTeamName(message.replacementTeam);
 
             return t`🧭 ${missingPlayer} left, so ${replacementPlayer} took their spot on ${replacementTeam}.`;
         }
         case "manager.shortage.rebuild": {
-            const missingPlayer = formatPlayerName(
-                message.args?.["missingPlayerName"],
-                message.args?.["missingPlayerId"],
-            );
+            const missingPlayer = formatPlayerName(message.missingPlayer);
 
             return t`🧭 Teams were rebuilt after ${missingPlayer} left.`;
         }

@@ -470,6 +470,19 @@ describe("planRoomManagement", () => {
             team: Team.SPECTATORS,
             reason: "afk",
         });
+        expect(expired.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: {
+                id: "manager.readiness.public-marked",
+                players: [createPlayer(1, { team: Team.RED })],
+            },
+        });
+        expect(expired.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: { id: "manager.readiness.pause-ended" },
+        });
         expect(expired.state.autoAfkPlayerIds).toEqual([1]);
     });
 
@@ -521,6 +534,27 @@ describe("planRoomManagement", () => {
         expect(moveActions(repeated.actions)).toEqual([]);
         expect(repeated.trace.reason).toBe("afk pause waiting");
 
+        const cleared = planRoomManagement(
+            createSnapshot({
+                nowMs: 7_500,
+                players: [createPlayer(1, { team: Team.RED })],
+                game: createGame({
+                    selectedMode: GAME_MODE.CLASSIC,
+                    activeMode: GAME_MODE.CLASSIC,
+                    running: true,
+                    paused: true,
+                    inspection: beforePlay("pre:afk"),
+                }),
+            }),
+            recordPlayerActivity(repeated.state, 1, 7_500),
+        );
+
+        expect(cleared.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: { id: "manager.afk.pause-ended" },
+        });
+
         const expired = planRoomManagement(
             createSnapshot({
                 nowMs: 11_000,
@@ -541,6 +575,19 @@ describe("planRoomManagement", () => {
             playerId: 1,
             team: Team.SPECTATORS,
             reason: "afk",
+        });
+        expect(expired.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: {
+                id: "manager.afk.public-marked",
+                players: [createPlayer(1, { team: Team.RED })],
+            },
+        });
+        expect(expired.actions).toContainEqual({
+            type: "send-message",
+            to: "room",
+            message: { id: "manager.afk.pause-ended" },
         });
     });
 

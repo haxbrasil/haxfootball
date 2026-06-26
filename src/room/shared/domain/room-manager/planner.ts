@@ -13,6 +13,7 @@ import type {
     RoomManagementDecision,
     RoomManagementMessage,
     RoomManagementPlanningOptions,
+    RoomManagementPlayer,
     RoomManagementSnapshot,
     RoomManagerState,
 } from "./types";
@@ -71,6 +72,15 @@ function requiresRunningGameRestart(ctx: ManagerContext): boolean {
     );
 }
 
+function getPlayersByIds(
+    players: readonly RoomManagementPlayer[],
+    playerIds: readonly number[],
+): readonly RoomManagementPlayer[] {
+    const playerIdSet = new Set(playerIds);
+
+    return players.filter((player) => playerIdSet.has(player.id));
+}
+
 function scheduleModeSyncAfterStop(
     ctx: ManagerContext,
     reason: string,
@@ -122,22 +132,22 @@ function getModeSyncActions(
     const stopCurrentGameActions: readonly RoomManagementAction[] =
         ctx.snapshot.game.running && restartRequired
             ? [
-                {
-                    type: "stop-game",
-                    reason: "mode-sync",
-                },
-            ]
+                  {
+                      type: "stop-game",
+                      reason: "mode-sync",
+                  },
+              ]
             : [];
 
     if (ctx.desiredMode === "idle") {
         const stopGameActions: readonly RoomManagementAction[] = ctx.snapshot
             .game.running
             ? [
-                {
-                    type: "stop-game",
-                    reason: "idle",
-                },
-            ]
+                  {
+                      type: "stop-game",
+                      reason: "idle",
+                  },
+              ]
             : [];
         const spectatorMoveActions = ctx.fieldPlayers.map<RoomManagementAction>(
             (player) => ({
@@ -171,7 +181,7 @@ function getModeSyncActions(
 
     const setModeActions: readonly RoomManagementAction[] =
         ctx.desiredGameMode &&
-            ctx.snapshot.game.selectedMode !== ctx.desiredGameMode
+        ctx.snapshot.game.selectedMode !== ctx.desiredGameMode
             ? [{ type: "set-mode", mode: ctx.desiredGameMode }]
             : [];
     const rosterMoveActions = ctx.desiredRoster.flatMap<RoomManagementAction>(
@@ -206,12 +216,12 @@ function getModeSyncActions(
         : [];
     const modeMessageActions: readonly RoomManagementAction[] = restartRequired
         ? [
-            {
-                type: "send-message",
-                to: "room",
-                message: { id: MODE_MESSAGES[ctx.desiredMode] },
-            },
-        ]
+              {
+                  type: "send-message",
+                  to: "room",
+                  message: { id: MODE_MESSAGES[ctx.desiredMode] },
+              },
+          ]
         : [];
 
     return [
@@ -241,23 +251,23 @@ function getStateAfterModeSync(ctx: ManagerContext): RoomManagerState {
             ctx.desiredMode === "idle"
                 ? null
                 : {
-                    mode: ctx.desiredMode,
-                    players: ctx.desiredRoster,
-                    startedAtMs: ctx.snapshot.nowMs,
-                },
+                      mode: ctx.desiredMode,
+                      players: ctx.desiredRoster,
+                      startedAtMs: ctx.snapshot.nowMs,
+                  },
         lastCompletedResultKey:
             getCompletedResultKey(ctx.snapshot.game.result) ??
             ctx.state.lastCompletedResultKey,
         readiness:
             ctx.snapshot.config.afkActivityDetectionEnabled &&
-                (ctx.desiredMode === "flag" || ctx.desiredMode === "classic")
+            (ctx.desiredMode === "flag" || ctx.desiredMode === "classic")
                 ? {
-                    matchStartedAtMs: ctx.snapshot.nowMs,
-                    waitingPlayerIds: ctx.desiredRoster.map(
-                        (player) => player.playerId,
-                    ),
-                    warningSentPlayerIds: [],
-                }
+                      matchStartedAtMs: ctx.snapshot.nowMs,
+                      waitingPlayerIds: ctx.desiredRoster.map(
+                          (player) => player.playerId,
+                      ),
+                      warningSentPlayerIds: [],
+                  }
                 : null,
         pendingVisibleAction: null,
     };
@@ -418,8 +428,8 @@ const shortageRule: MainRule = {
         );
         const replacementPlayer = shortage.replacementPlayerId
             ? ctx.snapshot.players.find(
-                (player) => player.id === shortage.replacementPlayerId,
-            )
+                  (player) => player.id === shortage.replacementPlayerId,
+              )
             : null;
 
         if (
@@ -490,18 +500,18 @@ const shortageRule: MainRule = {
                     shortage: null,
                     activeRoster: ctx.state.activeRoster
                         ? {
-                            ...ctx.state.activeRoster,
-                            players: ctx.state.activeRoster.players.map(
-                                (rosterPlayer) =>
-                                    rosterPlayer.playerId ===
-                                        replacementPlayer.id
-                                        ? {
-                                            ...rosterPlayer,
-                                            playerId: missingPlayer.id,
-                                        }
-                                        : rosterPlayer,
-                            ),
-                        }
+                              ...ctx.state.activeRoster,
+                              players: ctx.state.activeRoster.players.map(
+                                  (rosterPlayer) =>
+                                      rosterPlayer.playerId ===
+                                      replacementPlayer.id
+                                          ? {
+                                                ...rosterPlayer,
+                                                playerId: missingPlayer.id,
+                                            }
+                                          : rosterPlayer,
+                              ),
+                          }
                         : null,
                 },
                 reason: "shortage original restored",
@@ -517,18 +527,18 @@ const shortageRule: MainRule = {
         if (replacement) {
             const latestCheckpoint =
                 ctx.snapshot.game.checkpoints[
-                ctx.snapshot.game.checkpoints.length - 1
+                    ctx.snapshot.game.checkpoints.length - 1
                 ] ?? null;
             const restoreCheckpointActions: readonly RoomManagementAction[] =
                 !ctx.canApplyVisibleGameChange && latestCheckpoint
                     ? [
-                        {
-                            type: "restore-checkpoint",
-                            ...(latestCheckpoint.key
-                                ? { checkpointId: latestCheckpoint.key }
-                                : {}),
-                        },
-                    ]
+                          {
+                              type: "restore-checkpoint",
+                              ...(latestCheckpoint.key
+                                  ? { checkpointId: latestCheckpoint.key }
+                                  : {}),
+                          },
+                      ]
                     : [];
             const replacementActions: readonly RoomManagementAction[] = [
                 {
@@ -542,13 +552,15 @@ const shortageRule: MainRule = {
                     to: "room",
                     message: {
                         id: "manager.shortage.replaced",
-                        args: {
-                            missingPlayerId: shortage.missingPlayerId,
-                            missingPlayerName: shortage.missingPlayerName,
-                            replacementPlayerId: replacement.id,
-                            replacementPlayerName: replacement.name,
-                            replacementTeam: shortage.previousTeam,
+                        missingPlayer: {
+                            id: shortage.missingPlayerId,
+                            name: shortage.missingPlayerName,
                         },
+                        replacementPlayer: {
+                            id: replacement.id,
+                            name: replacement.name,
+                        },
+                        replacementTeam: shortage.previousTeam,
                     },
                 },
                 {
@@ -572,18 +584,18 @@ const shortageRule: MainRule = {
                     },
                     activeRoster: ctx.state.activeRoster
                         ? {
-                            ...ctx.state.activeRoster,
-                            players: ctx.state.activeRoster.players.map(
-                                (rosterPlayer) =>
-                                    rosterPlayer.playerId ===
-                                        shortage.missingPlayerId
-                                        ? {
-                                            ...rosterPlayer,
-                                            playerId: replacement.id,
-                                        }
-                                        : rosterPlayer,
-                            ),
-                        }
+                              ...ctx.state.activeRoster,
+                              players: ctx.state.activeRoster.players.map(
+                                  (rosterPlayer) =>
+                                      rosterPlayer.playerId ===
+                                      shortage.missingPlayerId
+                                          ? {
+                                                ...rosterPlayer,
+                                                playerId: replacement.id,
+                                            }
+                                          : rosterPlayer,
+                              ),
+                          }
                         : null,
                 },
                 reason: "shortage replacement found",
@@ -598,9 +610,9 @@ const shortageRule: MainRule = {
                     to: "room",
                     message: {
                         id: "manager.shortage.rebuild",
-                        args: {
-                            missingPlayerId: shortage.missingPlayerId,
-                            missingPlayerName: shortage.missingPlayerName,
+                        missingPlayer: {
+                            id: shortage.missingPlayerId,
+                            name: shortage.missingPlayerName,
                         },
                     },
                 },
@@ -677,6 +689,11 @@ const readinessRule: MainRule = {
                     },
                     { type: "set-pre-play-timeout-hold", held: false },
                     {
+                        type: "send-message",
+                        to: "room",
+                        message: { id: "manager.readiness.pause-ended" },
+                    },
+                    {
                         type: "emit-event",
                         event: "manager-readiness",
                         payload: {
@@ -706,12 +723,12 @@ const readinessRule: MainRule = {
         const warningActions =
             unwarnedPlayerIds.length > 0
                 ? [
-                    {
-                        type: "send-message",
-                        to: "room",
-                        message: { id: "manager.readiness.waiting" },
-                    } satisfies RoomManagementAction,
-                ]
+                      {
+                          type: "send-message",
+                          to: "room",
+                          message: { id: "manager.readiness.waiting" },
+                      } satisfies RoomManagementAction,
+                  ]
                 : [];
         const waitingActions = [...holdActions, ...warningActions];
 
@@ -751,6 +768,10 @@ const readinessRule: MainRule = {
                     message: { id: "manager.afk.marked" },
                 },
             ]);
+        const inactivePlayers = getPlayersByIds(
+            ctx.snapshot.players,
+            waitingPlayerIds,
+        );
 
         return {
             actions: [
@@ -761,6 +782,19 @@ const readinessRule: MainRule = {
                 },
                 { type: "set-pre-play-timeout-hold", held: false },
                 ...inactivePlayerActions,
+                {
+                    type: "send-message",
+                    to: "room",
+                    message: {
+                        id: "manager.readiness.public-marked",
+                        players: inactivePlayers,
+                    },
+                },
+                {
+                    type: "send-message",
+                    to: "room",
+                    message: { id: "manager.readiness.pause-ended" },
+                },
                 {
                     type: "emit-event",
                     event: "manager-readiness",
@@ -857,7 +891,7 @@ const afkPrePlayCheckRule: MainRule = {
                     to: "room",
                     message: {
                         id: "manager.afk.public-warning",
-                        args: { playerName: player.name },
+                        player,
                     },
                 })),
                 ...inactivePlayers.map<RoomManagementAction>((player) => ({
@@ -924,6 +958,11 @@ const afkPauseRule: MainRule = {
                         reason: "afk-warning-cleared",
                     },
                     { type: "set-pre-play-timeout-hold", held: false },
+                    {
+                        type: "send-message",
+                        to: "room",
+                        message: { id: "manager.afk.pause-ended" },
+                    },
                 ],
                 state: clearAfkPauseState(ctx.state, ctx.snapshot.nowMs),
                 reason: "afk warning cleared",
@@ -963,7 +1002,6 @@ const afkPauseRule: MainRule = {
                     },
                 },
             ]);
-
         return {
             actions: [
                 {
@@ -973,6 +1011,19 @@ const afkPauseRule: MainRule = {
                 },
                 { type: "set-pre-play-timeout-hold", held: false },
                 ...expiredPlayerActions,
+                {
+                    type: "send-message",
+                    to: "room",
+                    message: {
+                        id: "manager.afk.public-marked",
+                        players: expiredPlayers,
+                    },
+                },
+                {
+                    type: "send-message",
+                    to: "room",
+                    message: { id: "manager.afk.pause-ended" },
+                },
             ],
             state: {
                 ...clearAfkPauseState(ctx.state, ctx.snapshot.nowMs),
@@ -1019,13 +1070,13 @@ const reconcileRosterOwnershipRule: MainRule = {
             ...ctx.state,
             activeRoster:
                 ctx.standardCurrentRoster &&
-                    ctx.desiredMode !== "idle" &&
-                    ctx.desiredMode !== "training"
+                ctx.desiredMode !== "idle" &&
+                ctx.desiredMode !== "training"
                     ? {
-                        mode: ctx.desiredMode,
-                        players: ctx.standardCurrentRoster,
-                        startedAtMs: ctx.snapshot.nowMs,
-                    }
+                          mode: ctx.desiredMode,
+                          players: ctx.standardCurrentRoster,
+                          startedAtMs: ctx.snapshot.nowMs,
+                      }
                     : null,
         },
         reason: ctx.standardCurrentRoster
@@ -1048,10 +1099,10 @@ const adoptStandardRosterRule: MainRule = {
                 ctx.desiredMode === "idle" || !ctx.standardCurrentRoster
                     ? null
                     : {
-                        mode: ctx.desiredMode,
-                        players: ctx.standardCurrentRoster,
-                        startedAtMs: ctx.snapshot.nowMs,
-                    },
+                          mode: ctx.desiredMode,
+                          players: ctx.standardCurrentRoster,
+                          startedAtMs: ctx.snapshot.nowMs,
+                      },
         },
         reason: "standard roster adopted",
     }),
@@ -1294,15 +1345,15 @@ export function recordPlayerActivity(
         ),
         afkCheck: state.afkCheck
             ? {
-                ...state.afkCheck,
-                playerIds: state.afkCheck.playerIds.filter(
-                    (candidate) => candidate !== playerId,
-                ),
-                warningSentPlayerIds:
-                    state.afkCheck.warningSentPlayerIds.filter(
-                        (candidate) => candidate !== playerId,
-                    ),
-            }
+                  ...state.afkCheck,
+                  playerIds: state.afkCheck.playerIds.filter(
+                      (candidate) => candidate !== playerId,
+                  ),
+                  warningSentPlayerIds:
+                      state.afkCheck.warningSentPlayerIds.filter(
+                          (candidate) => candidate !== playerId,
+                      ),
+              }
             : null,
         afkReminderAt: state.afkReminderAt.filter(
             (entry) => entry.playerId !== playerId,
@@ -1337,8 +1388,8 @@ export function setPlayerAfk(
     const nextManualAfkPlayerIds = afk
         ? Array.from(new Set([...state.manualAfkPlayerIds, playerId]))
         : state.manualAfkPlayerIds.filter(
-            (candidate) => candidate !== playerId,
-        );
+              (candidate) => candidate !== playerId,
+          );
 
     return {
         ...state,
@@ -1357,15 +1408,15 @@ export function setPlayerAfk(
         ),
         afkCheck: state.afkCheck
             ? {
-                ...state.afkCheck,
-                playerIds: state.afkCheck.playerIds.filter(
-                    (candidate) => candidate !== playerId,
-                ),
-                warningSentPlayerIds:
-                    state.afkCheck.warningSentPlayerIds.filter(
-                        (candidate) => candidate !== playerId,
-                    ),
-            }
+                  ...state.afkCheck,
+                  playerIds: state.afkCheck.playerIds.filter(
+                      (candidate) => candidate !== playerId,
+                  ),
+                  warningSentPlayerIds:
+                      state.afkCheck.warningSentPlayerIds.filter(
+                          (candidate) => candidate !== playerId,
+                      ),
+              }
             : null,
         afkReminderAt: state.afkReminderAt.filter(
             (entry) => entry.playerId !== playerId,
