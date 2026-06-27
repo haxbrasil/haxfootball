@@ -21,6 +21,8 @@ import type {
 const AFK_PRE_PLAY_INACTIVE_MS = 5_000;
 const AFK_PRE_PLAY_GRACE_MS = 5_000;
 const FIRST_PLAY_READINESS_GRACE_MS = 10_000;
+const READINESS_WAITING_AVATAR = "❌";
+const READINESS_CONFIRMED_AVATAR = "✅";
 
 type MainRule = {
     name: string;
@@ -351,6 +353,31 @@ function addCheckedPrePlayInstanceKey(
     );
 }
 
+function getReadinessAvatarActions(
+    readiness: { waitingPlayerIds: readonly number[] },
+    waitingPlayerIds: readonly number[],
+): readonly RoomManagementAction[] {
+    const waitingPlayerIdSet = new Set(waitingPlayerIds);
+
+    return readiness.waitingPlayerIds.map((playerId) => ({
+        type: "set-avatar",
+        playerId,
+        avatar: waitingPlayerIdSet.has(playerId)
+            ? READINESS_WAITING_AVATAR
+            : READINESS_CONFIRMED_AVATAR,
+    }));
+}
+
+function getClearReadinessAvatarActions(readiness: {
+    waitingPlayerIds: readonly number[];
+}): readonly RoomManagementAction[] {
+    return readiness.waitingPlayerIds.map((playerId) => ({
+        type: "set-avatar",
+        playerId,
+        avatar: null,
+    }));
+}
+
 function resetActivityForPlayers(
     state: RoomManagerState,
     playerIds: readonly number[],
@@ -389,7 +416,12 @@ const disabledRule: MainRule = {
     when: (ctx) =>
         !ctx.snapshot.config.enabled || ctx.state.status === "disabled",
     plan: (ctx) => ({
-        actions: [{ type: "set-pre-play-timeout-hold", held: false }],
+        actions: [
+            { type: "set-pre-play-timeout-hold", held: false },
+            ...(ctx.state.readiness
+                ? getClearReadinessAvatarActions(ctx.state.readiness)
+                : []),
+        ],
         state: {
             ...ctx.state,
             pendingVisibleAction: null,
@@ -404,8 +436,16 @@ const suspendedRule: MainRule = {
     name: "suspendedRule",
     when: (ctx) => ctx.state.status === "suspended",
     plan: (ctx) => ({
-        actions: [{ type: "set-pre-play-timeout-hold", held: false }],
-        state: ctx.state,
+        actions: [
+            { type: "set-pre-play-timeout-hold", held: false },
+            ...(ctx.state.readiness
+                ? getClearReadinessAvatarActions(ctx.state.readiness)
+                : []),
+        ],
+        state: {
+            ...ctx.state,
+            readiness: null,
+        },
         reason: "manager suspended",
     }),
 };
@@ -649,7 +689,10 @@ const readinessRule: MainRule = {
 
         if (ctx.desiredMode !== "flag" && ctx.desiredMode !== "classic") {
             return {
-                actions: [{ type: "set-pre-play-timeout-hold", held: false }],
+                actions: [
+                    { type: "set-pre-play-timeout-hold", held: false },
+                    ...getClearReadinessAvatarActions(readiness),
+                ],
                 state: {
                     ...ctx.state,
                     readiness: null,
@@ -660,12 +703,29 @@ const readinessRule: MainRule = {
 
         if (!ctx.snapshot.config.afkActivityDetectionEnabled) {
             return {
-                actions: [{ type: "set-pre-play-timeout-hold", held: false }],
+                actions: [
+                    { type: "set-pre-play-timeout-hold", held: false },
+                    ...getClearReadinessAvatarActions(readiness),
+                ],
                 state: {
                     ...ctx.state,
                     readiness: null,
                 },
                 reason: "readiness skipped",
+            };
+        }
+
+        if (!ctx.snapshot.game.running) {
+            return {
+                actions: [
+                    { type: "set-pre-play-timeout-hold", held: false },
+                    ...getClearReadinessAvatarActions(readiness),
+                ],
+                state: {
+                    ...ctx.state,
+                    readiness: null,
+                },
+                reason: "readiness cleared after game stopped",
             };
         }
 
@@ -688,6 +748,7 @@ const readinessRule: MainRule = {
                         reason: "readiness-complete",
                     },
                     { type: "set-pre-play-timeout-hold", held: false },
+                    ...getClearReadinessAvatarActions(readiness),
                     {
                         type: "send-message",
                         to: "room",
@@ -731,13 +792,17 @@ const readinessRule: MainRule = {
                   ]
                 : [];
         const waitingActions = [...holdActions, ...warningActions];
+        const avatarActions = getReadinessAvatarActions(
+            readiness,
+            waitingPlayerIds,
+        );
 
         if (
             ctx.snapshot.nowMs - readiness.matchStartedAtMs <
             FIRST_PLAY_READINESS_GRACE_MS
         ) {
             return {
-                actions: waitingActions,
+                actions: [...waitingActions, ...avatarActions],
                 state: {
                     ...ctx.state,
                     readiness: {
@@ -781,6 +846,7 @@ const readinessRule: MainRule = {
                     reason: "readiness-timeout",
                 },
                 { type: "set-pre-play-timeout-hold", held: false },
+                ...getClearReadinessAvatarActions(readiness),
                 ...inactivePlayerActions,
                 {
                     type: "send-message",

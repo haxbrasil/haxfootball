@@ -172,6 +172,7 @@ export type RoomManagementAction =
     | { type: "stop-game"; reason: string }
     | { type: "pause-game"; paused: boolean; reason: string }
     | { type: "set-pre-play-timeout-hold"; held: boolean }
+    | { type: "set-avatar"; playerId: number; avatar: string | null }
     | {
           type: "restore-checkpoint";
           checkpointId?: string;

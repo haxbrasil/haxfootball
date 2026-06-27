@@ -438,6 +438,11 @@ describe("planRoomManagement", () => {
             paused: true,
             reason: "readiness",
         });
+        expect(waiting.actions).toContainEqual({
+            type: "set-avatar",
+            playerId: 1,
+            avatar: "❌",
+        });
         expect(waiting.actions).not.toContainEqual({
             type: "move-player",
             playerId: 1,
@@ -483,7 +488,84 @@ describe("planRoomManagement", () => {
             to: "room",
             message: { id: "manager.readiness.pause-ended" },
         });
+        expect(expired.actions).toContainEqual({
+            type: "set-avatar",
+            playerId: 1,
+            avatar: null,
+        });
         expect(expired.state.autoAfkPlayerIds).toEqual([1]);
+    });
+
+    it("shows confirmed readiness avatars and clears them when the game stops", () => {
+        const state: RoomManagerState = {
+            ...createState(),
+            readiness: {
+                matchStartedAtMs: 0,
+                waitingPlayerIds: [1, 2],
+                warningSentPlayerIds: [],
+            },
+        };
+        const activeState = recordPlayerActivity(state, 2, 1_000);
+        const waiting = planRoomManagement(
+            createSnapshot({
+                nowMs: 2_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                    createPlayer(3, { team: Team.RED }),
+                    createPlayer(4, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.FLAG,
+                    activeMode: GAME_MODE.FLAG,
+                    running: true,
+                    inspection: beforePlay(),
+                }),
+            }),
+            activeState,
+        );
+
+        expect(waiting.actions).toContainEqual({
+            type: "set-avatar",
+            playerId: 1,
+            avatar: "❌",
+        });
+        expect(waiting.actions).toContainEqual({
+            type: "set-avatar",
+            playerId: 2,
+            avatar: "✅",
+        });
+
+        const stopped = planRoomManagement(
+            createSnapshot({
+                nowMs: 3_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                    createPlayer(3, { team: Team.RED }),
+                    createPlayer(4, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.FLAG,
+                    activeMode: GAME_MODE.FLAG,
+                    running: false,
+                    inspection: null,
+                }),
+            }),
+            waiting.state,
+        );
+
+        expect(stopped.actions).toContainEqual({
+            type: "set-avatar",
+            playerId: 1,
+            avatar: null,
+        });
+        expect(stopped.actions).toContainEqual({
+            type: "set-avatar",
+            playerId: 2,
+            avatar: null,
+        });
+        expect(stopped.state.readiness).toBeNull();
     });
 
     it("normal AFK check runs once per pre-play key and expires after five seconds", () => {

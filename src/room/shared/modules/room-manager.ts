@@ -220,6 +220,7 @@ export function createRoomManagerModule({
     let pendingTimer: ReturnType<typeof setTimeout> | null = null;
     let ownActionDepth = 0;
     let replanAfterOwnAction = false;
+    const avatarOverrides = new Map<number, string>();
 
     const clearPendingTimer = () => {
         if (!pendingTimer) return;
@@ -337,6 +338,25 @@ export function createRoomManagerModule({
             case "set-pre-play-timeout-hold":
                 gameRuntimeStore.setPrePlayTimeoutHold(action.held);
                 return;
+            case "set-avatar": {
+                const currentAvatar = avatarOverrides.get(action.playerId);
+
+                if (action.avatar === null) {
+                    if (currentAvatar === undefined) return;
+                    avatarOverrides.delete(action.playerId);
+                    runOwnAction(() => {
+                        room.setAvatar(action.playerId, null);
+                    });
+                    return;
+                }
+
+                if (currentAvatar === action.avatar) return;
+                avatarOverrides.set(action.playerId, action.avatar);
+                runOwnAction(() => {
+                    room.setAvatar(action.playerId, action.avatar);
+                });
+                return;
+            }
             case "restore-checkpoint":
                 gameRuntimeStore.restoreCheckpoint(
                     action.checkpointId
@@ -591,6 +611,7 @@ export function createRoomManagerModule({
         })
         .onPlayerLeave((room, player) => {
             const nowMs = Date.now();
+            avatarOverrides.delete(player.id);
             const wasActiveRosterPlayer =
                 state.activeRoster?.players.some(
                     (rosterPlayer) => rosterPlayer.playerId === player.id,
