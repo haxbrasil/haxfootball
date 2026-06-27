@@ -57,6 +57,7 @@ const roomServerEnvSchema = {
         .int()
         .positive()
         .optional(),
+    HAXFOOTBALL_INCIDENT_LEVEL: z.enum(["normal", "full"]).default("normal"),
 } satisfies z.ZodRawShape;
 
 export const env = createEnv(
@@ -82,6 +83,7 @@ export const env = createEnv(
                 seconds: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_SECONDS,
                 maxRecords: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS,
             },
+            incidentLevel: rawEnv.HAXFOOTBALL_INCIDENT_LEVEL,
             roomManagerEnabled:
                 rawEnv.ROOM_PROPERTIES_JSON.algorithmic_room_management_enabled,
             roomManagerAfkActivityDetectionEnabled:

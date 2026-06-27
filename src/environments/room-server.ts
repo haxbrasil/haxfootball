@@ -76,6 +76,7 @@ async function bootstrap() {
         ],
         {
             incidents: incidentRecorder,
+            incidentLevel: env.incidentLevel,
         },
     );
 }

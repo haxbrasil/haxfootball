@@ -9,7 +9,10 @@ import {
     parseCommandMessage,
 } from "@core/commands";
 import { Room } from "@core/room";
-import type { IncidentRecorder } from "@room/shared/domain/incidents";
+import type {
+    IncidentRecord,
+    IncidentRecorder,
+} from "@room/shared/domain/incidents";
 
 export type StadiumChangeHandlerResponse = {
     undo?: boolean;
@@ -333,6 +336,11 @@ export function createModule() {
 
 type UpdateRoomModulesOptions = {
     incidents?: IncidentRecorder;
+    incidentLevel?: "normal" | "full";
+};
+
+type RoomWithOptionalLiveTrace = RoomObject & {
+    getLiveTraceRecords?: () => readonly IncidentRecord[];
 };
 
 export function updateRoomModules(
@@ -361,6 +369,22 @@ export function updateRoomModules(
             position: player.position ?? null,
         })),
     }));
+
+    if (options.incidents) {
+        if (options.incidentLevel === "full") {
+            const traceRoom: RoomWithOptionalLiveTrace = roomObject;
+
+            options.incidents.setExtraRecordsProvider((kind) => {
+                if (kind !== "desync") {
+                    return [];
+                }
+
+                return traceRoom.getLiveTraceRecords?.() ?? [];
+            });
+        } else {
+            options.incidents.setExtraRecordsProvider(null);
+        }
+    }
 
     const commandConfigs = modules
         .map((module) => module.getCommandConfig())

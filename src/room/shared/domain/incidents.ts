@@ -39,6 +39,16 @@ type IncidentRecorderOptions = {
     maxRecords?: number;
 };
 
+type IncidentExtraRecordsProvider = (
+    kind: IncidentKind,
+    context: {
+        reason?: string;
+        playerId?: number;
+        players?: Array<{ id: number; name: string }>;
+        tick?: number;
+    },
+) => readonly IncidentRecord[];
+
 const DEFAULT_WINDOW_MS = 15_000;
 const DEFAULT_MAX_RECORDS = 2_000;
 const MAX_SANITIZE_DEPTH = 6;
@@ -50,6 +60,7 @@ export class IncidentRecorder {
     private readonly maxRecords: number;
     private snapshotProvider: (() => IncidentSnapshot | undefined) | null =
         null;
+    private extraRecordsProvider: IncidentExtraRecordsProvider | null = null;
 
     public constructor(options: IncidentRecorderOptions = {}) {
         this.windowMs = options.windowMs ?? DEFAULT_WINDOW_MS;
@@ -60,6 +71,12 @@ export class IncidentRecorder {
         provider: (() => IncidentSnapshot | undefined) | null,
     ): void {
         this.snapshotProvider = provider;
+    }
+
+    public setExtraRecordsProvider(
+        provider: IncidentExtraRecordsProvider | null,
+    ): void {
+        this.extraRecordsProvider = provider;
     }
 
     public record(type: string, data: IncidentRecordData = {}): void {
@@ -90,6 +107,10 @@ export class IncidentRecorder {
         this.trim(now);
 
         const snapshot = this.snapshotProvider?.();
+        const roomRecords = this.records.map(
+            ({ time: _time, ...record }) => record,
+        );
+        const extraRecords = this.extraRecordsProvider?.(kind, context) ?? [];
 
         return {
             kind,
@@ -99,7 +120,7 @@ export class IncidentRecorder {
                 ? { playerId: context.playerId }
                 : {}),
             ...(typeof context.tick === "number" ? { tick: context.tick } : {}),
-            records: this.records.map(({ time: _time, ...record }) => record),
+            records: mergeIncidentRecords(roomRecords, extraRecords),
             ...(snapshot ? { snapshot } : {}),
         };
     }
@@ -115,6 +136,34 @@ export class IncidentRecorder {
             this.records.shift();
         }
     }
+}
+
+function mergeIncidentRecords(
+    roomRecords: readonly IncidentRecord[],
+    extraRecords: readonly IncidentRecord[],
+): IncidentRecord[] {
+    return [
+        ...roomRecords.map((record, index) => ({
+            record,
+            sourceOrder: 0,
+            index,
+        })),
+        ...extraRecords.map((record, index) => ({
+            record,
+            sourceOrder: 1,
+            index,
+        })),
+    ]
+        .sort((left, right) => {
+            const atComparison = left.record.at.localeCompare(right.record.at);
+            if (atComparison !== 0) return atComparison;
+
+            const sourceComparison = left.sourceOrder - right.sourceOrder;
+            if (sourceComparison !== 0) return sourceComparison;
+
+            return left.index - right.index;
+        })
+        .map(({ record }) => record);
 }
 
 export function sanitizeIncidentValue(value: unknown, depth = 0): unknown {
