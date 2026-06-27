@@ -34,7 +34,7 @@ type PlayerStub = {
 
 function createRoomStub(options: RoomStubOptions = {}): Room {
     return {
-        invalidateCaches: options.invalidateCaches ?? (() => { }),
+        invalidateCaches: options.invalidateCaches ?? (() => {}),
         getPlayerList: options.getPlayerList ?? (() => []),
         getBallPosition: options.getBallPosition ?? (() => ({ x: 0, y: 0 })),
         getDiscProperties: options.getDiscProperties ?? (() => null),
@@ -96,7 +96,7 @@ describe("createEngine", () => {
         });
         const registry: StateRegistry = {
             TEST: () => ({
-                run() { },
+                run() {},
             }),
         };
         const engine = createEngine(
@@ -129,7 +129,7 @@ describe("createEngine", () => {
         };
         const registry: StateRegistry = {
             TEST: () => ({
-                run() { },
+                run() {},
                 leave,
             }),
         };
@@ -175,7 +175,7 @@ describe("createEngine", () => {
         });
         const registry: StateRegistry = {
             TEST: () => ({
-                run() { },
+                run() {},
                 leave,
             }),
         };

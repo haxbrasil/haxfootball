@@ -71,12 +71,12 @@ function buildCurrentFieldRoster(
     return players.flatMap<RoomRosterPlayer>((player, order) =>
         isFieldTeam(player.team)
             ? [
-                {
-                    playerId: player.id,
-                    team: player.team,
-                    order,
-                },
-            ]
+                  {
+                      playerId: player.id,
+                      team: player.team,
+                      order,
+                  },
+              ]
             : [],
     );
 }
