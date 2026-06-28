@@ -1,27 +1,23 @@
 import { type FieldPosition } from "@common/game/game";
 import { hexColorToNumber } from "@common/general/color";
+import type { Pair } from "@common/general/types";
 import type { Line } from "@common/math/geometry";
 import { CollisionFlag } from "@haxball/stadium";
 import {
     BALL_COLOR,
-    index,
     classicMapMeasures as MapMeasures,
-    lineIndex,
-    LOS_BLOCKER_DISC_COUNT,
     type PlaneMaskName,
     PLANE_MASK_BY_NAME,
 } from "@modes/classic/stadium";
 import { Team } from "@runtime/models";
 import { getPositionFromFieldPosition } from "./position";
 
+const dynamicLineRefs = (ref: string): Pair<string> => [`${ref}.a`, `${ref}.b`];
+
 const SPECIAL_DISC_IDS = {
-    LOS: lineIndex("blue0"),
-    FIRST_DOWN: lineIndex("orange0"),
-    INTERCEPTION_PATH: lineIndex("ball0"),
-    LOS_BLOCKERS: Array.from(
-        { length: LOS_BLOCKER_DISC_COUNT },
-        (_, blockerIndex) => index(`losBlocker${blockerIndex}`),
-    ),
+    LOS: dynamicLineRefs("blue0"),
+    FIRST_DOWN: dynamicLineRefs("orange0"),
+    INTERCEPTION_PATH: dynamicLineRefs("ball0"),
 };
 
 export const getPlaneMask = (name: PlaneMaskName): CollisionFlag =>
@@ -30,14 +26,18 @@ export const getPlaneMask = (name: PlaneMaskName): CollisionFlag =>
 export const BALL_DISC_ID = 0;
 export const BALL_ACTIVE_COLOR = hexColorToNumber(BALL_COLOR);
 export const BALL_INACTIVE_COLOR = 0x808080;
+export const LOS_BLOCKER_REFS = {
+    A: "losBlocker.a",
+    B: "losBlocker.b",
+};
 
-export function getLineOfScrimmage(): { id: number }[];
+export function getLineOfScrimmage(): { id: string }[];
 export function getLineOfScrimmage(
     fieldPos: FieldPosition,
-): { id: number; position: Position }[];
+): { id: string; position: Position }[];
 export function getLineOfScrimmage(
     fieldPos?: FieldPosition,
-): { id: number; position?: Position }[] {
+): { id: string; position?: Position }[] {
     if (fieldPos === undefined) {
         return [
             { id: SPECIAL_DISC_IDS.LOS[0] },
@@ -56,17 +56,17 @@ export function getLineOfScrimmage(
     ];
 }
 
-export function getFirstDownLine(): { id: number }[];
+export function getFirstDownLine(): { id: string }[];
 export function getFirstDownLine(
     offensiveTeam: Team,
     fieldPos: FieldPosition,
     distance: number,
-): { id: number; position: Position }[];
+): { id: string; position: Position }[];
 export function getFirstDownLine(
     offensiveTeam?: Team,
     fieldPos?: FieldPosition,
     distance?: number,
-): { id: number; position?: Position }[] {
+): { id: string; position?: Position }[] {
     if (
         offensiveTeam === undefined ||
         fieldPos === undefined ||
@@ -93,13 +93,13 @@ export function getFirstDownLine(
     ];
 }
 
-export function getInterceptionPath(): { id: number }[];
+export function getInterceptionPath(): { id: string }[];
 export function getInterceptionPath(
     line: Line,
-): { id: number; position: Position }[];
+): { id: string; position: Position }[];
 export function getInterceptionPath(
     line?: Line,
-): { id: number; position?: Position }[] {
+): { id: string; position?: Position }[] {
     if (!line) {
         return [
             { id: SPECIAL_DISC_IDS.INTERCEPTION_PATH[0] },
@@ -117,8 +117,4 @@ export function getInterceptionPath(
             position: { x: line.end.x, y: line.end.y },
         },
     ];
-}
-
-export function getLineOfScrimmageBlockers(): { id: number }[] {
-    return SPECIAL_DISC_IDS.LOS_BLOCKERS.map((id) => ({ id }));
 }

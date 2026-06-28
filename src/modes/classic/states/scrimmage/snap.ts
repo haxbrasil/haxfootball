@@ -12,7 +12,11 @@ import {
     $unsetFirstDownLine,
     $unsetLineOfScrimmage,
 } from "@modes/classic/hooks/game";
-import { DownState } from "@modes/classic/shared/rules/down";
+import {
+    DownState,
+    incrementDownState,
+    processDownEventIncrement,
+} from "@modes/classic/shared/rules/down";
 import { cn, formatNames } from "@modes/classic/shared/presentation/message";
 import {
     applyDefensivePenalty,
@@ -780,10 +784,7 @@ export function Snap({
 
         const offenderNames = formatNames(illegalTouchers);
 
-        const penaltyResult = applyOffensivePenalty(
-            downState,
-            -OFFENSIVE_FOUL_PENALTY_YARDS,
-        );
+        const downIncrement = incrementDownState(downState);
 
         illegalTouchers.forEach((player) => {
             $event({
@@ -794,21 +795,20 @@ export function Snap({
                     down: downState.downAndDistance.down,
                     distance: downState.downAndDistance.distance,
                     startFieldPosition: downState.fieldPos,
-                    yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                    yards: 0,
                 },
             });
         });
 
-        processOffensivePenalty({
-            event: penaltyResult.event,
+        processDownEventIncrement({
+            event: downIncrement.event,
             onNextDown() {
                 $effect(($) => {
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`illegal touch by ${offenderNames}`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`loss of down.`,
                         ),
                         color: COLOR.WARNING,
@@ -820,9 +820,8 @@ export function Snap({
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`illegal touch by ${offenderNames}`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`turnover on downs.`,
                         ),
                         color: COLOR.WARNING,
@@ -850,7 +849,7 @@ export function Snap({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: downIncrement.downState,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -925,10 +924,7 @@ export function Snap({
     }
 
     function $penalizeIllegalQuarterbackAdvance(): never {
-        const penaltyResult = applyOffensivePenalty(
-            downState,
-            -OFFENSIVE_FOUL_PENALTY_YARDS,
-        );
+        const downIncrement = incrementDownState(downState);
 
         $event({
             type: Stat.Foul,
@@ -938,7 +934,7 @@ export function Snap({
                 down: downState.downAndDistance.down,
                 distance: downState.downAndDistance.distance,
                 startFieldPosition: downState.fieldPos,
-                yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                yards: 0,
             },
         });
 
@@ -956,16 +952,15 @@ export function Snap({
             $setBallActive();
         });
 
-        processOffensivePenalty({
-            event: penaltyResult.event,
+        processDownEventIncrement({
+            event: downIncrement.event,
             onNextDown() {
                 $effect(($) => {
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`illegal advance beyond the LOS`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`loss of down.`,
                         ),
                         color: COLOR.WARNING,
@@ -977,9 +972,8 @@ export function Snap({
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`illegal advance beyond the LOS`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`turnover on downs.`,
                         ),
                         color: COLOR.WARNING,
@@ -991,7 +985,7 @@ export function Snap({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: downIncrement.downState,
             },
             wait: ticks({ seconds: 1 }),
         });

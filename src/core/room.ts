@@ -3,6 +3,7 @@ import { StadiumObject } from "@haxball/stadium";
 type TeamTarget = "teams" | "red" | "blue";
 type ObjectWithId = { id: number };
 type AnnouncementTargetFilter = (player: PlayerObject) => boolean;
+export type DiscRef = number | string;
 
 export type AnnouncementTarget =
     | number
@@ -106,7 +107,7 @@ const getTrackedStadiumName = (stadium: TrackedStadium): string => {
 
 export class Room {
     private playerListCache: PlayerObject[] | null = null;
-    private discPropsCache = new Map<number, DiscPropertiesObject | null>();
+    private discPropsCache = new Map<DiscRef, DiscPropertiesObject | null>();
     private playerDiscPropsCache = new Map<
         number,
         DiscPropertiesObject | null
@@ -137,7 +138,7 @@ export class Room {
         this.playerListCache = null;
     }
 
-    private invalidateDiscCache(discIndex?: number) {
+    private invalidateDiscCache(discIndex?: DiscRef) {
         if (typeof discIndex === "number") {
             this.discPropsCache.delete(discIndex);
         } else {
@@ -584,7 +585,7 @@ export class Room {
         return this.room.getDiscCount();
     }
 
-    public getDiscProperties(discIndex: number): DiscPropertiesObject | null {
+    public getDiscProperties(discIndex: DiscRef): DiscPropertiesObject | null {
         if (this.discPropsCache.has(discIndex)) {
             return this.discPropsCache.get(discIndex) ?? null;
         }
@@ -595,11 +596,16 @@ export class Room {
     }
 
     public setDiscProperties(
-        discIndex: number,
+        discIndex: DiscRef,
         properties: DiscPropertiesObject,
     ): void {
         this.room.setDiscProperties(discIndex, properties);
         this.invalidateDiscCache(discIndex);
+    }
+
+    public patchStadium(patch: unknown): void {
+        this.room.patchStadium(patch);
+        this.discPropsCache.clear();
     }
 
     public getPlayerDiscProperties(

@@ -45,7 +45,6 @@ export const COLOR_SCHEMA = mapNestedRecordValues(
 
 export const BALL_RADIUS = 7.85;
 export const BALL_COLOR = COLOR_SCHEMA.BALL.DEFAULT;
-export const LOS_BLOCKER_DISC_COUNT = 36;
 
 export const PLANE_MASK_BY_NAME = {
     redEndZoneTrap: "c0",
@@ -56,292 +55,302 @@ export const PLANE_MASK_BY_NAME = {
 
 export type PlaneMaskName = keyof typeof PLANE_MASK_BY_NAME;
 
-export const {
-    stadium: classicStadium,
-    index: classicStadiumIndex,
-    mapMeasures: classicMapMeasures,
-    getIndex: index,
-    getLineIndex: lineIndex,
-} = buildStadium({
-    measures: {
-        name: "Classic",
-        size: { width: 1090, height: 395 },
-        field: { width: 1860, height: 532 },
-        endZones: { depth: 155 },
-        goal: { width: 120 },
-        yard: {
-            length: 15.5,
-            lines: {
-                intervalYards: 10,
-                redZoneYards: 20,
-            },
-        },
-        hashMarks: {
-            bandTopY: -80,
-            bandBottomY: 80,
-            markHeight: 20,
-            subdivisionYards: 2,
-        },
-        ticks: {
-            height: 25,
-            offsetYards: 5,
-            greenTopYards: [65, 85],
-            greenBottomYards: [95],
-        },
-    },
-    colors: {
-        yard: {
-            default: COLOR_SCHEMA.YARD.DEFAULT,
-            goal: COLOR_SCHEMA.YARD.GOAL,
-            redZone: COLOR_SCHEMA.YARD.RED_ZONE,
-            midfield: COLOR_SCHEMA.YARD.MIDFIELD,
-        },
-        hash: COLOR_SCHEMA.FIELD.HASH,
-        tick: COLOR_SCHEMA.FIELD.TICK,
-        tickGreen: COLOR_SCHEMA.FIELD.TICK_GREEN,
-    },
-    features: {
-        collisionSidelines: {
-            leftX: -775,
-            rightX: 775,
-            topY: -375,
-            bottomY: 375,
-            segment: {
-                vis: false,
-                color: COLOR_SCHEMA.GOAL_POSTS.SEGMENT,
-                bCoef: 0.1,
-                cMask: mask("red", "blue"),
-                cGroup: [],
-            },
-            vertex: { cMask: [] },
-        },
-        goalPosts: {
-            leftX: -930,
-            rightX: 930,
-            topY: -60,
-            bottomY: 60,
-            segment: {
-                color: COLOR_SCHEMA.GOAL_POSTS.SEGMENT,
-                cMask: [],
-            },
-            vertex: { cMask: [] },
-            posts: ADD_DIAGONALS_TO_GOAL_POSTS
-                ? [
-                      { from: [-930, -60], to: [-980, -130] },
-                      { from: [-930, 60], to: [-990, -10] },
-                      { from: [930, -60], to: [980, -130] },
-                      { from: [930, 60], to: [990, -10] },
-                  ]
-                : [],
-            disc: {
-                radius: 4,
-                invMass: 0,
-                color: COLOR_SCHEMA.GOAL_POSTS.DISC,
-            },
-        },
-        ballBoundaries: {
-            leftX: -1005,
-            rightX: 1005,
-            topY: 360,
-            bottomY: -360,
-            leftSegment: {
-                vis: false,
-                color: COLOR_SCHEMA.BOUNDARIES.LEFT,
-                cMask: mask("ball"),
-            },
-            rightSegment: {
-                vis: false,
-                color: COLOR_SCHEMA.BOUNDARIES.RIGHT,
-                cMask: mask("ball"),
-            },
-        },
-        planes: [
-            {
-                rect: { x: [-1065, 1065], y: [-350, 350] },
-                side: "outside",
-                props: { cMask: ["ball"], bCoef: 1.5 },
-                name: "ballOutOfBounds",
-            },
-            {
-                rect: { x: [-1090, 1090], y: [-375, 375] },
-                side: "outside",
-                props: { bCoef: 0.9 },
-                name: "fieldWall",
-            },
-            {
-                line: "leftGoalLine",
-                side: "right",
-                props: { cMask: [PLANE_MASK_BY_NAME.redEndZoneTrap] },
-                name: "redEndZoneTrap",
-            },
-            {
-                line: "rightGoalLine",
-                side: "left",
-                props: { cMask: [PLANE_MASK_BY_NAME.blueEndZoneTrap] },
-                name: "blueEndZoneTrap",
-            },
-            {
-                normal: [-1, 0],
-                dist: 0,
-                cMask: [PLANE_MASK_BY_NAME.midfieldPlaneRed],
-                name: "midfieldPlaneRed",
-            },
-            {
-                normal: [1, 0],
-                dist: 0,
-                cMask: [PLANE_MASK_BY_NAME.midfieldPlaneBlue],
-                name: "midfieldPlaneBlue",
-            },
-        ],
-    },
-    schema: {
-        canBeStored: false,
-        playerPhysics: {
-            bCoef: 0.75,
-            invMass: 1e26,
-            kickStrength: 7,
-        },
-        cameraFollow: "player",
-        ballPhysics: {
-            radius: BALL_RADIUS,
-            bCoef: 0.25,
-            cMask: ["red", "blue", "wall"],
-            color: BALL_COLOR,
-            cGroup: ["ball", "kick", "score"],
-        },
-        spawnDistance: 980,
-        traits: {},
-        redSpawnPoints: [],
-        blueSpawnPoints: [],
-        dynamicLines: [
-            {
-                name: "orange0",
-                joint: { color: COLOR_SCHEMA.LINES.FIRST_DOWN },
-            },
-            {
-                name: "blue0",
-                joint: {
-                    color: COLOR_SCHEMA.LINES.LINE_OF_SCRIMMAGE,
+export const { stadium: classicStadium, mapMeasures: classicMapMeasures } =
+    buildStadium({
+        measures: {
+            name: "Classic",
+            size: { width: 1090, height: 395 },
+            field: { width: 1860, height: 532 },
+            endZones: { depth: 155 },
+            goal: { width: 120 },
+            yard: {
+                length: 15.5,
+                lines: {
+                    intervalYards: 10,
+                    redZoneYards: 20,
                 },
             },
-            {
-                name: "ball0",
-                disc: {
-                    radius: 7.125,
-                    invMass: 0,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.INTERCEPTION_PATH,
+            hashMarks: {
+                bandTopY: -80,
+                bandBottomY: 80,
+                markHeight: 20,
+                subdivisionYards: 2,
+            },
+            ticks: {
+                height: 25,
+                offsetYards: 5,
+                greenTopYards: [65, 85],
+                greenBottomYards: [95],
+            },
+        },
+        colors: {
+            yard: {
+                default: COLOR_SCHEMA.YARD.DEFAULT,
+                goal: COLOR_SCHEMA.YARD.GOAL,
+                redZone: COLOR_SCHEMA.YARD.RED_ZONE,
+                midfield: COLOR_SCHEMA.YARD.MIDFIELD,
+            },
+            hash: COLOR_SCHEMA.FIELD.HASH,
+            tick: COLOR_SCHEMA.FIELD.TICK,
+            tickGreen: COLOR_SCHEMA.FIELD.TICK_GREEN,
+        },
+        features: {
+            collisionSidelines: {
+                leftX: -775,
+                rightX: 775,
+                topY: -375,
+                bottomY: 375,
+                segment: {
+                    vis: false,
+                    color: COLOR_SCHEMA.GOAL_POSTS.SEGMENT,
+                    bCoef: 0.1,
+                    cMask: mask("red", "blue"),
                     cGroup: [],
+                },
+                vertex: { cMask: [] },
+            },
+            goalPosts: {
+                leftX: -930,
+                rightX: 930,
+                topY: -60,
+                bottomY: 60,
+                segment: {
+                    color: COLOR_SCHEMA.GOAL_POSTS.SEGMENT,
                     cMask: [],
                 },
-                joint: { color: COLOR_SCHEMA.LINES.INTERCEPTION_PATH },
-            },
-            ...repeat(12, (index) => ({
-                name: `red${index}`,
-                joint: { color: COLOR_SCHEMA.LINES.CROWDING_OUTER },
-            })),
-            ...repeat(6, (index) => ({
-                name: `white${index}`,
-                joint: { color: COLOR_SCHEMA.LINES.CROWDING_INNER },
-            })),
-            ...repeat(2, (index) => ({
-                name: `tail${index}`,
-                joint: { color: COLOR_SCHEMA.LINES.CROWDING_INNER },
-            })),
-        ],
-        anchors: [
-            {
-                name: "outerCrowdingCorner0",
+                vertex: { cMask: [] },
+                posts: ADD_DIAGONALS_TO_GOAL_POSTS
+                    ? [
+                          { from: [-930, -60], to: [-980, -130] },
+                          { from: [-930, 60], to: [-990, -10] },
+                          { from: [930, -60], to: [980, -130] },
+                          { from: [930, 60], to: [990, -10] },
+                      ]
+                    : [],
                 disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "outerCrowdingCorner1",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "outerCrowdingCorner2",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "outerCrowdingCorner3",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "innerCrowdingCorner0",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_INNER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "innerCrowdingCorner1",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_INNER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "innerCrowdingCorner2",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: COLOR_SCHEMA.LINES.CROWDING_INNER,
-                    cGroup: [],
-                },
-            },
-            {
-                name: "innerCrowdingCorner3",
-                disc: {
-                    radius: 1,
-                    invMass: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: "transparent",
-                    cGroup: [],
-                },
-            },
-            ...repeat(LOS_BLOCKER_DISC_COUNT, (index) => ({
-                name: `losBlocker${index}`,
-                disc: {
-                    radius: 0,
+                    radius: 4,
                     invMass: 0,
-                    bCoef: 1,
-                    pos: SPECIAL_HIDDEN_POSITION,
-                    color: "transparent",
-                    cGroup: mask("wall"),
-                    cMask: mask("red", "blue"),
+                    color: COLOR_SCHEMA.GOAL_POSTS.DISC,
                 },
-            })),
-        ],
-    },
-});
+            },
+            ballBoundaries: {
+                leftX: -1005,
+                rightX: 1005,
+                topY: 360,
+                bottomY: -360,
+                leftSegment: {
+                    vis: false,
+                    color: COLOR_SCHEMA.BOUNDARIES.LEFT,
+                    cMask: mask("ball"),
+                },
+                rightSegment: {
+                    vis: false,
+                    color: COLOR_SCHEMA.BOUNDARIES.RIGHT,
+                    cMask: mask("ball"),
+                },
+            },
+            planes: [
+                {
+                    rect: { x: [-1065, 1065], y: [-350, 350] },
+                    side: "outside",
+                    props: { cMask: ["ball"], bCoef: 1.5 },
+                    ref: "ballOutOfBounds",
+                },
+                {
+                    rect: { x: [-1090, 1090], y: [-375, 375] },
+                    side: "outside",
+                    props: { bCoef: 0.9 },
+                    ref: "fieldWall",
+                },
+                {
+                    line: "leftGoalLine",
+                    side: "right",
+                    props: { cMask: [PLANE_MASK_BY_NAME.redEndZoneTrap] },
+                    ref: "redEndZoneTrap",
+                },
+                {
+                    line: "rightGoalLine",
+                    side: "left",
+                    props: { cMask: [PLANE_MASK_BY_NAME.blueEndZoneTrap] },
+                    ref: "blueEndZoneTrap",
+                },
+                {
+                    normal: [-1, 0],
+                    dist: 0,
+                    cMask: [PLANE_MASK_BY_NAME.midfieldPlaneRed],
+                    ref: "midfieldPlaneRed",
+                },
+                {
+                    normal: [1, 0],
+                    dist: 0,
+                    cMask: [PLANE_MASK_BY_NAME.midfieldPlaneBlue],
+                    ref: "midfieldPlaneBlue",
+                },
+            ],
+        },
+        schema: {
+            canBeStored: false,
+            playerPhysics: {
+                bCoef: 0.75,
+                invMass: 1e26,
+                kickStrength: 7,
+            },
+            cameraFollow: "player",
+            ballPhysics: {
+                radius: BALL_RADIUS,
+                bCoef: 0.25,
+                cMask: ["red", "blue", "wall"],
+                color: BALL_COLOR,
+                cGroup: ["ball", "kick", "score"],
+            },
+            spawnDistance: 980,
+            traits: {},
+            redSpawnPoints: [],
+            blueSpawnPoints: [],
+            points: [
+                {
+                    ref: "losBlocker.a",
+                    x: SPECIAL_HIDDEN_POSITION[0],
+                    y: SPECIAL_HIDDEN_POSITION[1],
+                    vertex: { cMask: [] },
+                },
+                {
+                    ref: "losBlocker.b",
+                    x: SPECIAL_HIDDEN_POSITION[0],
+                    y: SPECIAL_HIDDEN_POSITION[1],
+                    vertex: { cMask: [] },
+                },
+            ],
+            lines: [
+                {
+                    ref: "losBlocker",
+                    from: "losBlocker.a",
+                    to: "losBlocker.b",
+                    segment: {
+                        vis: false,
+                        bCoef: 1,
+                        cGroup: mask("wall"),
+                        cMask: mask("red", "blue"),
+                    },
+                },
+            ],
+            dynamicLines: [
+                {
+                    ref: "orange0",
+                    joint: { color: COLOR_SCHEMA.LINES.FIRST_DOWN },
+                },
+                {
+                    ref: "blue0",
+                    joint: {
+                        color: COLOR_SCHEMA.LINES.LINE_OF_SCRIMMAGE,
+                    },
+                },
+                {
+                    ref: "ball0",
+                    disc: {
+                        radius: 7.125,
+                        invMass: 0,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.INTERCEPTION_PATH,
+                        cGroup: [],
+                        cMask: [],
+                    },
+                    joint: { color: COLOR_SCHEMA.LINES.INTERCEPTION_PATH },
+                },
+                ...repeat(12, (index) => ({
+                    ref: `red${index}`,
+                    joint: { color: COLOR_SCHEMA.LINES.CROWDING_OUTER },
+                })),
+                ...repeat(6, (index) => ({
+                    ref: `white${index}`,
+                    joint: { color: COLOR_SCHEMA.LINES.CROWDING_INNER },
+                })),
+                ...repeat(2, (index) => ({
+                    ref: `tail${index}`,
+                    joint: { color: COLOR_SCHEMA.LINES.CROWDING_INNER },
+                })),
+            ],
+            anchors: [
+                {
+                    ref: "outerCrowdingCorner0",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "outerCrowdingCorner1",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "outerCrowdingCorner2",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "outerCrowdingCorner3",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_OUTER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "innerCrowdingCorner0",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_INNER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "innerCrowdingCorner1",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_INNER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "innerCrowdingCorner2",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: COLOR_SCHEMA.LINES.CROWDING_INNER,
+                        cGroup: [],
+                    },
+                },
+                {
+                    ref: "innerCrowdingCorner3",
+                    disc: {
+                        radius: 1,
+                        invMass: 1,
+                        pos: SPECIAL_HIDDEN_POSITION,
+                        color: "transparent",
+                        cGroup: [],
+                    },
+                },
+            ],
+        },
+    });

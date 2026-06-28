@@ -12,15 +12,13 @@ import { AVATARS, findCatchers, opposite } from "@common/game/game";
 import {
     advanceDownState,
     DownState,
+    incrementDownState,
     processDownEvent,
+    processDownEventIncrement,
     withLastBallY,
 } from "@modes/classic/shared/rules/down";
 import { cn, formatNames } from "@modes/classic/shared/presentation/message";
 import { formatSafetyScoreMessage } from "@modes/classic/shared/rules/safety";
-import {
-    applyOffensivePenalty,
-    processOffensivePenalty,
-} from "@modes/classic/shared/rules/penalty";
 import {
     calculateYardsGained,
     calculateDirectionalGain,
@@ -45,8 +43,6 @@ import { COLOR } from "@common/general/color";
 import { SCORES } from "@modes/classic/shared/rules/scoring";
 import { Stat } from "@modes/classic/stats";
 import type { Config } from "@modes/classic/config";
-
-const OFFENSIVE_FOUL_PENALTY_YARDS = 5;
 
 type Frame = {
     state: GameState;
@@ -156,11 +152,7 @@ export function Blitz({
         if (offensiveTouchers.length === 0) return;
 
         const offenderNames = formatNames(offensiveTouchers);
-
-        const penaltyResult = applyOffensivePenalty(
-            downState,
-            -OFFENSIVE_FOUL_PENALTY_YARDS,
-        );
+        const downIncrement = incrementDownState(downState);
 
         offensiveTouchers.forEach((player) => {
             $event({
@@ -171,21 +163,20 @@ export function Blitz({
                     down: downState.downAndDistance.down,
                     distance: downState.downAndDistance.distance,
                     startFieldPosition: downState.fieldPos,
-                    yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                    yards: 0,
                 },
             });
         });
 
-        processOffensivePenalty({
-            event: penaltyResult.event,
+        processDownEventIncrement({
+            event: downIncrement.event,
             onNextDown() {
                 $effect(($) => {
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`Illegal touch by ${offenderNames}`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`loss of down.`,
                         ),
                         color: COLOR.WARNING,
@@ -197,9 +188,8 @@ export function Blitz({
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`Illegal touch by ${offenderNames}`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`turnover on downs.`,
                         ),
                         color: COLOR.WARNING,
@@ -211,7 +201,7 @@ export function Blitz({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: downIncrement.downState,
             },
         });
     }
@@ -238,10 +228,7 @@ export function Blitz({
     }
 
     function $penalizeIllegalQuarterbackAdvance(): never {
-        const penaltyResult = applyOffensivePenalty(
-            downState,
-            -OFFENSIVE_FOUL_PENALTY_YARDS,
-        );
+        const downIncrement = incrementDownState(downState);
 
         $event({
             type: Stat.Foul,
@@ -251,7 +238,7 @@ export function Blitz({
                 down: downState.downAndDistance.down,
                 distance: downState.downAndDistance.distance,
                 startFieldPosition: downState.fieldPos,
-                yards: OFFENSIVE_FOUL_PENALTY_YARDS,
+                yards: 0,
             },
         });
 
@@ -269,16 +256,15 @@ export function Blitz({
             $setBallActive();
         });
 
-        processOffensivePenalty({
-            event: penaltyResult.event,
+        processDownEventIncrement({
+            event: downIncrement.event,
             onNextDown() {
                 $effect(($) => {
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`illegal advance beyond the LOS`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`loss of down.`,
                         ),
                         color: COLOR.WARNING,
@@ -290,9 +276,8 @@ export function Blitz({
                     $.send({
                         message: cn(
                             "❌",
-                            penaltyResult.downState,
+                            downIncrement.downState,
                             t`illegal advance beyond the LOS`,
-                            t`${OFFENSIVE_FOUL_PENALTY_YARDS}-yard penalty`,
                             t`turnover on downs.`,
                         ),
                         color: COLOR.WARNING,
@@ -304,7 +289,7 @@ export function Blitz({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: downIncrement.downState,
             },
             wait: ticks({ seconds: 1 }),
         });

@@ -10,7 +10,7 @@ import {
     type RuntimeMatchEventSink,
     type Transition,
 } from "@runtime/runtime";
-import { Room } from "@core/room";
+import { Room, type DiscRef } from "@core/room";
 import { Team, type FieldTeam, isFieldTeam } from "@runtime/models";
 import { CommandHandleResult, CommandSpec } from "@core/commands";
 import {
@@ -43,7 +43,7 @@ export interface EngineOptions<Cfg> {
     config: Cfg;
     globalSchema?: GlobalSchema<any, any>;
     matchEvents?: RuntimeMatchEventSink;
-    trackedDiscs?: Readonly<Record<string, number>>;
+    trackedDiscs?: Readonly<Record<string, DiscRef>>;
 }
 
 /**
@@ -68,7 +68,7 @@ export interface GameStateBall {
 }
 
 export interface GameStateDisc extends GameStateBall {
-    id: number;
+    id: DiscRef;
 }
 
 export interface GameState {
@@ -208,7 +208,7 @@ function getBallSnapshot(room: Room): GameStateBall {
 }
 
 function getExtraDiscSnapshot(
-    discId: number,
+    discId: DiscRef,
     disc: DiscPropertiesObject | null,
 ): GameStateDisc | null {
     if (!disc || typeof disc.x !== "number" || typeof disc.y !== "number") {
@@ -309,7 +309,7 @@ function buildGameState(
     room: Room,
     kickerIds: Set<number>,
     tickNumber: number,
-    trackedDiscs: Readonly<Record<string, number>>,
+    trackedDiscs: Readonly<Record<string, DiscRef>>,
 ): GameState {
     const list = room.getPlayerList();
     const ball = getBallSnapshot(room);

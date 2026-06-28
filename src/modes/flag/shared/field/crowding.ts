@@ -6,52 +6,50 @@ import {
     type PointLike,
 } from "@common/math/geometry";
 import { SPECIAL_HIDDEN_POSITION } from "@common/stadium-builder/consts";
-import {
-    index,
-    flagMapMeasures as MapMeasures,
-    lineIndex,
-} from "@modes/flag/stadium";
+import { flagMapMeasures as MapMeasures } from "@modes/flag/stadium";
 import { Team, type FieldTeam } from "@runtime/models";
 import { getPositionFromFieldPosition } from "./position";
 
-const OUTER_CROWDING_SEGMENTS: Pair<number>[] = [
-    lineIndex("red0"),
-    lineIndex("red1"),
-    lineIndex("red2"),
-    lineIndex("red3"),
-    lineIndex("red4"),
-    lineIndex("red5"),
-    lineIndex("red6"),
-    lineIndex("red7"),
-    lineIndex("red8"),
-    lineIndex("red9"),
-    lineIndex("red10"),
-    lineIndex("red11"),
+const dynamicLineRefs = (ref: string): Pair<string> => [`${ref}.a`, `${ref}.b`];
+
+const OUTER_CROWDING_SEGMENTS: Pair<string>[] = [
+    dynamicLineRefs("red0"),
+    dynamicLineRefs("red1"),
+    dynamicLineRefs("red2"),
+    dynamicLineRefs("red3"),
+    dynamicLineRefs("red4"),
+    dynamicLineRefs("red5"),
+    dynamicLineRefs("red6"),
+    dynamicLineRefs("red7"),
+    dynamicLineRefs("red8"),
+    dynamicLineRefs("red9"),
+    dynamicLineRefs("red10"),
+    dynamicLineRefs("red11"),
 ];
 
-const OUTER_CROWDING_CORNERS: Quad<number> = [
-    index("outerCrowdingCorner0"),
-    index("outerCrowdingCorner1"),
-    index("outerCrowdingCorner2"),
-    index("outerCrowdingCorner3"),
+const OUTER_CROWDING_CORNERS: Quad<string> = [
+    "outerCrowdingCorner0",
+    "outerCrowdingCorner1",
+    "outerCrowdingCorner2",
+    "outerCrowdingCorner3",
 ];
 
-const INNER_CROWDING_SEGMENTS: Pair<number>[] = [
-    lineIndex("white0"),
-    lineIndex("white1"),
-    lineIndex("white2"),
-    lineIndex("white3"),
-    lineIndex("white4"),
-    lineIndex("white5"),
-    lineIndex("tail0"),
-    lineIndex("tail1"),
+const INNER_CROWDING_SEGMENTS: Pair<string>[] = [
+    dynamicLineRefs("white0"),
+    dynamicLineRefs("white1"),
+    dynamicLineRefs("white2"),
+    dynamicLineRefs("white3"),
+    dynamicLineRefs("white4"),
+    dynamicLineRefs("white5"),
+    dynamicLineRefs("tail0"),
+    dynamicLineRefs("tail1"),
 ];
 
-const INNER_CROWDING_CORNERS: Quad<number> = [
-    index("innerCrowdingCorner0"),
-    index("innerCrowdingCorner1"),
-    index("innerCrowdingCorner2"),
-    index("innerCrowdingCorner3"),
+const INNER_CROWDING_CORNERS: Quad<string> = [
+    "innerCrowdingCorner0",
+    "innerCrowdingCorner1",
+    "innerCrowdingCorner2",
+    "innerCrowdingCorner3",
 ];
 
 const CROWDING_OUTER_BEHIND_YARDS = 2.5;
@@ -67,7 +65,7 @@ const CROWDING_INNER_MIN_GAP_TO_OUTER_FRONT_YARDS = 2;
 const CROWDING_INNER_MIN_HEIGHT_YARDS = 2;
 const CROWDING_INNER_MIN_WIDTH_YARDS = 1;
 
-type CrowdingPlacement = readonly [number, number, number];
+type CrowdingPlacement = readonly [string, number, number];
 type CrowdingRectangle = {
     start: Pair<number>;
     direction: 1 | -1;
@@ -135,7 +133,7 @@ function isInnerCrowdingDisabledAtLine(fieldPos: FieldPosition): boolean {
 }
 
 function crowdingDashSize(
-    segments: readonly Pair<number>[],
+    segments: readonly Pair<string>[],
     extension: Pair<number>,
 ) {
     const [w, h] = extension;
@@ -162,8 +160,8 @@ function disabledCrowdingRectangle(): CrowdingRectangle {
 }
 
 function placeCrowdingBox(
-    segments: readonly Pair<number>[],
-    corners: Quad<number>,
+    segments: readonly Pair<string>[],
+    corners: Quad<string>,
     rect: CrowdingRectangle,
 ): CrowdingPlacement[] {
     const [width, height] = rect.extension;

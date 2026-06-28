@@ -35,22 +35,22 @@ describe("buildStadium", () => {
 
         const { stadium, index } = buildStadium({ measures, colors });
 
-        const segmentNames = Object.keys(index.names.segments);
-        const topHashNames = segmentNames.filter((name) =>
-            name.startsWith("hashMarkTop"),
+        const segmentRefs = Object.keys(index.refs.segments);
+        const topHashRefs = segmentRefs.filter((ref) =>
+            ref.startsWith("hashMarkTop"),
         );
-        const bottomHashNames = segmentNames.filter((name) =>
-            name.startsWith("hashMarkBottom"),
+        const bottomHashRefs = segmentRefs.filter((ref) =>
+            ref.startsWith("hashMarkBottom"),
         );
 
-        expect(topHashNames).toHaveLength(8);
-        expect(bottomHashNames).toHaveLength(8);
+        expect(topHashRefs).toHaveLength(8);
+        expect(bottomHashRefs).toHaveLength(8);
 
-        const getX = (name: string) => {
-            const segmentIndex = index.names.segments[name];
+        const getX = (ref: string) => {
+            const segmentIndex = index.refs.segments[ref];
 
             if (segmentIndex === undefined) {
-                throw new Error(`Missing segment ${name}`);
+                throw new Error(`Missing segment ${ref}`);
             }
 
             const segment = stadium.segments?.[segmentIndex];
@@ -71,12 +71,12 @@ describe("buildStadium", () => {
             return v0.x;
         };
 
-        const hashXs = topHashNames.map(getX).sort((a, b) => a - b);
+        const hashXs = topHashRefs.map(getX).sort((a, b) => a - b);
         const expected = [-80, -60, -40, -20, 20, 40, 60, 80];
 
         expect(hashXs).toEqual(expected);
 
-        const midfieldIndex = index.names.segments["midfieldLine"];
+        const midfieldIndex = index.refs.segments["midfieldLine"];
 
         if (midfieldIndex === undefined) {
             throw new Error("Missing midfield line index");

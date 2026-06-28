@@ -16,7 +16,7 @@ import { t } from "@lingui/core/macro";
 import {
     TRAINING_BALL_COLOR,
     TRAINING_BALL_DAMPING,
-    TRAINING_BALL_DISC_IDS,
+    TRAINING_BALL_DISC_REFS,
     TRAINING_BALL_INV_MASS,
     TRAINING_BLUE_TARGET_COLOR,
     TRAINING_HIDDEN_DISC,
@@ -26,8 +26,7 @@ import {
     TRAINING_RED_TARGET_COLOR,
     TRAINING_TARGET_BCOEF,
     TRAINING_TARGET_DAMPING,
-    TRAINING_TARGET_DISC_IDS,
-    TRAINING_TARGET_DISC_NAMES,
+    TRAINING_TARGET_DISC_REFS,
     TRAINING_TARGET_GROUP,
     TRAINING_TARGET_INV_MASS,
 } from "../stadium";
@@ -98,7 +97,7 @@ function getLaneTarget(
     laneIndex: number,
     targetIndex: number,
 ): GameStateDisc | null {
-    const discName = TRAINING_TARGET_DISC_NAMES[laneIndex]?.[targetIndex];
+    const discName = TRAINING_TARGET_DISC_REFS[laneIndex]?.[targetIndex];
 
     return discName === undefined ? null : (state.discs[discName] ?? null);
 }
@@ -212,20 +211,20 @@ export function Training() {
     });
 
     function $hideLane(laneIndex: number) {
-        const ballId = TRAINING_BALL_DISC_IDS[laneIndex];
-        const targetIds = TRAINING_TARGET_DISC_IDS[laneIndex];
+        const ballRef = TRAINING_BALL_DISC_REFS[laneIndex];
+        const targetRefs = TRAINING_TARGET_DISC_REFS[laneIndex];
 
         $effect(($) => {
-            if (ballId !== undefined) {
-                $.setDiscProperties(ballId, {
+            if (ballRef !== undefined) {
+                $.setDiscProperties(ballRef, {
                     x: TRAINING_LANES[laneIndex]?.ball.x ?? 0,
                     y: TRAINING_LANES[laneIndex]?.ball.y ?? 0,
                     ...TRAINING_HIDDEN_DISC,
                 });
             }
 
-            targetIds?.forEach((targetId) => {
-                $.setDiscProperties(targetId, TRAINING_HIDDEN_DISC);
+            targetRefs?.forEach((targetRef) => {
+                $.setDiscProperties(targetRef, TRAINING_HIDDEN_DISC);
             });
         });
     }
@@ -243,8 +242,8 @@ export function Training() {
         player: GameStatePlayer;
         announce: "assignment" | "miss" | "replacement" | null;
     }) {
-        const ballId = TRAINING_BALL_DISC_IDS[laneIndex];
-        const targetIds = TRAINING_TARGET_DISC_IDS[laneIndex];
+        const ballRef = TRAINING_BALL_DISC_REFS[laneIndex];
+        const targetRefs = TRAINING_TARGET_DISC_REFS[laneIndex];
         const placements = createTargetPlacements(lane);
         const playerSpawn = getPlayerSpawnForTargetPlacements(lane, placements);
         laneState.placements = placements;
@@ -253,8 +252,8 @@ export function Training() {
         $effect(($) => {
             const cf = $.CollisionFlags;
 
-            if (ballId !== undefined) {
-                $.setDiscProperties(ballId, {
+            if (ballRef !== undefined) {
+                $.setDiscProperties(ballRef, {
                     x: lane.ball.x,
                     y: lane.ball.y,
                     radius: 7.85,
@@ -278,11 +277,11 @@ export function Training() {
                 yspeed: 0,
             });
 
-            targetIds?.forEach((targetId, targetIndex) => {
+            targetRefs?.forEach((targetRef, targetIndex) => {
                 const placement = placements[targetIndex];
                 if (!placement) return;
 
-                $.setDiscProperties(targetId, {
+                $.setDiscProperties(targetRef, {
                     x: placement.x,
                     y: placement.y,
                     radius: TRAINING_TARGET_RADIUS,
@@ -336,7 +335,7 @@ export function Training() {
         laneState: LaneRuntime;
         player: GameStatePlayer;
     }) {
-        const ballId = TRAINING_BALL_DISC_IDS[laneIndex];
+        const ballRef = TRAINING_BALL_DISC_REFS[laneIndex];
         const playerSpawn = getPlayerSpawnForTargetPlacements(
             lane,
             laneState.placements,
@@ -352,8 +351,8 @@ export function Training() {
         $effect(($) => {
             const cf = $.CollisionFlags;
 
-            if (ballId !== undefined) {
-                $.setDiscProperties(ballId, {
+            if (ballRef !== undefined) {
+                $.setDiscProperties(ballRef, {
                     x: lane.ball.x,
                     y: lane.ball.y,
                     radius: 7.85,

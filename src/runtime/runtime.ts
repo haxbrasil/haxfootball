@@ -1,4 +1,4 @@
-import { Room } from "@core/room";
+import { Room, type DiscRef } from "@core/room";
 import type { GameState } from "./engine";
 import type {
     GlobalSchema,
@@ -86,8 +86,8 @@ export type RuntimeMatchEventSink = (event: RuntimeMatchEvent) => void;
 const BALL_DEFAULT_INDEX = 0;
 
 const mergeProps =
-    <T extends Record<string, any>>(map: Map<number, T>) =>
-    (key: number, props: T) => {
+    <T extends Record<string, any>, K>(map: Map<K, T>) =>
+    (key: K, props: T) => {
         const existing = map.get(key);
         if (existing) {
             Object.assign(existing, props);
@@ -97,14 +97,14 @@ const mergeProps =
     };
 
 export function createMutationBuffer(room: Room) {
-    const discProps = new Map<number, DiscPropsPatch>();
+    const discProps = new Map<DiscRef, DiscPropsPatch>();
     const playerDiscProps = new Map<number, DiscPropsPatch>();
     const avatars = new Map<number, AvatarValue>();
     const teams = new Map<number, TeamValue>();
     const admins = new Map<number, AdminValue>();
 
-    const queueDiscProps = mergeProps<DiscPropsPatch>(discProps);
-    const queuePlayerDiscProps = mergeProps<DiscPropsPatch>(playerDiscProps);
+    const queueDiscProps = mergeProps(discProps);
+    const queuePlayerDiscProps = mergeProps(playerDiscProps);
 
     const trimPatch = <T extends Record<string, any>>(patch: T): T | null => {
         const trimmed: Record<string, any> = {};
@@ -132,7 +132,7 @@ export function createMutationBuffer(room: Room) {
     };
 
     return {
-        queueDisc: (discIndex: number, props: DiscProps) =>
+        queueDisc: (discIndex: DiscRef, props: DiscProps) =>
             queueDiscProps(discIndex, props),
         queuePlayerDisc: (player: PlayerRef, props: DiscProps) =>
             queuePlayerDiscProps(toPlayerId(player), props),
@@ -582,8 +582,9 @@ export function flushRuntime(): {
         },
         setPlayerDiscProperties: (player: PlayerRef, props: DiscProps) =>
             mutations.queuePlayerDisc(player, props),
-        setDiscProperties: (discIndex: number, props: DiscProps) =>
+        setDiscProperties: (discIndex: DiscRef, props: DiscProps) =>
             mutations.queueDisc(discIndex, props),
+        patchStadium: (patch: unknown) => room.patchStadium(patch),
         setAvatar: (player: PlayerRef, avatar: AvatarValue) =>
             mutations.queueAvatar(player, avatar),
         setTeam: (player: PlayerRef, team: TeamValue) =>

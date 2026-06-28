@@ -1,14 +1,9 @@
 import { $effect } from "@runtime/runtime";
-import { Team } from "@runtime/models";
-import {
-    getLineOfScrimmage,
-    getLineOfScrimmageBlockers,
-} from "@modes/flag/shared/field";
+import { getLineOfScrimmage, LOS_BLOCKER_REFS } from "@modes/flag/shared/field";
 import { SPECIAL_HIDDEN_DISC_POSITION } from "@common/stadium-builder/consts";
-import { computeBlockingPlan } from "@modes/flag/shared/interaction/los-blocking";
 
 const LOS_BLOCKING_VERTICAL_EXTENSION = 2000;
-const LOS_BLOCKING_SLOT_RADIUS = 4;
+let patchedLineKey: string | null = null;
 
 export function $syncLineOfScrimmageBlocking({
     enabled = true,
@@ -22,14 +17,19 @@ export function $syncLineOfScrimmageBlocking({
         const topDisc = $.getDiscProperties(line[0].id);
         const bottomDisc = $.getDiscProperties(line[1].id);
 
-        if (!topDisc || !bottomDisc) return;
+        if (!topDisc || !bottomDisc) {
+            patchedLineKey = null;
+            return;
+        }
         if (typeof topDisc.x !== "number" || typeof topDisc.y !== "number") {
+            patchedLineKey = null;
             return;
         }
         if (
             typeof bottomDisc.x !== "number" ||
             typeof bottomDisc.y !== "number"
         ) {
+            patchedLineKey = null;
             return;
         }
 
@@ -38,69 +38,54 @@ export function $syncLineOfScrimmageBlocking({
                 topDisc.y === SPECIAL_HIDDEN_DISC_POSITION.y) ||
             (bottomDisc.x === SPECIAL_HIDDEN_DISC_POSITION.x &&
                 bottomDisc.y === SPECIAL_HIDDEN_DISC_POSITION.y);
+        const shouldShow = enabled && !lineIsHidden;
+        const visibleLineKey = `${topDisc.x}:${topDisc.y}:${bottomDisc.x}:${bottomDisc.y}`;
+        const nextLineKey = shouldShow ? visibleLineKey : "hidden";
 
-        const blockerIds = getLineOfScrimmageBlockers().map(({ id }) => id);
+        if (patchedLineKey === nextLineKey) return;
 
-        if (!enabled || lineIsHidden) {
-            blockerIds.forEach((blockerId) => {
-                $.setDiscProperties(blockerId, SPECIAL_HIDDEN_DISC_POSITION);
-            });
-
-            return;
-        }
-
-        const blockers = blockerIds
-            .map((id) => {
-                const disc = $.getDiscProperties(id);
-                if (!disc) return null;
-                if (typeof disc.x !== "number" || typeof disc.y !== "number") {
-                    return null;
-                }
-
-                return {
-                    id,
-                    position: { x: disc.x, y: disc.y },
-                };
-            })
-            .filter((blocker) => blocker !== null);
-
-        const players = $.getPlayerList()
-            .filter(
-                (player) =>
-                    player.team === Team.RED || player.team === Team.BLUE,
-            )
-            .map((player) => {
-                const disc = $.getPlayerDiscProperties(player.id);
-                if (!disc) return null;
-                if (typeof disc.x !== "number" || typeof disc.y !== "number") {
-                    return null;
-                }
-
-                return {
-                    id: player.id,
-                    position: { x: disc.x, y: disc.y },
-                };
-            })
-            .filter((player) => player !== null);
-
-        const plan = computeBlockingPlan({
-            line: {
-                a: {
+        const hiddenVertex = {
+            x: SPECIAL_HIDDEN_DISC_POSITION.x,
+            y: SPECIAL_HIDDEN_DISC_POSITION.y,
+        };
+        const visibleVertexes = [
+            {
+                type: "replace",
+                ref: LOS_BLOCKER_REFS.A,
+                value: {
                     x: topDisc.x,
                     y: topDisc.y - LOS_BLOCKING_VERTICAL_EXTENSION,
                 },
-                b: {
+            },
+            {
+                type: "replace",
+                ref: LOS_BLOCKER_REFS.B,
+                value: {
                     x: bottomDisc.x,
                     y: bottomDisc.y + LOS_BLOCKING_VERTICAL_EXTENSION,
                 },
             },
-            players,
-            blockers,
-            blockerRadius: LOS_BLOCKING_SLOT_RADIUS,
-        });
+        ];
+        const hiddenVertexes = [
+            {
+                type: "replace",
+                ref: LOS_BLOCKER_REFS.A,
+                value: hiddenVertex,
+            },
+            {
+                type: "replace",
+                ref: LOS_BLOCKER_REFS.B,
+                value: hiddenVertex,
+            },
+        ];
 
-        plan.moves.forEach((move) => {
-            $.setDiscProperties(move.blockerId, move.target);
-        });
+        if (shouldShow) {
+            $.patchStadium({ vertexes: visibleVertexes });
+            patchedLineKey = nextLineKey;
+            return;
+        }
+
+        $.patchStadium({ vertexes: hiddenVertexes });
+        patchedLineKey = nextLineKey;
     });
 }

@@ -7,6 +7,7 @@ import {
     $isGamePaused,
     $next,
     $tick,
+    $config,
 } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
@@ -46,6 +47,8 @@ import {
     MIN_SNAP_DELAY_TICKS,
 } from "@modes/classic/shared/rules/snap";
 import type { GameStateInspection } from "@runtime/inspection";
+import { $syncLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import { type Config } from "@modes/classic/config";
 
 const LOADING_DURATION = ticks({ seconds: 0.5 });
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
@@ -119,6 +122,7 @@ export function ExtraPoint({
         yards: EXTRA_POINT_YARD_LINE,
         side: opposite(offensiveTeam),
     };
+    const config = $config<Config>();
     const lineOfScrimmageX = getPositionFromFieldPosition(fieldPos);
     const ballPosWithOffset = calculateSnapBallPosition(
         offensiveTeam,
@@ -142,6 +146,10 @@ export function ExtraPoint({
         $unsetFirstDownLine();
         $setBallActive();
         $setBallMoveable();
+
+        if (config.flags.losBlocking) {
+            $syncLineOfScrimmageBlocking({ enabled: false });
+        }
     });
 
     $checkpoint({
@@ -379,6 +387,10 @@ export function ExtraPoint({
         $handleDefensiveKick(frame);
         $handleKick(frame);
         $handleOffenseCrossedLine(frame);
+
+        if (config.flags.losBlocking) {
+            $syncLineOfScrimmageBlocking();
+        }
     }
 
     function join(_player: GameStatePlayer) {

@@ -3,7 +3,6 @@ import type {
     JointSpec,
     LineSpec,
     SegmentProps,
-    StadiumIndex,
     VertexProps,
 } from "@common/stadium-generator";
 import { asArray, mergeDeep, repeat } from "@common/general/helpers";
@@ -20,7 +19,7 @@ type LineParamsCore = {
     from: LinePoint;
     to: LinePoint;
     segment: SegmentProps;
-    name?: string;
+    ref?: string;
 };
 
 const stripExtend = <T extends Record<string, unknown>>(
@@ -49,20 +48,20 @@ export function line(
     from: LinePoint,
     to: LinePoint,
     segment: SegmentProps,
-    name?: string,
+    ref?: string,
 ): LineSpec;
 export function line(
     fromOrParams: LinePoint | ExtendInput<LineParamsCore>,
     to?: LinePoint,
     segment?: SegmentProps,
-    name?: string,
+    ref?: string,
 ): LineSpec {
     if (typeof to === "undefined" && "from" in fromOrParams) {
         const resolved = resolveExtend<LineParamsCore>(
             fromOrParams as ExtendInput<LineParamsCore>,
         );
 
-        const { from, to: target, segment: seg, name: label } = resolved;
+        const { from, to: target, segment: seg, ref: reference } = resolved;
 
         if (!from || !target || !seg) {
             throw new Error(
@@ -71,7 +70,7 @@ export function line(
         }
 
         return {
-            ...(label ? { name: label } : {}),
+            ...(reference ? { ref: reference } : {}),
             from,
             to: target,
             segment: seg,
@@ -85,7 +84,7 @@ export function line(
     }
 
     return {
-        ...(name ? { name } : {}),
+        ...(ref ? { ref } : {}),
         from: fromOrParams as LinePoint,
         to,
         segment,
@@ -97,13 +96,13 @@ type VLineParamsCore = {
     yStart: number;
     yEnd: number;
     segment: SegmentProps;
-    name?: string;
+    ref?: string;
     vertex?: VertexProps;
 };
 
 export const vLine = (params: ExtendInput<VLineParamsCore>): LineSpec => {
     const resolved = resolveExtend<VLineParamsCore>(params);
-    const { x, yStart, yEnd, segment, name: label, vertex } = resolved;
+    const { x, yStart, yEnd, segment, ref, vertex } = resolved;
 
     if (
         x === undefined ||
@@ -120,7 +119,7 @@ export const vLine = (params: ExtendInput<VLineParamsCore>): LineSpec => {
         vertex ? { x, y: yStart, vertex } : { x, y: yStart },
         vertex ? { x, y: yEnd, vertex } : { x, y: yEnd },
         segment,
-        label,
+        ref,
     );
 };
 
@@ -148,8 +147,8 @@ export const anchorsFromPairs = ({
     pairs,
 }: AnchorsFromPairsParams): AnchorSpec[] =>
     pairs.flatMap(([d0, d1], index) => [
-        { name: `${prefix}${index}.a`, index: d0 },
-        { name: `${prefix}${index}.b`, index: d1 },
+        { ref: `${prefix}${index}.a`, index: d0 },
+        { ref: `${prefix}${index}.b`, index: d1 },
     ]);
 
 type JointsFromPairsParams = {
@@ -164,45 +163,9 @@ export const jointsFromPairs = ({
     color,
 }: JointsFromPairsParams): JointSpec[] =>
     pairs.map((_, index) => ({
+        ref: `${prefix}${index}`,
         from: `${prefix}${index}.a`,
         to: `${prefix}${index}.b`,
         color,
         length: range(0, 99999),
     }));
-
-type StadiumIndexKind = keyof StadiumIndex["names"];
-type StadiumIndexHit = { kind: StadiumIndexKind; index: number };
-
-const findIndexHits = (index: StadiumIndex, name: string): StadiumIndexHit[] =>
-    (Object.keys(index.names) as StadiumIndexKind[]).flatMap((kind) => {
-        const id = index.names[kind][name];
-        return id === undefined ? [] : [{ kind, index: id }];
-    });
-
-export const getIndexByName = (index: StadiumIndex, name: string): number => {
-    const hits = findIndexHits(index, name);
-
-    if (hits.length === 0) {
-        throw new Error(`Missing stadium index for "${name}"`);
-    }
-
-    if (hits.length > 1) {
-        const kinds = hits.map(({ kind }) => kind).join(", ");
-        throw new Error(`Ambiguous stadium name "${name}" found in: ${kinds}`);
-    }
-
-    return hits[0]!.index;
-};
-
-export const getDynamicLine = (
-    index: StadiumIndex,
-    name: string,
-): Pair<number> => {
-    const line = index.dynamicLines.names[name];
-
-    if (!line) {
-        throw new Error(`Missing dynamic line "${name}"`);
-    }
-
-    return line;
-};

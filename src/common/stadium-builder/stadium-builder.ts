@@ -10,12 +10,7 @@ import type {
     StadiumSchema,
     VertexProps,
 } from "@common/stadium-generator";
-import {
-    getDynamicLine,
-    getIndexByName,
-    line,
-    vLine,
-} from "@common/stadium-generator/utils";
+import { line, vLine } from "@common/stadium-generator/utils";
 
 type RectBounds = {
     leftX: number;
@@ -157,8 +152,6 @@ export type StadiumMapMeasures = {
 
 export type StadiumBuildResult = StadiumBuild & {
     mapMeasures: StadiumMapMeasures;
-    getIndex: (name: string) => number;
-    getLineIndex: (name: string) => Pair<number>;
 };
 
 export type BuildStadiumOptions = {
@@ -172,7 +165,7 @@ export type BuildStadiumOptions = {
 };
 
 const buildFieldBounds = (inner: RectBounds, color: string): RectSpec => ({
-    name: "fieldBounds",
+    ref: "fieldBounds",
     x: [inner.leftX, inner.rightX],
     y: [inner.topY, inner.bottomY],
     segment: { color, cMask: [] },
@@ -256,7 +249,7 @@ const buildYardLines = (
             return colors.yard.default;
         })();
 
-        const name = (() => {
+        const ref = (() => {
             if (isGoalLine) return y === 0 ? "leftGoalLine" : "rightGoalLine";
             if (isMidfield) return "midfieldLine";
             return undefined;
@@ -269,7 +262,7 @@ const buildYardLines = (
                 yEnd: innerField.bottomY,
                 segment: { color, cMask: [] },
                 vertex: { cMask: [] },
-                ...(name ? { name } : {}),
+                ...(ref ? { ref } : {}),
             }),
         );
     }
@@ -317,7 +310,7 @@ const buildHashMarks = (
                     yEnd: topEndY,
                     segment: { color, cMask: [] },
                     vertex: { cMask: [] },
-                    name: `hashMarkTop${index}`,
+                    ref: `hashMarkTop${index}`,
                 }),
             );
             lines.push(
@@ -327,7 +320,7 @@ const buildHashMarks = (
                     yEnd: bottomEndY,
                     segment: { color, cMask: [] },
                     vertex: { cMask: [] },
-                    name: `hashMarkBottom${index}`,
+                    ref: `hashMarkBottom${index}`,
                 }),
             );
             index += 1;
@@ -379,7 +372,7 @@ const buildTickMarks = (
                 yEnd: topEndY,
                 segment: { color: topColor, cMask: [] },
                 vertex: { cMask: [] },
-                name: `tickTop${index}`,
+                ref: `tickTop${index}`,
             }),
             vLine({
                 x,
@@ -387,7 +380,7 @@ const buildTickMarks = (
                 yEnd: bottomEndY,
                 segment: { color: bottomColor, cMask: [] },
                 vertex: { cMask: [] },
-                name: `tickBottom${index}`,
+                ref: `tickBottom${index}`,
             }),
         ];
     });
@@ -643,23 +636,10 @@ export const buildStadium = (
         goalLines,
     );
 
-    const STADIUM_DISC_INDEX_OFFSET = 1;
-
     const stadiumResult = defineStadium(builtSchema);
-
-    const getIndex = (name: string): number =>
-        getIndexByName(stadiumResult.index, name) + STADIUM_DISC_INDEX_OFFSET;
-
-    const getLineIndex = (name: string): Pair<number> => {
-        const [d0, d1] = getDynamicLine(stadiumResult.index, name);
-
-        return [d0 + STADIUM_DISC_INDEX_OFFSET, d1 + STADIUM_DISC_INDEX_OFFSET];
-    };
 
     return {
         ...stadiumResult,
         mapMeasures,
-        getIndex,
-        getLineIndex,
     };
 };

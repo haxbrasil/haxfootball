@@ -238,22 +238,21 @@ export function distributeOnLine<T extends PointLike>(
     });
 }
 
-type VertexID = number;
-type DashSegment = readonly [VertexID, VertexID];
-type Corners = readonly [VertexID, VertexID, VertexID, VertexID];
 type Coordinate = Pair<number>;
 type Direction = 1 | -1;
 type Extension = Pair<number>;
-type PlacedVertex = readonly [VertexID, number, number];
+type DashSegment<T> = readonly [T, T];
+type Corners<T> = readonly [T, T, T, T];
+type PlacedVertex<T> = readonly [T, number, number];
 
-export function dashedRectangleFromSegments(
-    segments: readonly DashSegment[],
-    corners: Corners,
+export function dashedRectangleFromSegments<T>(
+    segments: readonly DashSegment<T>[],
+    corners: Corners<T>,
     start: Coordinate,
     direction: Direction,
     extension: Extension,
     dashSize: number,
-): PlacedVertex[] {
+): PlacedVertex<T>[] {
     const [xStart, yMid] = start;
     const [wRaw, hRaw] = extension;
 
@@ -272,9 +271,9 @@ export function dashedRectangleFromSegments(
     const yTop = yMid - h / 2;
     const yBot = yMid + h / 2;
 
-    const posById = new Map<VertexID, Pair<number>>();
+    const posById = new Map<T, Pair<number>>();
 
-    const setPos = (id: VertexID, p: Pair<number>) => {
+    const setPos = (id: T, p: Pair<number>) => {
         const prev = posById.get(id);
         if (!prev) {
             posById.set(id, p);
@@ -347,7 +346,7 @@ export function dashedRectangleFromSegments(
         }
     }
 
-    const out: PlacedVertex[] = [];
+    const out: PlacedVertex<T>[] = [];
 
     for (const [a, b] of segments) {
         const pa = posById.get(a)!;

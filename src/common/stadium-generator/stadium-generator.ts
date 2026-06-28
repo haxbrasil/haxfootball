@@ -19,15 +19,15 @@ export type PointSpec = {
     vertex?: VertexProps;
 };
 
-export type NamedPointSpec = PointSpec & {
-    name: string;
+export type RefPointSpec = PointSpec & {
+    ref: string;
     tags?: string[];
 };
 
 export type PointRef = string | PointSpec;
 
 export type LineSpec = {
-    name?: string;
+    ref?: string;
     from: PointRef;
     to: PointRef;
     segment?: SegmentProps;
@@ -35,7 +35,7 @@ export type LineSpec = {
 };
 
 export type RectSpec = {
-    name?: string;
+    ref?: string;
     x: Pair<number>;
     y: Pair<number>;
     segment?: SegmentProps;
@@ -51,30 +51,30 @@ type RectRef = string | RectSpec;
 
 export type PlaneSpec =
     | ({ normal: Pair<number>; dist: number } & PlaneProps & {
-              name?: string;
+              ref?: string;
               tags?: string[];
           })
     | {
           line: LineRef;
           side: PlaneSide;
           props?: PlaneProps;
-          name?: string;
+          ref?: string;
           tags?: string[];
       }
     | {
           rect: RectRef;
           side: RectPlaneSide;
           props?: PlaneProps;
-          name?: string;
+          ref?: string;
           tags?: string[];
       };
 
 export type AnchorSpec =
-    | { name: string; index: number; tags?: string[] }
-    | { name: string; disc: Disc; tags?: string[] };
+    | { ref: string; index: number; tags?: string[] }
+    | { ref: string; disc: Disc; tags?: string[] };
 
 export type DynamicLineSpec = {
-    name: string;
+    ref: string;
     joint: JointProps;
     disc?: Partial<Disc>;
     endpoints?: {
@@ -88,17 +88,17 @@ export type JointSpec =
     | ({
           from: string;
           to: string;
-      } & JointProps & { name?: string; tags?: string[] })
+      } & JointProps & { ref?: string; tags?: string[] })
     | ({
           d0: number;
           d1: number;
-      } & JointProps & { name?: string; tags?: string[] });
+      } & JointProps & { ref?: string; tags?: string[] });
 
 export type StadiumSchema = Omit<
     StadiumObject,
     "vertexes" | "segments" | "planes" | "joints" | "discs"
 > & {
-    points?: NamedPointSpec[];
+    points?: RefPointSpec[];
     lines?: LineSpec[];
     rects?: RectSpec[];
     planes?: PlaneSpec[];
@@ -112,7 +112,7 @@ export type StadiumSchema = Omit<
 };
 
 export type StadiumIndex = {
-    names: {
+    refs: {
         vertexes: Record<string, number>;
         segments: Record<string, number>;
         planes: Record<string, number>;
@@ -127,7 +127,7 @@ export type StadiumIndex = {
         joints: Record<string, number[]>;
     };
     dynamicLines: {
-        names: Record<string, Pair<number>>;
+        refs: Record<string, Pair<number>>;
         tags: Record<string, Array<Pair<number>>>;
     };
 };
@@ -137,14 +137,14 @@ export type StadiumBuild = {
     index: StadiumIndex;
 };
 
-type NamedLine = LineSpec & { name: string };
-type NamedRect = RectSpec & { name: string };
+type RefLine = LineSpec & { ref: string };
+type RefRect = RectSpec & { ref: string };
 
 const asNamedLines = (lines: LineSpec[] = []) =>
-    lines.filter((line): line is NamedLine => Boolean(line.name));
+    lines.filter((line): line is RefLine => Boolean(line.ref));
 
 const asNamedRects = (rects: RectSpec[] = []) =>
-    rects.filter((rect): rect is NamedRect => Boolean(rect.name));
+    rects.filter((rect): rect is RefRect => Boolean(rect.ref));
 
 const pointKey = (point: PointSpec) =>
     JSON.stringify({
@@ -252,8 +252,8 @@ const resolvePointRef = (
 
 const resolveLineRef = (
     ref: LineRef,
-    namedLines: Map<string, NamedLine>,
-    pointMap: Map<string, NamedPointSpec>,
+    namedLines: Map<string, RefLine>,
+    pointMap: Map<string, RefPointSpec>,
 ): { start: PointSpec; end: PointSpec } => {
     if (typeof ref === "string") {
         const line = namedLines.get(ref);
@@ -284,7 +284,7 @@ const resolveLineRef = (
 
 const resolveRectRef = (
     ref: RectRef,
-    namedRects: Map<string, NamedRect>,
+    namedRects: Map<string, RefRect>,
 ): RectSpec => {
     if (typeof ref === "string") {
         const rect = namedRects.get(ref);
@@ -314,30 +314,30 @@ const rectToLines = (rect: RectSpec): LineSpec[] => {
     };
     const point = (x: number, y: number) =>
         vertex ? { x, y, vertex } : { x, y };
-    const named = (suffix: string) =>
-        rect.name ? { name: `${rect.name}.${suffix}` } : {};
+    const referenced = (suffix: string) =>
+        rect.ref ? { ref: `${rect.ref}.${suffix}` } : {};
 
     return [
         {
-            ...named("top"),
+            ...referenced("top"),
             ...base,
             from: point(minX, minY),
             to: point(maxX, minY),
         },
         {
-            ...named("right"),
+            ...referenced("right"),
             ...base,
             from: point(maxX, minY),
             to: point(maxX, maxY),
         },
         {
-            ...named("bottom"),
+            ...referenced("bottom"),
             ...base,
             from: point(maxX, maxY),
             to: point(minX, maxY),
         },
         {
-            ...named("left"),
+            ...referenced("left"),
             ...base,
             from: point(minX, maxY),
             to: point(minX, minY),
@@ -346,7 +346,7 @@ const rectToLines = (rect: RectSpec): LineSpec[] => {
 };
 
 const createStadiumIndex = (): StadiumIndex => ({
-    names: {
+    refs: {
         vertexes: {},
         segments: {},
         planes: {},
@@ -361,24 +361,24 @@ const createStadiumIndex = (): StadiumIndex => ({
         joints: {},
     },
     dynamicLines: {
-        names: {},
+        refs: {},
         tags: {},
     },
 });
 
-const setIndexName = (
+const setIndexRef = (
     target: Record<string, number>,
-    name: string | undefined,
+    ref: string | undefined,
     index: number,
     kind: string,
 ) => {
-    if (!name) return;
+    if (!ref) return;
 
-    if (name in target) {
-        throw new Error(`Duplicate stadium ${kind} name: ${name}`);
+    if (ref in target) {
+        throw new Error(`Duplicate stadium ${kind} ref: ${ref}`);
     }
 
-    target[name] = index;
+    target[ref] = index;
 };
 
 const addIndexTags = (
@@ -449,35 +449,31 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
     const jointDiscOffset = rest.ballPhysics === "disc0" ? 0 : 1;
 
     const stadiumIndex = createStadiumIndex();
-    const namedRects = new Map<string, NamedRect>();
+    const namedRects = new Map<string, RefRect>();
 
     asNamedRects(rects).forEach((rect) => {
-        if (namedRects.has(rect.name)) {
-            throw new Error(`Duplicate stadium rect name: ${rect.name}`);
+        if (namedRects.has(rect.ref)) {
+            throw new Error(`Duplicate stadium rect ref: ${rect.ref}`);
         }
-        namedRects.set(rect.name, rect);
+        namedRects.set(rect.ref, rect);
     });
 
     const pointNameIndex = new Map<string, number>();
-    const pointMap = new Map<string, NamedPointSpec>();
+    const pointMap = new Map<string, RefPointSpec>();
     const baseVertexes = points.map((point, pointIdx) => {
-        if (pointNameIndex.has(point.name)) {
-            throw new Error(`Duplicate stadium point name: ${point.name}`);
+        if (pointNameIndex.has(point.ref)) {
+            throw new Error(`Duplicate stadium point ref: ${point.ref}`);
         }
 
-        pointNameIndex.set(point.name, pointIdx);
-        pointMap.set(point.name, point);
+        pointNameIndex.set(point.ref, pointIdx);
+        pointMap.set(point.ref, point);
 
-        setIndexName(
-            stadiumIndex.names.vertexes,
-            point.name,
-            pointIdx,
-            "point",
-        );
+        setIndexRef(stadiumIndex.refs.vertexes, point.ref, pointIdx, "point");
 
         addIndexTags(stadiumIndex.tags.vertexes, point.tags, pointIdx);
 
         return {
+            ref: point.ref,
             x: point.x,
             y: point.y,
             ...point.vertex,
@@ -487,14 +483,14 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
     const inlineIndex = new Map<string, number>();
     const inlineVertexes: Vertex[] = [];
     const allLines = [...lines, ...rects.flatMap(rectToLines)];
-    const namedLines = new Map<string, NamedLine>();
+    const namedLines = new Map<string, RefLine>();
 
     asNamedLines(allLines).forEach((line) => {
-        if (namedLines.has(line.name)) {
-            throw new Error(`Duplicate stadium line name: ${line.name}`);
+        if (namedLines.has(line.ref)) {
+            throw new Error(`Duplicate stadium line ref: ${line.ref}`);
         }
 
-        namedLines.set(line.name, line);
+        namedLines.set(line.ref, line);
     });
 
     const builtSegments = allLines.map((line, segmentIndex) => {
@@ -514,16 +510,12 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
             baseVertexes.length,
         );
 
-        setIndexName(
-            stadiumIndex.names.segments,
-            line.name,
-            segmentIndex,
-            "line",
-        );
+        setIndexRef(stadiumIndex.refs.segments, line.ref, segmentIndex, "line");
 
         addIndexTags(stadiumIndex.tags.segments, line.tags, segmentIndex);
 
         return {
+            ...(line.ref ? { ref: line.ref } : {}),
             v0,
             v1,
             ...line.segment,
@@ -539,19 +531,21 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
     const dynamicLineJoints: JointSpec[] = [];
 
     dynamicLines.forEach((line) => {
-        if (line.name in stadiumIndex.dynamicLines.names) {
-            throw new Error(`Duplicate dynamic line name: ${line.name}`);
+        if (line.ref in stadiumIndex.dynamicLines.refs) {
+            throw new Error(`Duplicate dynamic line ref: ${line.ref}`);
         }
 
         const discA: Disc = {
             ...DEFAULT_DYNAMIC_LINE_DISC,
             ...line.disc,
             ...line.endpoints?.a,
+            ref: `${line.ref}.a`,
         };
         const discB: Disc = {
             ...DEFAULT_DYNAMIC_LINE_DISC,
             ...line.disc,
             ...line.endpoints?.b,
+            ref: `${line.ref}.b`,
         };
 
         const d0 = builtDiscs.length;
@@ -564,25 +558,32 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
             d0,
             d1,
             length: length ?? DEFAULT_DYNAMIC_LINE_LENGTH,
+            ref: line.ref,
             ...jointProps,
         });
 
         const pair: Pair<number> = [d0, d1];
-        stadiumIndex.dynamicLines.names[line.name] = pair;
+        stadiumIndex.dynamicLines.refs[line.ref] = pair;
         addIndexPairTags(stadiumIndex.dynamicLines.tags, line.tags, pair);
     });
 
     anchors.forEach((anchor) => {
-        if (anchorIndex.has(anchor.name)) {
-            throw new Error(`Duplicate stadium anchor name: ${anchor.name}`);
+        if (anchorIndex.has(anchor.ref)) {
+            throw new Error(`Duplicate stadium anchor ref: ${anchor.ref}`);
         }
 
         if ("index" in anchor) {
-            anchorIndex.set(anchor.name, anchor.index);
+            anchorIndex.set(anchor.ref, anchor.index);
+            if (builtDiscs[anchor.index]) {
+                builtDiscs[anchor.index] = {
+                    ...builtDiscs[anchor.index],
+                    ref: anchor.ref,
+                };
+            }
 
-            setIndexName(
-                stadiumIndex.names.discs,
-                anchor.name,
+            setIndexRef(
+                stadiumIndex.refs.discs,
+                anchor.ref,
                 anchor.index,
                 "anchor",
             );
@@ -594,15 +595,10 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
 
         const discIndex = builtDiscs.length;
 
-        builtDiscs.push(anchor.disc);
-        anchorIndex.set(anchor.name, discIndex);
+        builtDiscs.push({ ...anchor.disc, ref: anchor.ref });
+        anchorIndex.set(anchor.ref, discIndex);
 
-        setIndexName(
-            stadiumIndex.names.discs,
-            anchor.name,
-            discIndex,
-            "anchor",
-        );
+        setIndexRef(stadiumIndex.refs.discs, anchor.ref, discIndex, "anchor");
 
         addIndexTags(stadiumIndex.tags.discs, anchor.tags, discIndex);
     });
@@ -622,16 +618,11 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
                 throw new Error(`Unknown stadium anchor: ${entry.to}`);
             }
 
-            const {
-                from: _from,
-                to: _to,
-                name: _name,
-                tags: _tags,
-                ...rest
-            } = entry;
+            const { from: _from, to: _to, ref, tags: _tags, ...rest } = entry;
 
             return [
                 {
+                    ...(ref ? { ref } : {}),
                     d0: d0 + jointDiscOffset,
                     d1: d1 + jointDiscOffset,
                     ...rest,
@@ -639,10 +630,11 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
             ];
         }
 
-        const { d0, d1, name: _name, tags: _tags, ...rest } = entry;
+        const { d0, d1, ref, tags: _tags, ...rest } = entry;
 
         return [
             {
+                ...(ref ? { ref } : {}),
                 d0: d0 + jointDiscOffset,
                 d1: d1 + jointDiscOffset,
                 ...rest,
@@ -650,12 +642,12 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
         ];
     });
 
-    const planeBuilds: Array<{ plane: Plane; name?: string; tags?: string[] }> =
+    const planeBuilds: Array<{ plane: Plane; ref?: string; tags?: string[] }> =
         [];
 
     planes.forEach((entry) => {
         if ("normal" in entry && "dist" in entry) {
-            const { normal, dist, name, tags, ...rest } = entry;
+            const { normal, dist, ref, tags, ...rest } = entry;
 
             planeBuilds.push({
                 plane: {
@@ -663,7 +655,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
                     dist,
                     ...rest,
                 },
-                ...(name ? { name } : {}),
+                ...(ref ? { ref } : {}),
                 ...(tags ? { tags } : {}),
             });
 
@@ -671,7 +663,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
         }
 
         if ("line" in entry) {
-            const { props, side, name, tags } = entry;
+            const { props, side, ref, tags } = entry;
             const line = resolveLineRef(entry.line, namedLines, pointMap);
 
             ensureAxisAligned(line.start, line.end, "Plane from line");
@@ -684,7 +676,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
                         ...plane,
                         ...props,
                     },
-                    ...(name ? { name } : {}),
+                    ...(ref ? { ref } : {}),
                     ...(tags ? { tags } : {}),
                 });
 
@@ -698,19 +690,19 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
                     ...plane,
                     ...props,
                 },
-                ...(name ? { name } : {}),
+                ...(ref ? { ref } : {}),
                 ...(tags ? { tags } : {}),
             });
 
             return;
         }
 
-        const { props, side, name, tags } = entry;
+        const { props, side, ref, tags } = entry;
         const rect = resolveRectRef(entry.rect, namedRects);
 
         planesFromRect(rect, side).forEach((plane, planeIndex) => {
-            const derivedName = name
-                ? `${name}.${rectPlaneSuffixes[planeIndex]}`
+            const derivedRef = ref
+                ? `${ref}.${rectPlaneSuffixes[planeIndex]}`
                 : undefined;
 
             planeBuilds.push({
@@ -718,21 +710,19 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
                     ...plane,
                     ...props,
                 },
-                ...(derivedName ? { name: derivedName } : {}),
+                ...(derivedRef ? { ref: derivedRef } : {}),
                 ...(tags ? { tags } : {}),
             });
         });
     });
 
-    const builtPlanes = planeBuilds.map(({ plane }) => plane);
+    const builtPlanes = planeBuilds.map(({ plane, ref }) => ({
+        ...plane,
+        ...(ref ? { ref } : {}),
+    }));
 
     planeBuilds.forEach((entry, planeIndex) => {
-        setIndexName(
-            stadiumIndex.names.planes,
-            entry.name,
-            planeIndex,
-            "plane",
-        );
+        setIndexRef(stadiumIndex.refs.planes, entry.ref, planeIndex, "plane");
 
         addIndexTags(stadiumIndex.tags.planes, entry.tags, planeIndex);
     });
@@ -742,12 +732,7 @@ const buildStadium = (schema: StadiumSchema): StadiumBuild => {
 
         if (!entry) return;
 
-        setIndexName(
-            stadiumIndex.names.joints,
-            entry.name,
-            jointIndex,
-            "joint",
-        );
+        setIndexRef(stadiumIndex.refs.joints, entry.ref, jointIndex, "joint");
 
         addIndexTags(stadiumIndex.tags.joints, entry.tags, jointIndex);
     });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defineStadium } from "@common/stadium-generator/stadium-generator";
 import type { StadiumSchema } from "@common/stadium-generator/stadium-generator";
-import { classicStadium, classicStadiumIndex } from "@modes/classic/stadium";
+import { classicStadium } from "@modes/classic/stadium";
 import type { Joint, StadiumObject } from "@haxball/stadium";
 
 const findJoint = (joints: Joint[] | undefined, d0: number, d1: number) =>
@@ -22,15 +22,15 @@ describe("defineStadium dynamic lines", () => {
             height: 100,
             ballPhysics: { radius: 5, invMass: 1 },
             dynamicLines: [
-                { name: "line0", joint: { color: "FFFFFF" } },
-                { name: "line1", joint: { color: "FF0000" } },
+                { ref: "line0", joint: { color: "FFFFFF" } },
+                { ref: "line1", joint: { color: "FF0000" } },
             ],
         };
 
         const { stadium, index } = defineStadium(schema);
         const offset = getBallOffset(schema);
 
-        Object.entries(index.dynamicLines.names).forEach(([name, pair]) => {
+        Object.entries(index.dynamicLines.refs).forEach(([ref, pair]) => {
             expect(pair[1]).toBe(pair[0] + 1);
 
             const joint = findJoint(
@@ -39,7 +39,7 @@ describe("defineStadium dynamic lines", () => {
                 pair[1] + offset,
             );
 
-            expect(joint, `missing joint for ${name}`).toBeDefined();
+            expect(joint, `missing joint for ${ref}`).toBeDefined();
         });
     });
 
@@ -50,13 +50,13 @@ describe("defineStadium dynamic lines", () => {
             height: 100,
             ballPhysics: "disc0",
             discs: [{ radius: 5, invMass: 1, pos: [0, 0], color: "FFFFFF" }],
-            dynamicLines: [{ name: "line0", joint: { color: "FFFFFF" } }],
+            dynamicLines: [{ ref: "line0", joint: { color: "FFFFFF" } }],
         };
 
         const { stadium, index } = defineStadium(schema);
         const offset = getBallOffset(schema);
 
-        const pair = index.dynamicLines.names["line0"];
+        const pair = index.dynamicLines.refs["line0"];
         expect(pair).toBeDefined();
 
         if (!pair) return;
@@ -81,8 +81,8 @@ describe("defineStadium dynamic lines", () => {
                 { radius: 1, invMass: 1, pos: [1, 1], color: "FFFFFF" },
             ],
             anchors: [
-                { name: "a", index: 0 },
-                { name: "b", index: 1 },
+                { ref: "a", index: 0 },
+                { ref: "b", index: 1 },
             ],
             joints: [{ from: "a", to: "b", color: "FFFFFF" }],
         };
@@ -101,31 +101,48 @@ describe("defineStadium dynamic lines", () => {
 });
 
 describe("classic stadium dynamic line wiring", () => {
+    const dynamicLinePairs = () => {
+        const refs = new Map<string, number>();
+        const discs = classicStadium.discs ?? [];
+
+        discs.forEach((disc, index) => {
+            if (disc.ref) refs.set(disc.ref, index);
+        });
+
+        return Array.from(refs.entries()).flatMap(([ref, index]) => {
+            if (!ref.endsWith(".a")) return [];
+
+            const baseRef = ref.slice(0, -2);
+            const otherIndex = refs.get(`${baseRef}.b`);
+
+            if (otherIndex === undefined) return [];
+
+            const pair: readonly [number, number] = [index, otherIndex];
+            return [{ ref: baseRef, pair }];
+        });
+    };
+
     it("keeps dynamic line discs contiguous and in-range", () => {
         const discs = classicStadium.discs ?? [];
 
-        Object.values(classicStadiumIndex.dynamicLines.names).forEach(
-            (pair) => {
-                expect(pair[1]).toBe(pair[0] + 1);
-                expect(pair[0]).toBeGreaterThanOrEqual(0);
-                expect(pair[1]).toBeLessThan(discs.length);
-            },
-        );
+        dynamicLinePairs().forEach(({ pair }) => {
+            expect(pair[1]).toBe(pair[0] + 1);
+            expect(pair[0]).toBeGreaterThanOrEqual(0);
+            expect(pair[1]).toBeLessThan(discs.length);
+        });
     });
 
     it("matches every classic dynamic line to a joint", () => {
         const offset = getBallOffset(classicStadium);
 
-        Object.entries(classicStadiumIndex.dynamicLines.names).forEach(
-            ([name, pair]) => {
-                const joint = findJoint(
-                    classicStadium.joints,
-                    pair[0] + offset,
-                    pair[1] + offset,
-                );
+        dynamicLinePairs().forEach(({ ref, pair }) => {
+            const joint = findJoint(
+                classicStadium.joints,
+                pair[0] + offset,
+                pair[1] + offset,
+            );
 
-                expect(joint, `missing joint for ${name}`).toBeDefined();
-            },
-        );
+            expect(joint, `missing joint for ${ref}`).toBeDefined();
+        });
     });
 });
