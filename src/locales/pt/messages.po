@@ -84,7 +84,7 @@ msgstr "{0} saiu da end zone"
 
 #. placeholder {0}: frame.player.name
 #. placeholder {0}: frame.quarterback.name
-#: src/modes/classic/states/scrimmage/blitz.ts:384
+#: src/modes/classic/states/scrimmage/blitz.ts:369
 #: src/modes/classic/states/scrimmage/live-ball.ts:442
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:201
 #: src/modes/classic/states/scrimmage/run.ts:201
@@ -108,14 +108,14 @@ msgid "{0} went out in the end zone"
 msgstr "{0} saiu na end zone"
 
 #. placeholder {0}: Crowding.CROWDING_PENALTY_YARDS
-#: src/modes/classic/states/scrimmage/snap.ts:545
-#: src/modes/classic/states/scrimmage/snap.ts:575
+#: src/modes/classic/states/scrimmage/snap.ts:549
+#: src/modes/classic/states/scrimmage/snap.ts:579
 #: src/modes/flag/states/snap.ts:539
 msgid "{0}-yard penalty"
 msgstr "penalidade de {0} jardas"
 
 #. placeholder {0}: Crowding.CROWDING_PENALTY_YARDS
-#: src/modes/classic/states/scrimmage/snap.ts:525
+#: src/modes/classic/states/scrimmage/snap.ts:529
 #: src/modes/flag/states/snap.ts:510
 msgid "{0}-yard penalty."
 msgstr "penalidade de {0} jardas."
@@ -131,40 +131,32 @@ msgstr "{0}, e {1}"
 msgid "{BLITZ_BASE_DELAY_IN_SECONDS}s until the blitz!"
 msgstr "{BLITZ_BASE_DELAY_IN_SECONDS}s até a blitz!"
 
-#: src/modes/classic/states/scrimmage/snap.ts:396
-#: src/modes/classic/states/scrimmage/snap.ts:429
+#: src/modes/classic/states/scrimmage/snap.ts:400
+#: src/modes/classic/states/scrimmage/snap.ts:433
 #: src/modes/flag/states/snap.ts:414
 msgid "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty"
 msgstr "penalidade de {DEFENSIVE_OFFSIDE_PENALTY_YARDS} jardas"
 
-#: src/modes/classic/states/scrimmage/snap.ts:375
+#: src/modes/classic/states/scrimmage/snap.ts:379
 #: src/modes/flag/states/snap.ts:382
 msgid "{DEFENSIVE_OFFSIDE_PENALTY_YARDS}-yard penalty."
 msgstr "penalidade de {DEFENSIVE_OFFSIDE_PENALTY_YARDS} jardas."
 
-#: src/modes/classic/states/scrimmage/snap.ts:689
-#: src/modes/classic/states/scrimmage/snap.ts:722
+#: src/modes/classic/states/scrimmage/snap.ts:693
+#: src/modes/classic/states/scrimmage/snap.ts:726
 #: src/modes/flag/states/snap.ts:664
 msgid "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty"
 msgstr "penalidade de {DEFENSIVE_TOUCHING_PENALTY_YARDS} jardas"
 
-#: src/modes/classic/states/scrimmage/snap.ts:668
+#: src/modes/classic/states/scrimmage/snap.ts:672
 #: src/modes/flag/states/snap.ts:632
 msgid "{DEFENSIVE_TOUCHING_PENALTY_YARDS}-yard penalty."
 msgstr "penalidade de {DEFENSIVE_TOUCHING_PENALTY_YARDS} jardas."
 
-#: src/modes/classic/states/scrimmage/blitz.ts:188
-#: src/modes/classic/states/scrimmage/blitz.ts:202
-#: src/modes/classic/states/scrimmage/blitz.ts:281
-#: src/modes/classic/states/scrimmage/blitz.ts:295
-#: src/modes/classic/states/scrimmage/snap.ts:274
-#: src/modes/classic/states/scrimmage/snap.ts:288
-#: src/modes/classic/states/scrimmage/snap.ts:811
-#: src/modes/classic/states/scrimmage/snap.ts:825
-#: src/modes/classic/states/scrimmage/snap.ts:895
-#: src/modes/classic/states/scrimmage/snap.ts:909
-#: src/modes/classic/states/scrimmage/snap.ts:968
-#: src/modes/classic/states/scrimmage/snap.ts:982
+#: src/modes/classic/states/scrimmage/snap.ts:278
+#: src/modes/classic/states/scrimmage/snap.ts:292
+#: src/modes/classic/states/scrimmage/snap.ts:894
+#: src/modes/classic/states/scrimmage/snap.ts:908
 #: src/modes/flag/states/blitz.ts:182
 #: src/modes/flag/states/blitz.ts:196
 #: src/modes/flag/states/snap.ts:281
@@ -194,7 +186,7 @@ msgstr "{redZoneFouls}/{RED_ZONE_FOUL_LIMIT} {redZoneFouls, plural, one {falta} 
 msgid "{teamName} {0}"
 msgstr "{teamName} {0}"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:580
+#: src/modes/classic/states/scrimmage/blitz.ts:565
 #: src/modes/classic/states/scrimmage/live-ball.ts:656
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:386
 #: src/modes/classic/states/scrimmage/run.ts:386
@@ -205,7 +197,7 @@ msgstr "{teamName} {0}"
 msgid "{yardsGained} yard gain"
 msgstr "ganho de {yardsGained} jardas"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:398
+#: src/modes/classic/states/scrimmage/blitz.ts:383
 #: src/modes/classic/states/scrimmage/live-ball.ts:456
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:215
 #: src/modes/classic/states/scrimmage/run.ts:215
@@ -225,7 +217,7 @@ msgstr "ganho de {yardsGained} jardas"
 msgid "{yardsGained}-yard penalty"
 msgstr "penalidade de {yardsGained} jardas"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:608
+#: src/modes/classic/states/scrimmage/blitz.ts:593
 #: src/modes/classic/states/scrimmage/live-ball.ts:684
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:414
 #: src/modes/classic/states/scrimmage/run.ts:414
@@ -236,7 +228,7 @@ msgstr "penalidade de {yardsGained} jardas"
 msgid "{yardsLost} yard loss"
 msgstr "perda de {yardsLost} jardas"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:424
+#: src/modes/classic/states/scrimmage/blitz.ts:409
 #: src/modes/classic/states/scrimmage/live-ball.ts:482
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:241
 #: src/modes/classic/states/scrimmage/run.ts:241
@@ -248,8 +240,8 @@ msgid "{yardsLost}-yard loss"
 msgstr "perda de {yardsLost} jardas"
 
 #. placeholder {0}: player.name
-#: src/modes/classic/states/extra-point/extra-point-retry.ts:174
-#: src/modes/classic/states/extra-point/extra-point.ts:203
+#: src/modes/classic/states/extra-point/extra-point-retry.ts:182
+#: src/modes/classic/states/extra-point/extra-point.ts:211
 msgid "*️⃣ {0} starts the two-point try!"
 msgstr "*️⃣ Tentativa de 2 pontos do {0}!"
 
@@ -270,7 +262,7 @@ msgstr "• Desativadas: {0}"
 msgid "• Enabled: {0}"
 msgstr "• Ativas: {0}"
 
-#: src/modes/training/states/training.ts:319
+#: src/modes/training/states/training.ts:318
 msgid "↩️ Miss. Your lane reset to 10 targets."
 msgstr "↩️ Errou. Sua área foi reiniciada com 10 alvos."
 
@@ -311,8 +303,8 @@ msgstr "⏱️ Faça o hike em até {HIKE_TIMEOUT_SECONDS}s."
 #~ msgid "⏱️ Kickoff. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 #~ msgstr "⏱️ Kickoff. Chute em até {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 
-#: src/modes/classic/states/extra-point/extra-point-retry.ts:202
-#: src/modes/classic/states/extra-point/extra-point.ts:263
+#: src/modes/classic/states/extra-point/extra-point-retry.ts:210
+#: src/modes/classic/states/extra-point/extra-point.ts:271
 msgid "⏱️ PAT window expired."
 msgstr "⏱️ Tempo do extra point esgotado."
 
@@ -370,10 +362,6 @@ msgstr "⚙️ Flags disponíveis:"
 #: src/modes/flag/definition/index.ts:169
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Flags disponíveis: {0}."
-
-#: src/room/shared/modules/room-manager.ts:127
-msgid "⚠️ {playerName} is AFK. The game is paused until they show activity."
-msgstr "⚠️ {playerName} está AFK. O jogo está pausado até que demonstre atividade."
 
 #: src/modes/classic/states/scrimmage/presnap.ts:576
 msgid "⚠️ Field goal is only available from the defensive side of the field."
@@ -503,7 +491,7 @@ msgstr "⚠️ O comando de {0} não está disponível no modo {1}."
 msgid "⚠️ The game has not been started yet."
 msgstr "⚠️ A partida ainda não foi iniciada."
 
-#: src/modes/classic/states/extra-point/extra-point.ts:178
+#: src/modes/classic/states/extra-point/extra-point.ts:186
 msgid "⚠️ Two-point try is no longer available"
 msgstr "⚠️ Tentativa de 2 pontos não está mais disponível"
 
@@ -547,16 +535,20 @@ msgstr "⚠️ Uso: !los <red/blue> <1-50>."
 msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Uso: !qb [#id|name]."
 
-#: src/room/shared/modules/room-manager.ts:497
+#: src/room/shared/modules/room-manager.ts:520
 msgid "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
 msgstr "⚠️ Use !manager on, !manager off, !manager resume ou !manager status."
 
-#: src/modes/classic/states/extra-point/extra-point-retry.ts:151
-#: src/modes/classic/states/extra-point/extra-point.ts:165
+#: src/modes/classic/states/extra-point/extra-point-retry.ts:159
+#: src/modes/classic/states/extra-point/extra-point.ts:173
 #: src/modes/classic/states/scrimmage/presnap.ts:272
 #: src/modes/flag/states/presnap.ts:246
 msgid "⚠️ Wait a moment before snapping."
 msgstr "️⚠️ Aguarde um momento antes de dar hike."
+
+#: src/room/shared/modules/room-manager.ts:130
+msgid "⚠️ Waiting for {playerNames} to show activity. The game is paused until then."
+msgstr "⚠️ Aguardando atividade de {playerNames}. O jogo está pausado até lá."
 
 #: src/modes/classic/states/scrimmage/presnap.ts:588
 msgid "⚠️ You are too far from the ball to attempt the field goal."
@@ -566,14 +558,14 @@ msgstr "⚠️ Você está longe demais da bola para tentar o field goal."
 msgid "⚠️ You are too far from the ball to punt."
 msgstr "⚠️ Você está longe demais da bola para chutar o punt."
 
-#: src/modes/classic/states/extra-point/extra-point-retry.ts:163
-#: src/modes/classic/states/extra-point/extra-point.ts:192
+#: src/modes/classic/states/extra-point/extra-point-retry.ts:171
+#: src/modes/classic/states/extra-point/extra-point.ts:200
 #: src/modes/classic/states/scrimmage/presnap.ts:284
 #: src/modes/flag/states/presnap.ts:258
 msgid "⚠️ You are too far from the ball to snap it."
 msgstr "⚠️ Você está longe demais da bola para dar hike."
 
-#: src/room/shared/modules/room-manager.ts:140
+#: src/room/shared/modules/room-manager.ts:143
 msgid "⚠️ You can only use !afk before the play starts."
 msgstr "⚠️ Você só pode usar !afk antes da jogada começar."
 
@@ -623,12 +615,12 @@ msgid "⚠️ You were marked inactive. Move or press a key now to avoid being m
 msgstr "⚠️ Você foi marcado como inativo. Mova-se ou aperte uma tecla agora para evitar ser movido para os espectadores."
 
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:670
-#: src/modes/classic/states/scrimmage/snap.ts:1064
+#: src/modes/classic/states/scrimmage/snap.ts:1058
 #: src/modes/flag/states/snap.ts:984
 msgid "⚡ Early blitz will be available in {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 msgstr "⚡ Blitz antecipada ficará disponível em {BLITZ_EARLY_NOTICE_REMAINING_SECONDS}s."
 
-#: src/room/shared/modules/room-manager.ts:138
+#: src/room/shared/modules/room-manager.ts:141
 msgid "✅ AFK pause ended. Resuming play."
 msgstr "✅ Pausa por AFK encerrada. Retomando a jogada."
 
@@ -644,7 +636,7 @@ msgstr "✅ Modo admin do HaxBall desativado."
 msgid "✅ HaxBall admin mode enabled."
 msgstr "✅ Modo admin do HaxBall ativado."
 
-#: src/modes/training/states/training.ts:484
+#: src/modes/training/states/training.ts:483
 msgid "✅ Hit! {clearedTargets}/10 targets cleared."
 msgstr "✅ Acertou! {clearedTargets}/10 alvos eliminados."
 
@@ -656,7 +648,7 @@ msgstr "✅ Senha removida com sucesso."
 msgid "✅ Password updated successfully."
 msgstr "✅ Senha atualizada com sucesso."
 
-#: src/room/shared/modules/room-manager.ts:152
+#: src/room/shared/modules/room-manager.ts:155
 msgid "✅ Presence check ended. Resuming play."
 msgstr "✅ Verificação de presença encerrada. Retomando a jogada."
 
@@ -737,7 +729,7 @@ msgstr "❌ Senha incorreta. Tente novamente."
 msgid "❌ Kickoff out of bounds"
 msgstr "❌ Kickoff fora de campo"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:354
+#: src/modes/classic/states/extra-point/extra-point.ts:362
 msgid "❌ Offense crossed the LOS"
 msgstr "❌ O ataque cruzou a linha de scrimmage"
 
@@ -815,16 +807,16 @@ msgid "🎭 {0} sells the fake field goal!"
 msgstr "🎭 {0} fingiu o field goal!"
 
 #. placeholder {0}: player.name
-#: src/modes/training/states/training.ts:311
+#: src/modes/training/states/training.ts:310
 msgid "🎯 {0} enters an open Training lane."
 msgstr "🎯 {0} entrou em uma área livre do Training."
 
-#: src/modes/training/states/training.ts:302
+#: src/modes/training/states/training.ts:301
 msgid "🎯 Training lane ready. Clear all 10 targets before everyone else."
 msgstr "🎯 Área de Training pronta. Elimine os 10 alvos antes dos outros."
 
 #. placeholder {0}: runner.name
-#: src/modes/classic/states/scrimmage/snap.ts:757
+#: src/modes/classic/states/scrimmage/snap.ts:761
 msgid "🏃 {0} takes the handoff and starts a run!"
 msgstr "🏃 {0} inicia uma corrida!"
 
@@ -843,14 +835,14 @@ msgstr "🏃 {0} inicia uma corrida!"
 msgid "🏃 Quarterback {0} keeps it and runs!"
 msgstr "🏃 O quarterback {0} segurou e correu!"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:327
-#: src/modes/classic/states/scrimmage/snap.ts:1020
+#: src/modes/classic/states/scrimmage/blitz.ts:312
+#: src/modes/classic/states/scrimmage/snap.ts:1014
 #: src/modes/flag/states/blitz.ts:318
 msgid "🏃 Quarterback crossed the LOS"
 msgstr "🏃 O quarterback cruzou a linha de scrimmage"
 
 #. placeholder {0}: player.name
-#: src/modes/training/states/training.ts:469
+#: src/modes/training/states/training.ts:468
 msgid "🏆 {0} cleared all 10 Training targets first!"
 msgstr "🏆 {0} eliminou todos os 10 alvos do Training primeiro!"
 
@@ -1023,15 +1015,15 @@ msgstr "🦵 {0} prepara o punt."
 msgid "🦵 {0} sets up to punt. Kick within {PUNT_KICK_TIMEOUT_SECONDS}s."
 msgstr "🦵 {0} prepara o punt. Chute em até {PUNT_KICK_TIMEOUT_SECONDS}s."
 
-#: src/room/shared/modules/room-manager.ts:160
+#: src/room/shared/modules/room-manager.ts:163
 msgid "🧭 {missingPlayer} left, so {replacementPlayer} took their spot on {replacementTeam}."
 msgstr "🧭 {missingPlayer} saiu, então {replacementPlayer} ficou com a vaga no {replacementTeam}."
 
-#: src/room/shared/modules/room-manager.ts:135
+#: src/room/shared/modules/room-manager.ts:138
 msgid "🧭 {playerNames} moved to spectators for inactivity."
 msgstr "🧭 Por inatividade, {playerNames} agora fica nos espectadores."
 
-#: src/room/shared/modules/room-manager.ts:149
+#: src/room/shared/modules/room-manager.ts:152
 msgid "🧭 {playerNames} moved to spectators for not showing presence."
 msgstr "🧭 Sem presença confirmada, {playerNames} agora fica nos espectadores."
 
@@ -1049,7 +1041,7 @@ msgstr "🧭 Gestão retomada."
 
 #. placeholder {0}: state.status
 #. placeholder {1}: decision.trace.reason
-#: src/room/shared/modules/room-manager.ts:488
+#: src/room/shared/modules/room-manager.ts:511
 msgid "🧭 Management status: {0}. {1}."
 msgstr "🧭 Status da gestão: {0}. {1}."
 
@@ -1073,17 +1065,13 @@ msgstr "🧭 Mudou para Flag."
 msgid "🧭 Switched to Training."
 msgstr "🧭 Mudou para Training."
 
-#: src/room/shared/modules/room-manager.ts:165
+#: src/room/shared/modules/room-manager.ts:168
 msgid "🧭 Teams were rebuilt after {missingPlayer} left."
 msgstr "🧭 Os times foram reorganizados depois que {missingPlayer} saiu."
 
-#: src/room/shared/modules/room-manager.ts:142
+#: src/room/shared/modules/room-manager.ts:145
 msgid "🧭 Waiting for everyone to demonstrate presence before the first play."
 msgstr "🧭 Aguardando que todos demonstrem presença antes da primeira jogada."
-
-#: src/room/shared/modules/room-manager.ts:142
-#~ msgid "🧭 Waiting for player activity before the first play."
-#~ msgstr "🧭 Aguardando atividade dos jogadores antes da primeira jogada."
 
 #: src/room/shared/modules/room-manager.ts:121
 msgid "🧭 You are active again."
@@ -1111,7 +1099,7 @@ msgid "🚧 Pass batted by {0}"
 msgstr "🚧 Passe desviado por {0}"
 
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:735
-#: src/modes/classic/states/scrimmage/snap.ts:1078
+#: src/modes/classic/states/scrimmage/snap.ts:1072
 #: src/modes/flag/states/snap.ts:998
 msgid "🚨 Defense is bringing the blitz!"
 msgstr "🚨 A defesa veio para a blitz!"
@@ -1173,7 +1161,7 @@ msgstr "🚪 Punt fora de campo"
 msgid "🚫 Only admins can change the game mode."
 msgstr "🚫 Apenas admins podem alterar o modo de jogo."
 
-#: src/room/shared/modules/room-manager.ts:430
+#: src/room/shared/modules/room-manager.ts:453
 msgid "🚫 Only admins can use room manager commands."
 msgstr "🚫 Apenas admins podem usar comandos da gestão."
 
@@ -1214,8 +1202,9 @@ msgstr "🛑 {0} foi derrubado na end zone"
 msgid "🛡️ INTERCEPTION by {0}!"
 msgstr "🛡️ INTERCEPTAÇÃO de {0}!"
 
-#: src/room/shared/modules/room-manager.ts:133
-#: src/room/shared/modules/room-manager.ts:147
+#: src/room/shared/modules/room-manager.ts:128
+#: src/room/shared/modules/room-manager.ts:136
+#: src/room/shared/modules/room-manager.ts:150
 msgid "A player"
 msgstr "Um jogador"
 
@@ -1228,15 +1217,15 @@ msgstr "Você já está conectado ({0})."
 msgid "Attempt a field goal"
 msgstr "Tentar um field goal"
 
-#: src/modes/classic/states/scrimmage/snap.ts:397
-#: src/modes/classic/states/scrimmage/snap.ts:546
-#: src/modes/classic/states/scrimmage/snap.ts:690
+#: src/modes/classic/states/scrimmage/snap.ts:401
+#: src/modes/classic/states/scrimmage/snap.ts:550
+#: src/modes/classic/states/scrimmage/snap.ts:694
 msgid "automatic first down."
 msgstr "primeira descida automática."
 
-#: src/modes/classic/states/scrimmage/snap.ts:430
-#: src/modes/classic/states/scrimmage/snap.ts:576
-#: src/modes/classic/states/scrimmage/snap.ts:723
+#: src/modes/classic/states/scrimmage/snap.ts:434
+#: src/modes/classic/states/scrimmage/snap.ts:580
+#: src/modes/classic/states/scrimmage/snap.ts:727
 #: src/modes/flag/states/snap.ts:415
 #: src/modes/flag/states/snap.ts:540
 #: src/modes/flag/states/snap.ts:665
@@ -1251,8 +1240,8 @@ msgstr "bola em jogo"
 #: src/modes/classic/states/scrimmage/snap-in-flight.ts:173
 #: src/modes/classic/states/scrimmage/snap-in-flight.ts:184
 #: src/modes/classic/states/scrimmage/snap-in-flight.ts:195
-#: src/modes/classic/states/scrimmage/snap.ts:894
-#: src/modes/classic/states/scrimmage/snap.ts:908
+#: src/modes/classic/states/scrimmage/snap.ts:893
+#: src/modes/classic/states/scrimmage/snap.ts:907
 #: src/modes/flag/states/snap-in-flight.ts:168
 #: src/modes/flag/states/snap-in-flight.ts:179
 #: src/modes/flag/states/snap.ts:824
@@ -1290,18 +1279,18 @@ msgstr "Blue"
 msgid "Clear all bans"
 msgstr "Remover todos os bans"
 
-#: src/room/shared/modules/room-manager.ts:553
+#: src/room/shared/modules/room-manager.ts:576
 msgid "Control algorithmic room management"
 msgstr "Controlar a gestão algorítmica da sala"
 
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:536
-#: src/modes/classic/states/scrimmage/snap.ts:544
-#: src/modes/classic/states/scrimmage/snap.ts:574
+#: src/modes/classic/states/scrimmage/snap.ts:548
+#: src/modes/classic/states/scrimmage/snap.ts:578
 #: src/modes/flag/states/snap.ts:538
 msgid "crowd abuse by {crowdingOffenderNames}"
 msgstr "crowd abuse por {crowdingOffenderNames}"
 
-#: src/modes/classic/states/scrimmage/snap.ts:524
+#: src/modes/classic/states/scrimmage/snap.ts:528
 #: src/modes/flag/states/snap.ts:509
 msgid "Crowd abuse by {crowdingOffenderNames}"
 msgstr "Crowd abuse por {crowdingOffenderNames}"
@@ -1315,22 +1304,22 @@ msgstr "a defesa retorna"
 msgid "defensive illegal touch"
 msgstr "toque ilegal da defesa"
 
-#: src/modes/classic/states/scrimmage/snap.ts:667
-#: src/modes/classic/states/scrimmage/snap.ts:688
-#: src/modes/classic/states/scrimmage/snap.ts:721
+#: src/modes/classic/states/scrimmage/snap.ts:671
+#: src/modes/classic/states/scrimmage/snap.ts:692
+#: src/modes/classic/states/scrimmage/snap.ts:725
 #: src/modes/flag/states/snap.ts:631
 #: src/modes/flag/states/snap.ts:663
 msgid "defensive illegal touch by {offenderNames}"
 msgstr "toque ilegal da defesa por {offenderNames}"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:291
+#: src/modes/classic/states/extra-point/extra-point.ts:299
 msgid "Defensive kick foul"
 msgstr "Chute ilegal da defesa"
 
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:370
-#: src/modes/classic/states/scrimmage/snap.ts:374
-#: src/modes/classic/states/scrimmage/snap.ts:395
-#: src/modes/classic/states/scrimmage/snap.ts:428
+#: src/modes/classic/states/scrimmage/snap.ts:378
+#: src/modes/classic/states/scrimmage/snap.ts:399
+#: src/modes/classic/states/scrimmage/snap.ts:432
 #: src/modes/flag/states/snap.ts:381
 #: src/modes/flag/states/snap.ts:413
 msgid "defensive offside"
@@ -1350,11 +1339,11 @@ msgstr "Ativa o limite de tempo para o hike."
 #: src/modes/classic/states/extra-point/extra-point-kick.ts:52
 #: src/modes/classic/states/extra-point/extra-point-pass-deflection.ts:46
 #: src/modes/classic/states/extra-point/extra-point-quarterback-run.ts:212
-#: src/modes/classic/states/extra-point/extra-point-retry.ts:218
+#: src/modes/classic/states/extra-point/extra-point-retry.ts:226
 #: src/modes/classic/states/extra-point/extra-point-run.ts:226
 #: src/modes/classic/states/extra-point/extra-point-snap-in-flight.ts:199
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:754
-#: src/modes/classic/states/extra-point/extra-point.ts:368
+#: src/modes/classic/states/extra-point/extra-point.ts:376
 msgid "Extra point"
 msgstr "Extra point"
 
@@ -1370,8 +1359,8 @@ msgstr "field goal anulado."
 msgid "field goal is good!"
 msgstr "field goal é bom!"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:385
-#: src/modes/classic/states/scrimmage/blitz.ts:566
+#: src/modes/classic/states/scrimmage/blitz.ts:370
+#: src/modes/classic/states/scrimmage/blitz.ts:551
 #: src/modes/classic/states/scrimmage/live-ball.ts:443
 #: src/modes/classic/states/scrimmage/live-ball.ts:642
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:202
@@ -1399,10 +1388,10 @@ msgstr "tempo para o hike esgotado"
 
 #: src/modes/classic/states/extra-point/extra-point-blitz.ts:189
 #: src/modes/classic/states/extra-point/extra-point-snap.ts:718
+#: src/modes/classic/states/scrimmage/blitz.ts:267
 #: src/modes/classic/states/scrimmage/blitz.ts:280
-#: src/modes/classic/states/scrimmage/blitz.ts:294
-#: src/modes/classic/states/scrimmage/snap.ts:967
-#: src/modes/classic/states/scrimmage/snap.ts:981
+#: src/modes/classic/states/scrimmage/snap.ts:963
+#: src/modes/classic/states/scrimmage/snap.ts:976
 #: src/modes/flag/states/blitz.ts:271
 #: src/modes/flag/states/blitz.ts:284
 #: src/modes/flag/states/snap.ts:936
@@ -1419,15 +1408,15 @@ msgstr "handoff ilegal"
 #~ msgid "illegal quarterback run"
 #~ msgstr "corrida ilegal do quarterback"
 
-#: src/modes/classic/states/scrimmage/snap.ts:810
+#: src/modes/classic/states/scrimmage/snap.ts:811
 #: src/modes/classic/states/scrimmage/snap.ts:824
 #: src/modes/flag/states/snap.ts:740
 #: src/modes/flag/states/snap.ts:754
 msgid "illegal touch by {offenderNames}"
 msgstr "toque ilegal por {offenderNames}"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:187
-#: src/modes/classic/states/scrimmage/blitz.ts:201
+#: src/modes/classic/states/scrimmage/blitz.ts:179
+#: src/modes/classic/states/scrimmage/blitz.ts:192
 #: src/modes/flag/states/blitz.ts:181
 #: src/modes/flag/states/blitz.ts:195
 msgid "Illegal touch by {offenderNames}"
@@ -1438,7 +1427,7 @@ msgstr "Toque ilegal por {offenderNames}"
 msgid "Interception"
 msgstr "Interceptação"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:179
+#: src/modes/classic/states/extra-point/extra-point.ts:187
 msgid "kick the PAT."
 msgstr "chute o extra point."
 
@@ -1487,12 +1476,12 @@ msgstr "kickoff tocado primeiro por {0}, do time que chutou."
 msgid "List all config flags"
 msgstr "Listar todas as flags de configuração"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:189
-#: src/modes/classic/states/scrimmage/blitz.ts:282
-#: src/modes/classic/states/scrimmage/snap.ts:275
+#: src/modes/classic/states/scrimmage/blitz.ts:180
+#: src/modes/classic/states/scrimmage/blitz.ts:268
+#: src/modes/classic/states/scrimmage/snap.ts:279
 #: src/modes/classic/states/scrimmage/snap.ts:812
-#: src/modes/classic/states/scrimmage/snap.ts:896
-#: src/modes/classic/states/scrimmage/snap.ts:969
+#: src/modes/classic/states/scrimmage/snap.ts:895
+#: src/modes/classic/states/scrimmage/snap.ts:964
 #: src/modes/flag/states/blitz.ts:183
 #: src/modes/flag/states/blitz.ts:272
 #: src/modes/flag/states/snap.ts:282
@@ -1502,12 +1491,12 @@ msgstr "Listar todas as flags de configuração"
 msgid "loss of down."
 msgstr "perde a descida."
 
-#: src/modes/classic/states/scrimmage/blitz.ts:399
-#: src/modes/classic/states/scrimmage/blitz.ts:412
-#: src/modes/classic/states/scrimmage/blitz.ts:425
-#: src/modes/classic/states/scrimmage/blitz.ts:581
-#: src/modes/classic/states/scrimmage/blitz.ts:595
-#: src/modes/classic/states/scrimmage/blitz.ts:609
+#: src/modes/classic/states/scrimmage/blitz.ts:384
+#: src/modes/classic/states/scrimmage/blitz.ts:397
+#: src/modes/classic/states/scrimmage/blitz.ts:410
+#: src/modes/classic/states/scrimmage/blitz.ts:566
+#: src/modes/classic/states/scrimmage/blitz.ts:580
+#: src/modes/classic/states/scrimmage/blitz.ts:594
 #: src/modes/classic/states/scrimmage/live-ball.ts:457
 #: src/modes/classic/states/scrimmage/live-ball.ts:470
 #: src/modes/classic/states/scrimmage/live-ball.ts:483
@@ -1553,7 +1542,7 @@ msgstr "perde a descida."
 msgid "next down."
 msgstr "próxima descida."
 
-#: src/modes/classic/states/scrimmage/blitz.ts:594
+#: src/modes/classic/states/scrimmage/blitz.ts:579
 #: src/modes/classic/states/scrimmage/live-ball.ts:670
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:400
 #: src/modes/classic/states/scrimmage/run.ts:400
@@ -1564,7 +1553,7 @@ msgstr "próxima descida."
 msgid "no gain"
 msgstr "sem ganho"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:411
+#: src/modes/classic/states/scrimmage/blitz.ts:396
 #: src/modes/classic/states/scrimmage/live-ball.ts:469
 #: src/modes/classic/states/scrimmage/quarterback-run.ts:228
 #: src/modes/classic/states/scrimmage/run.ts:228
@@ -1659,22 +1648,22 @@ msgstr "Chutar punt"
 msgid "punt touched first by {0} from the kicking team."
 msgstr "punt tocado primeiro por {0}, do time que chutou."
 
-#: src/modes/classic/states/scrimmage/snap.ts:287
+#: src/modes/classic/states/scrimmage/snap.ts:291
 #: src/modes/flag/states/snap.ts:294
 msgid "pushing foul by {offenderNames}"
 msgstr "pushing de {offenderNames}"
 
-#: src/modes/classic/states/scrimmage/snap.ts:273
+#: src/modes/classic/states/scrimmage/snap.ts:277
 #: src/modes/flag/states/snap.ts:280
 msgid "Pushing foul by {offenderNames}"
 msgstr "Pushing de {offenderNames}"
 
 #. placeholder {0}: frame.quarterback.name
-#: src/modes/classic/states/scrimmage/blitz.ts:565
-#: src/modes/classic/states/scrimmage/blitz.ts:579
-#: src/modes/classic/states/scrimmage/blitz.ts:593
+#: src/modes/classic/states/scrimmage/blitz.ts:550
+#: src/modes/classic/states/scrimmage/blitz.ts:564
+#: src/modes/classic/states/scrimmage/blitz.ts:578
+#: src/modes/classic/states/scrimmage/blitz.ts:592
 #: src/modes/classic/states/scrimmage/blitz.ts:607
-#: src/modes/classic/states/scrimmage/blitz.ts:622
 #: src/modes/flag/states/blitz.ts:548
 #: src/modes/flag/states/blitz.ts:562
 #: src/modes/flag/states/blitz.ts:576
@@ -1683,13 +1672,13 @@ msgid "Quarterback {0} sacked by {catcherNames}"
 msgstr "Sack do quarterback {0} por {catcherNames}"
 
 #. placeholder {0}: frame.quarterback.name
-#: src/modes/classic/states/scrimmage/blitz.ts:471
+#: src/modes/classic/states/scrimmage/blitz.ts:456
 #: src/modes/flag/states/blitz.ts:453
 msgid "Quarterback {0} went out in the end zone"
 msgstr "O quarterback {0} saiu na end zone"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:328
-#: src/modes/classic/states/scrimmage/snap.ts:1021
+#: src/modes/classic/states/scrimmage/blitz.ts:313
+#: src/modes/classic/states/scrimmage/snap.ts:1015
 #: src/modes/flag/states/blitz.ts:319
 msgid "quarterback run is live."
 msgstr "corrida do quarterback liberada."
@@ -1836,7 +1825,7 @@ msgstr "time deles"
 msgid "Time limit reached with a tied game, overtime is active and the next score wins."
 msgstr "Tempo esgotado com o jogo empatado, a prorrogação está ativa e o próximo ponto vence."
 
-#: src/room/shared/modules/room-manager.ts:558
+#: src/room/shared/modules/room-manager.ts:581
 msgid "Toggle AFK status"
 msgstr "Alternar status AFK"
 
@@ -1872,8 +1861,8 @@ msgstr "TOUCHDOWN de {0}!"
 msgid "turnover at the {0}-yard line!"
 msgstr "posse trocada na linha de {0} jardas!"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:435
-#: src/modes/classic/states/scrimmage/blitz.ts:623
+#: src/modes/classic/states/scrimmage/blitz.ts:420
+#: src/modes/classic/states/scrimmage/blitz.ts:608
 #: src/modes/classic/states/scrimmage/blocked-pass.ts:109
 #: src/modes/classic/states/scrimmage/live-ball.ts:493
 #: src/modes/classic/states/scrimmage/live-ball.ts:699
@@ -1899,12 +1888,12 @@ msgstr "posse trocada na linha de {0} jardas!"
 msgid "TURNOVER ON DOWNS!"
 msgstr "TURNOVER ON DOWNS!"
 
-#: src/modes/classic/states/scrimmage/blitz.ts:203
-#: src/modes/classic/states/scrimmage/blitz.ts:296
-#: src/modes/classic/states/scrimmage/snap.ts:289
-#: src/modes/classic/states/scrimmage/snap.ts:826
-#: src/modes/classic/states/scrimmage/snap.ts:910
-#: src/modes/classic/states/scrimmage/snap.ts:983
+#: src/modes/classic/states/scrimmage/blitz.ts:193
+#: src/modes/classic/states/scrimmage/blitz.ts:281
+#: src/modes/classic/states/scrimmage/snap.ts:293
+#: src/modes/classic/states/scrimmage/snap.ts:825
+#: src/modes/classic/states/scrimmage/snap.ts:909
+#: src/modes/classic/states/scrimmage/snap.ts:977
 #: src/modes/flag/states/blitz.ts:197
 #: src/modes/flag/states/blitz.ts:285
 #: src/modes/flag/states/snap.ts:296
@@ -1916,7 +1905,7 @@ msgstr "turnover on downs."
 
 #: src/modes/classic/states/extra-point/extra-point-quarterback-run.ts:111
 #: src/modes/classic/states/extra-point/extra-point-run.ts:125
-#: src/modes/classic/states/extra-point/extra-point.ts:292
+#: src/modes/classic/states/extra-point/extra-point.ts:300
 msgid "TWO POINTS!"
 msgstr "DOIS PONTOS!"
 
@@ -1941,7 +1930,7 @@ msgstr "tentativa de 2 pontos falhou."
 msgid "two-point try is good!"
 msgstr "tentativa de 2 pontos é boa!"
 
-#: src/modes/classic/states/extra-point/extra-point.ts:355
+#: src/modes/classic/states/extra-point/extra-point.ts:363
 msgid "two-point try is no longer available."
 msgstr "tentativa de 2 pontos não está mais disponível."
 

@@ -135,7 +135,7 @@ export type RoomManagementMessage =
       }
     | {
           id: "manager.afk.public-warning";
-          player: RoomManagementPlayerReference;
+          players: readonly RoomManagementPlayerReference[];
       }
     | {
           id: "manager.afk.public-marked" | "manager.readiness.public-marked";

@@ -17,6 +17,7 @@ import {
     DEFAULT_ROOM_MANAGER_STATE,
     ROOM_MANAGER_DEFAULT_VISIBLE_ACTION_DELAY_MS,
     planRoomManagement,
+    recordGameStart,
     recordPlayerActivity,
     setManagerStatus,
     setPlayerAfk,
@@ -122,9 +123,12 @@ function formatManagerMessage(message: RoomManagementMessage): string {
         case "manager.afk.warning":
             return t`⚠️ You were marked inactive. Move or press a key now to avoid being moved to spectators.`;
         case "manager.afk.public-warning": {
-            const playerName = formatPlayerName(message.player);
+            const playerNames =
+                message.players.length > 0
+                    ? formatNames(message.players)
+                    : t`A player`;
 
-            return t`⚠️ ${playerName} is AFK. The game is paused until they show activity.`;
+            return t`⚠️ Waiting for ${playerNames} to show activity. The game is paused until then.`;
         }
         case "manager.afk.public-marked": {
             const playerNames =
@@ -673,6 +677,7 @@ export function createRoomManagerModule({
             planAndExecute(room);
         })
         .onGameStart((room) => {
+            state = recordGameStart(buildSnapshot(room), state);
             planAndExecute(room);
         })
         .onGameStop((room) => {

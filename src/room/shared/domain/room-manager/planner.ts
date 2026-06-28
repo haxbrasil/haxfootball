@@ -1,4 +1,5 @@
 import { Team, isFieldTeam } from "@runtime/models";
+import { GAME_MODE } from "@modes/types";
 import {
     deriveManagerContext,
     getCompletedResultKey,
@@ -312,12 +313,15 @@ function getLastActivityAt(
 }
 
 function getPlayerInactiveMs(ctx: ManagerContext, playerId: number): number {
-    const lastActivityAt =
-        getLastActivityAt(ctx.state, playerId) ??
-        ctx.state.activeRoster?.startedAtMs ??
-        ctx.snapshot.nowMs;
+    const lastActivityAt = getLastActivityAt(ctx.state, playerId);
+    const rosterStartedAt = ctx.state.activeRoster?.startedAtMs ?? null;
+    const baselines = [lastActivityAt, rosterStartedAt].filter(
+        (value): value is number => value !== null,
+    );
+    const activityBaseline =
+        baselines.length > 0 ? Math.max(...baselines) : ctx.snapshot.nowMs;
 
-    return ctx.snapshot.nowMs - lastActivityAt;
+    return ctx.snapshot.nowMs - activityBaseline;
 }
 
 function clearAfkPauseState(
@@ -351,6 +355,14 @@ function addCheckedPrePlayInstanceKey(
     return Array.from(
         new Set([...state.checkedPrePlayInstanceKeys, instanceKey]),
     );
+}
+
+function addCurrentPrePlayInstanceKey(ctx: ManagerContext): readonly string[] {
+    const instanceKey = getPrePlayInstanceKey(ctx);
+
+    return instanceKey
+        ? addCheckedPrePlayInstanceKey(ctx.state, instanceKey)
+        : ctx.state.checkedPrePlayInstanceKeys;
 }
 
 function getReadinessAvatarActions(
@@ -729,15 +741,17 @@ const readinessRule: MainRule = {
             };
         }
 
-        const waitingPlayerIds = readiness.waitingPlayerIds.filter(
-            (playerId) => {
-                const lastActivityAt = getLastActivityAt(ctx.state, playerId);
-                return (
-                    lastActivityAt === null ||
-                    lastActivityAt < readiness.matchStartedAtMs
-                );
-            },
-        );
+        const readinessStarted = readiness.warningSentPlayerIds.length > 0;
+        const waitingPlayerIds = readinessStarted
+            ? readiness.waitingPlayerIds.filter((playerId) => {
+                  const lastActivityAt = getLastActivityAt(ctx.state, playerId);
+
+                  return (
+                      lastActivityAt === null ||
+                      lastActivityAt <= readiness.matchStartedAtMs
+                  );
+              })
+            : readiness.waitingPlayerIds;
 
         if (waitingPlayerIds.length === 0) {
             return {
@@ -765,6 +779,8 @@ const readinessRule: MainRule = {
                 state: {
                     ...ctx.state,
                     readiness: null,
+                    checkedPrePlayInstanceKeys:
+                        addCurrentPrePlayInstanceKey(ctx),
                 },
                 reason: "readiness complete",
             };
@@ -796,9 +812,12 @@ const readinessRule: MainRule = {
             readiness,
             waitingPlayerIds,
         );
+        const readinessStartedAtMs = readinessStarted
+            ? readiness.matchStartedAtMs
+            : ctx.snapshot.nowMs;
 
         if (
-            ctx.snapshot.nowMs - readiness.matchStartedAtMs <
+            ctx.snapshot.nowMs - readinessStartedAtMs <
             FIRST_PLAY_READINESS_GRACE_MS
         ) {
             return {
@@ -807,6 +826,7 @@ const readinessRule: MainRule = {
                     ...ctx.state,
                     readiness: {
                         ...readiness,
+                        matchStartedAtMs: readinessStartedAtMs,
                         warningSentPlayerIds: Array.from(
                             new Set([
                                 ...readiness.warningSentPlayerIds,
@@ -880,6 +900,7 @@ const readinessRule: MainRule = {
                 ),
                 readiness: null,
                 pendingVisibleAction: null,
+                checkedPrePlayInstanceKeys: addCurrentPrePlayInstanceKey(ctx),
             },
             reason: "readiness inactive players moved",
         };
@@ -952,14 +973,14 @@ const afkPrePlayCheckRule: MainRule = {
                     reason: "afk-warning",
                 },
                 { type: "set-pre-play-timeout-hold", held: true },
-                ...inactivePlayers.map<RoomManagementAction>((player) => ({
+                {
                     type: "send-message",
                     to: "room",
                     message: {
                         id: "manager.afk.public-warning",
-                        player,
+                        players: inactivePlayers,
                     },
-                })),
+                },
                 ...inactivePlayers.map<RoomManagementAction>((player) => ({
                     type: "send-message",
                     to: player.id,
@@ -1430,6 +1451,56 @@ export function recordPlayerActivity(
             ),
             { playerId, atMs },
         ],
+    };
+}
+
+export function recordGameStart(
+    snapshot: RoomManagementSnapshot,
+    state: RoomManagerState,
+): RoomManagerState {
+    const activeMode = snapshot.game.activeMode ?? snapshot.game.selectedMode;
+    const canStartReadiness =
+        snapshot.config.enabled &&
+        state.status === "active" &&
+        snapshot.config.afkActivityDetectionEnabled &&
+        (activeMode === GAME_MODE.FLAG || activeMode === GAME_MODE.CLASSIC);
+
+    if (!canStartReadiness) {
+        return {
+            ...state,
+            readiness: null,
+        };
+    }
+
+    const afkPlayerIds = new Set([
+        ...state.manualAfkPlayerIds,
+        ...state.autoAfkPlayerIds,
+    ]);
+    const waitingPlayerIds = snapshot.players
+        .filter(
+            (player) =>
+                player.playable &&
+                isFieldTeam(player.team) &&
+                !afkPlayerIds.has(player.id),
+        )
+        .map((player) => player.id);
+
+    return {
+        ...state,
+        readiness:
+            waitingPlayerIds.length > 0
+                ? {
+                      matchStartedAtMs: snapshot.nowMs,
+                      waitingPlayerIds,
+                      warningSentPlayerIds: [],
+                  }
+                : null,
+        afkCheck: null,
+        afkWarningPlayerIds: [],
+        afkPausedPlayerIds: [],
+        afkPauseStartedAtMs: null,
+        afkPauseBaseline: [],
+        afkReminderAt: [],
     };
 }
 
