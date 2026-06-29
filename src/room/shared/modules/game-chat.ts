@@ -24,11 +24,15 @@ const getPlayerTeamPrefix = (team: number): string => {
 const getChatDisplayName = (
     getPlayerSession: PlayerSessionReader,
     player: PlayerObject,
+    options: { showTeamPrefix?: boolean } = {},
 ): string => {
     const session = getPlayerSession(player.id);
+    const showTeamPrefix = options.showTeamPrefix ?? true;
 
     if (session?.kind === "signed-in") {
-        return `${getPlayerTeamPrefix(player.team)} ${player.name}`;
+        return showTeamPrefix
+            ? `${getPlayerTeamPrefix(player.team)} ${player.name}`
+            : player.name;
     }
 
     if (session?.kind === "guest") {
@@ -143,7 +147,7 @@ export function registerGameChatHandlers(
             }
 
             room.send({
-                message: `☎️ ${getChatDisplayName(getPlayerSession, player)}: ${teamChat.message}`,
+                message: `☎️ ${getChatDisplayName(getPlayerSession, player, { showTeamPrefix: false })}: ${teamChat.message}`,
                 color: COLOR.ALERT,
                 to: teamChat.target,
                 sound: "notification",
