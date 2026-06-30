@@ -26,9 +26,9 @@ export const getPlaneMask = (name: PlaneMaskName): CollisionFlag =>
 export const BALL_DISC_ID = 0;
 export const BALL_ACTIVE_COLOR = hexColorToNumber(BALL_COLOR);
 export const BALL_INACTIVE_COLOR = 0x808080;
-export const LOS_BLOCKER_REFS = {
-    A: "losBlocker.a",
-    B: "losBlocker.b",
+export const LOS_BLOCKER_PLANE_REFS = {
+    RED: "losBlocker.red",
+    BLUE: "losBlocker.blue",
 };
 
 export function getLineOfScrimmage(): { id: string }[];

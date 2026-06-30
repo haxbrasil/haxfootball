@@ -32,6 +32,7 @@ export interface StateApi {
         player: PlayerObject,
         command: CommandSpec,
     ) => CommandHandleResult | void;
+    deferredOperationApplied?: (event: DeferredOperationAppliedEvent) => void;
     inspect?: () => GameStateInspection;
 }
 
@@ -83,6 +84,11 @@ export type ChatHandleResult = {
     sentBeforeHooks: boolean;
 };
 
+export type DeferredOperationAppliedEvent = {
+    operationId: string;
+    operationType: string;
+};
+
 export interface Engine<Cfg = unknown> {
     start: (name: string, params?: any) => void;
     stop: () => void;
@@ -104,6 +110,9 @@ export interface Engine<Cfg = unknown> {
         byPlayer: PlayerObject | null,
     ) => void;
     handlePlayerLeave: (player: PlayerObject) => void;
+    handleDeferredOperationApplied: (
+        event: DeferredOperationAppliedEvent,
+    ) => void;
     getGlobalStateSnapshot: <State = unknown>() => State | null;
     getCurrentStateName: () => string | null;
     getInspection: () => GameStateInspection | null;
@@ -535,6 +544,7 @@ export function createEngine<Cfg>(
             stateStartedTick?: number;
             selfStartedTick?: number;
             sourceState?: string | null;
+            stateInstanceKey?: string | null;
         },
     ): T {
         room.invalidateCaches();
@@ -574,6 +584,8 @@ export function createEngine<Cfg>(
             stateStartedTick,
             selfStartedTick,
             sourceState,
+            stateInstanceKey:
+                optsRun?.stateInstanceKey ?? current?.instanceKey ?? null,
         });
 
         setRuntimeRoom(room);
@@ -644,6 +656,7 @@ export function createEngine<Cfg>(
             typeof options?.selfStartedTick === "number"
                 ? options.selfStartedTick
                 : stateStartedTick;
+        const instanceKey = `${name}:${nextStateInstanceId++}`;
 
         const api = runOutsideTick(() => resolved(params ?? {}), {
             disposals,
@@ -652,6 +665,7 @@ export function createEngine<Cfg>(
             stateStartedTick,
             selfStartedTick,
             sourceState: name,
+            stateInstanceKey: instanceKey,
             ...(options?.muteEffects !== undefined
                 ? { muteEffects: options.muteEffects }
                 : {}),
@@ -664,7 +678,7 @@ export function createEngine<Cfg>(
             checkpointDrafts,
             stateStartedTick,
             selfStartedTick,
-            instanceKey: `${name}:${nextStateInstanceId++}`,
+            instanceKey,
         };
     }
 
@@ -1251,6 +1265,26 @@ export function createEngine<Cfg>(
         }
     }
 
+    function handleDeferredOperationApplied(
+        event: DeferredOperationAppliedEvent,
+    ): void {
+        if (!running || !current || !current.api.deferredOperationApplied) {
+            return;
+        }
+
+        runOutsideTick(
+            () => {
+                current!.api.deferredOperationApplied!(event);
+            },
+            {
+                allowTransition: true,
+                disposals: current.disposals,
+                checkpointDrafts: current.checkpointDrafts,
+                beforeGameState: lastGameState,
+            },
+        );
+    }
+
     function isRunning() {
         return running;
     }
@@ -1312,6 +1346,7 @@ export function createEngine<Cfg>(
         handlePlayerCommand,
         handlePlayerTeamChange,
         handlePlayerLeave,
+        handleDeferredOperationApplied,
         getGlobalStateSnapshot,
         getCurrentStateName,
         getInspection,

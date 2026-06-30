@@ -338,6 +338,9 @@ export function createGameModule({
             engine?.handleGameUnpause(byPlayer);
             writeGameRuntimeSnapshot();
         })
+        .onDeferredOperationApplied((_room, event) => {
+            engine?.handleDeferredOperationApplied(event);
+        })
         .onRoomLink((room) => {
             applySelectedModeRoomSettings(room);
         })

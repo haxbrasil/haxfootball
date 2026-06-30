@@ -220,6 +220,7 @@ let RUNTIME: {
     stateStartedTick: number;
     selfStartedTick: number;
     sourceState: string | null;
+    stateInstanceKey: string | null;
 } | null = null;
 
 const normalizeTransition = (args: {
@@ -274,6 +275,7 @@ export function installRuntime(ctx: {
     stateStartedTick?: number;
     selfStartedTick?: number;
     sourceState?: string | null;
+    stateInstanceKey?: string | null;
 }) {
     const mutations = ctx.mutations ?? createMutationBuffer(ctx.room);
     const disposals = ctx.disposals ?? [];
@@ -309,6 +311,7 @@ export function installRuntime(ctx: {
         stateStartedTick,
         selfStartedTick,
         sourceState: ctx.sourceState ?? null,
+        stateInstanceKey: ctx.stateInstanceKey ?? null,
     };
 
     return function uninstall() {
@@ -523,6 +526,15 @@ export function $tickNumber(): number {
     return RUNTIME.tickNumber;
 }
 
+export function $stateInstanceKey(): string {
+    if (!RUNTIME) throw new Error("$stateInstanceKey used outside of runtime");
+    if (!RUNTIME.stateInstanceKey) {
+        throw new Error("$stateInstanceKey used without a state instance");
+    }
+
+    return RUNTIME.stateInstanceKey;
+}
+
 /**
  * Access current tick counters:
  * - now: absolute engine tick.
@@ -584,7 +596,10 @@ export function flushRuntime(): {
             mutations.queuePlayerDisc(player, props),
         setDiscProperties: (discIndex: DiscRef, props: DiscProps) =>
             mutations.queueDisc(discIndex, props),
-        patchStadium: (patch: unknown) => room.patchStadium(patch),
+        patchStadium: (
+            patch: Parameters<Room["patchStadium"]>[0],
+            options?: Parameters<Room["patchStadium"]>[1],
+        ) => room.patchStadium(patch, options),
         setAvatar: (player: PlayerRef, avatar: AvatarValue) =>
             mutations.queueAvatar(player, avatar),
         setTeam: (player: PlayerRef, team: TeamValue) =>

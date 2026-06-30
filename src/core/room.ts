@@ -603,8 +603,11 @@ export class Room {
         this.invalidateDiscCache(discIndex);
     }
 
-    public patchStadium(patch: unknown): void {
-        this.room.patchStadium(patch);
+    public patchStadium(
+        patch: unknown,
+        options?: PatchStadiumOptionsObject,
+    ): void {
+        this.room.patchStadium(patch, options);
         this.discPropsCache.clear();
     }
 

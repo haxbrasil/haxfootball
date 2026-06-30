@@ -65,6 +65,13 @@ declare global {
         type: string;
         [key: string]: unknown;
     };
+    type DeferredOperationAppliedObject = {
+        operationId: string;
+        operationType: string;
+    };
+    type PatchStadiumOptionsObject = {
+        operationId?: string | null;
+    };
 
     type ScoresObject = HaxballRsScoresObject;
 
@@ -122,6 +129,8 @@ declare global {
         | "onStadiumChange"
         | "onKickRateLimitSet"
         | "onTeamsLockChange"
+        | "onDeferredOperationApplied"
+        | "patchStadium"
     > & {
         CollisionFlags: CollisionFlagsObject;
         getPlayer(playerId: number): PlayerObject | null;
@@ -168,6 +177,10 @@ declare global {
             locked: boolean,
             byPlayer: PlayerObject | null,
         ) => void;
+        onDeferredOperationApplied?: (
+            event: DeferredOperationAppliedObject,
+        ) => void;
+        patchStadium(patch: unknown, options?: PatchStadiumOptionsObject): void;
         setScore(red: number, blue: number): void;
     };
 }

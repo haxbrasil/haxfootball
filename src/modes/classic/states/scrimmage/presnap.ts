@@ -18,6 +18,7 @@ import {
     $effect,
     $isGamePaused,
     $next,
+    $stateInstanceKey,
     $tick,
 } from "@runtime/runtime";
 import {
@@ -56,7 +57,10 @@ import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import { CLASSIC_COMMAND } from "@modes/classic/shared/commands/names";
 import { COLOR } from "@common/general/color";
 import { type Config } from "@modes/classic/config";
-import { $syncLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import {
+    $requestLineOfScrimmageBlocking,
+    $setLineOfScrimmageBlockingCollision,
+} from "@modes/classic/hooks/los";
 import { BLITZ_BASE_DELAY_IN_SECONDS } from "@modes/classic/shared/rules/blitz";
 import {
     isTooFarFromBall,
@@ -135,6 +139,7 @@ function $setInitialPlayerPositions({
 
 export function Presnap({ downState }: { downState: DownState }) {
     const { offensiveTeam, downAndDistance, fieldPos } = downState;
+    const losBlockingOperationId = `classic-los:${$stateInstanceKey()}`;
 
     const initialState = $before();
     const initialPlayersSnapshot = initialState.players;
@@ -161,6 +166,9 @@ export function Presnap({ downState }: { downState: DownState }) {
     $setBallActive();
     $setLineOfScrimmage(fieldPos);
     $setFirstDownLine(offensiveTeam, fieldPos, downAndDistance.distance);
+    if (config.flags.losBlocking) {
+        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+    }
 
     $effect(($) => {
         $.setBall({ ...ballPosWithOffset, xspeed: 0, yspeed: 0 });
@@ -212,7 +220,7 @@ export function Presnap({ downState }: { downState: DownState }) {
         $unsetFirstDownLine();
 
         if (config.flags.losBlocking) {
-            $syncLineOfScrimmageBlocking({ enabled: false });
+            $setLineOfScrimmageBlockingCollision(false);
         }
     });
 
@@ -351,6 +359,10 @@ export function Presnap({ downState }: { downState: DownState }) {
                 ? { quarterbackId: selectedQuarterbackId }
                 : {}),
         });
+
+        if (config.flags.losBlocking) {
+            $setLineOfScrimmageBlockingCollision(true);
+        }
     }
 
     function chat(player: PlayerObject, message: string): false | void {
@@ -823,15 +835,21 @@ export function Presnap({ downState }: { downState: DownState }) {
         if (kickingQuarterback) {
             return $handleSnap(kickingQuarterback, selectedQuarterbackId);
         }
+    }
 
-        if (config.flags.losBlocking) {
-            $syncLineOfScrimmageBlocking();
-        }
+    function deferredOperationApplied(event: {
+        operationId: string;
+        operationType: string;
+    }) {
+        if (event.operationId !== losBlockingOperationId) return;
+        if (event.operationType !== "patchStadium") return;
+
+        $setLineOfScrimmageBlockingCollision(true);
     }
 
     function inspect(): GameStateInspection {
         return { continuity: "before-play-start" };
     }
 
-    return { run, chat, command, join, inspect };
+    return { run, chat, command, join, deferredOperationApplied, inspect };
 }

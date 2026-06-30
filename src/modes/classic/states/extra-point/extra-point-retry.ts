@@ -5,6 +5,7 @@ import {
     $effect,
     $isGamePaused,
     $next,
+    $stateInstanceKey,
     $tick,
     $config,
 } from "@runtime/runtime";
@@ -42,7 +43,10 @@ import {
     MIN_SNAP_DELAY_TICKS,
 } from "@modes/classic/shared/rules/snap";
 import type { GameStateInspection } from "@runtime/inspection";
-import { $syncLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import {
+    $requestLineOfScrimmageBlocking,
+    $setLineOfScrimmageBlockingCollision,
+} from "@modes/classic/hooks/los";
 import { type Config } from "@modes/classic/config";
 
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
@@ -106,6 +110,7 @@ export function ExtraPointRetry({
         yards: EXTRA_POINT_YARD_LINE,
         side: opposite(offensiveTeam),
     };
+    const losBlockingOperationId = `classic-extra-point-retry-los:${$stateInstanceKey()}`;
     const config = $config<Config>();
     const ballPosWithOffset = calculateSnapBallPosition(
         offensiveTeam,
@@ -115,6 +120,9 @@ export function ExtraPointRetry({
     const formationBallPos = calculateSnapBallPosition(offensiveTeam, fieldPos);
 
     $setLineOfScrimmage(fieldPos);
+    if (config.flags.losBlocking) {
+        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+    }
     $unsetFirstDownLine();
     $setBallActive();
     $lockBall();
@@ -133,7 +141,7 @@ export function ExtraPointRetry({
         $unlockBall();
 
         if (config.flags.losBlocking) {
-            $syncLineOfScrimmageBlocking({ enabled: false });
+            $setLineOfScrimmageBlockingCollision(false);
         }
     });
 
@@ -233,19 +241,29 @@ export function ExtraPointRetry({
     function run(_state: GameState) {
         const frame = buildFrame();
         $handleAttemptExpired(frame);
+    }
 
-        if (config.flags.losBlocking) {
-            $syncLineOfScrimmageBlocking();
-        }
+    function deferredOperationApplied(event: {
+        operationId: string;
+        operationType: string;
+    }) {
+        if (event.operationId !== losBlockingOperationId) return;
+        if (event.operationType !== "patchStadium") return;
+
+        $setLineOfScrimmageBlockingCollision(true);
     }
 
     function join(_player: GameStatePlayer) {
         $setInitialPlayerPositions(offensiveTeam, formationBallPos);
+
+        if (config.flags.losBlocking) {
+            $setLineOfScrimmageBlockingCollision(true);
+        }
     }
 
     function inspect(): GameStateInspection {
         return { continuity: "before-play-start" };
     }
 
-    return { run, chat, command, join, inspect };
+    return { run, chat, command, join, deferredOperationApplied, inspect };
 }

@@ -274,6 +274,13 @@ export class Module {
         return this;
     }
 
+    onDeferredOperationApplied(
+        handler: (room: Room, event: DeferredOperationAppliedObject) => void,
+    ): this {
+        this.events.push(["onDeferredOperationApplied", handler]);
+        return this;
+    }
+
     call(eventName: string, ...args: any[]): boolean {
         for (const [name, handler] of this.events) {
             if (name === eventName) {
@@ -639,4 +646,5 @@ export function updateRoomModules(
     roomObject.onStadiumChange = emitStadiumChange();
     roomObject.onRoomLink = emit("onRoomLink");
     roomObject.onKickRateLimitSet = emit("onKickRateLimitSet");
+    roomObject.onDeferredOperationApplied = emit("onDeferredOperationApplied");
 }

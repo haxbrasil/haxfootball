@@ -207,33 +207,22 @@ export const { stadium: classicStadium, mapMeasures: classicMapMeasures } =
             traits: {},
             redSpawnPoints: [],
             blueSpawnPoints: [],
-            points: [
+            points: [],
+            planes: [
                 {
-                    ref: "losBlocker.a",
-                    x: SPECIAL_HIDDEN_POSITION[0],
-                    y: SPECIAL_HIDDEN_POSITION[1],
-                    vertex: { cMask: [] },
+                    ref: "losBlocker.red",
+                    normal: [-1, 0],
+                    dist: -SPECIAL_HIDDEN_POSITION[0],
+                    cMask: ["redKO"],
                 },
                 {
-                    ref: "losBlocker.b",
-                    x: SPECIAL_HIDDEN_POSITION[0],
-                    y: SPECIAL_HIDDEN_POSITION[1],
-                    vertex: { cMask: [] },
-                },
-            ],
-            lines: [
-                {
-                    ref: "losBlocker",
-                    from: "losBlocker.a",
-                    to: "losBlocker.b",
-                    segment: {
-                        vis: false,
-                        bCoef: 1,
-                        cGroup: mask("wall"),
-                        cMask: mask("red", "blue"),
-                    },
+                    ref: "losBlocker.blue",
+                    normal: [1, 0],
+                    dist: -SPECIAL_HIDDEN_POSITION[0],
+                    cMask: ["blueKO"],
                 },
             ],
+            lines: [],
             dynamicLines: [
                 {
                     ref: "orange0",

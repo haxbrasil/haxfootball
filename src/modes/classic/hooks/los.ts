@@ -1,94 +1,94 @@
-import { $effect } from "@runtime/runtime";
+import { type FieldPosition } from "@common/game/game";
+import { SPECIAL_HIDDEN_POSITION } from "@common/stadium-builder/consts";
 import {
     getLineOfScrimmage,
-    LOS_BLOCKER_REFS,
+    LOS_BLOCKER_PLANE_REFS,
 } from "@modes/classic/shared/field";
-import { SPECIAL_HIDDEN_DISC_POSITION } from "@common/stadium-builder/consts";
+import { $effect } from "@runtime/hooks";
+import { Team } from "@runtime/models";
 
-const LOS_BLOCKING_VERTICAL_EXTENSION = 2000;
-let patchedLineKey: string | null = null;
+const losPlanePatch = (fieldPos: FieldPosition) => {
+    const [line] = getLineOfScrimmage(fieldPos);
+    const x = line?.position.x ?? SPECIAL_HIDDEN_POSITION[0];
 
-export function $syncLineOfScrimmageBlocking({
-    enabled = true,
-}: {
-    enabled?: boolean;
-} = {}) {
+    return {
+        planes: [
+            {
+                type: "replace",
+                ref: LOS_BLOCKER_PLANE_REFS.RED,
+                value: {
+                    normal: [-1, 0],
+                    dist: -x,
+                    cMask: ["redKO"],
+                },
+            },
+            {
+                type: "replace",
+                ref: LOS_BLOCKER_PLANE_REFS.BLUE,
+                value: {
+                    normal: [1, 0],
+                    dist: x,
+                    cMask: ["blueKO"],
+                },
+            },
+        ],
+    };
+};
+
+const teamCollisionGroup = (cf: CollisionFlagsObject, team: TeamID): number => {
+    if (team === Team.RED) return cf.red;
+    if (team === Team.BLUE) return cf.blue;
+
+    return 0;
+};
+
+const teamLineOfScrimmageCollisionGroup = (
+    cf: CollisionFlagsObject,
+    team: TeamID,
+): number => {
+    if (team === Team.RED) return cf.redKO;
+    if (team === Team.BLUE) return cf.blueKO;
+
+    return 0;
+};
+
+export function $requestLineOfScrimmageBlocking(
+    fieldPos: FieldPosition,
+    operationId: string,
+) {
     $effect(($) => {
-        const line = getLineOfScrimmage();
-        if (line.length < 2 || !line[0] || !line[1]) return;
+        $.patchStadium(losPlanePatch(fieldPos), { operationId });
+    });
 
-        const topDisc = $.getDiscProperties(line[0].id);
-        const bottomDisc = $.getDiscProperties(line[1].id);
+    $setLineOfScrimmageBlockingCollision(false);
+}
 
-        if (!topDisc || !bottomDisc) {
-            patchedLineKey = null;
-            return;
-        }
-        if (typeof topDisc.x !== "number" || typeof topDisc.y !== "number") {
-            patchedLineKey = null;
-            return;
-        }
-        if (
-            typeof bottomDisc.x !== "number" ||
-            typeof bottomDisc.y !== "number"
-        ) {
-            patchedLineKey = null;
-            return;
-        }
+export function $setLineOfScrimmageBlockingCollision(enabled: boolean) {
+    $effect(($) => {
+        const cf = $.CollisionFlags;
 
-        const lineIsHidden =
-            (topDisc.x === SPECIAL_HIDDEN_DISC_POSITION.x &&
-                topDisc.y === SPECIAL_HIDDEN_DISC_POSITION.y) ||
-            (bottomDisc.x === SPECIAL_HIDDEN_DISC_POSITION.x &&
-                bottomDisc.y === SPECIAL_HIDDEN_DISC_POSITION.y);
-        const shouldShow = enabled && !lineIsHidden;
-        const visibleLineKey = `${topDisc.x}:${topDisc.y}:${bottomDisc.x}:${bottomDisc.y}`;
-        const nextLineKey = shouldShow ? visibleLineKey : "hidden";
+        $.getPlayerList().forEach((player) => {
+            const baseGroup = teamCollisionGroup(cf, player.team);
+            if (baseGroup === 0) return;
 
-        if (patchedLineKey === nextLineKey) return;
+            const losGroup = teamLineOfScrimmageCollisionGroup(
+                cf,
+                player.team,
+            );
+            if (losGroup === 0) return;
 
-        const hiddenVertex = {
-            x: SPECIAL_HIDDEN_DISC_POSITION.x,
-            y: SPECIAL_HIDDEN_DISC_POSITION.y,
-        };
-        const visibleVertexes = [
-            {
-                type: "replace",
-                ref: LOS_BLOCKER_REFS.A,
-                value: {
-                    x: topDisc.x,
-                    y: topDisc.y - LOS_BLOCKING_VERTICAL_EXTENSION,
-                },
-            },
-            {
-                type: "replace",
-                ref: LOS_BLOCKER_REFS.B,
-                value: {
-                    x: bottomDisc.x,
-                    y: bottomDisc.y + LOS_BLOCKING_VERTICAL_EXTENSION,
-                },
-            },
-        ];
-        const hiddenVertexes = [
-            {
-                type: "replace",
-                ref: LOS_BLOCKER_REFS.A,
-                value: hiddenVertex,
-            },
-            {
-                type: "replace",
-                ref: LOS_BLOCKER_REFS.B,
-                value: hiddenVertex,
-            },
-        ];
+            const disc = $.getPlayerDiscProperties(player.id);
+            const currentGroup =
+                typeof disc?.cGroup === "number" ? disc.cGroup : baseGroup;
+            const withoutLos = currentGroup & ~cf.redKO & ~cf.blueKO;
+            const cGroup = enabled
+                ? withoutLos | baseGroup | losGroup
+                : withoutLos | baseGroup;
 
-        if (shouldShow) {
-            $.patchStadium({ vertexes: visibleVertexes });
-            patchedLineKey = nextLineKey;
-            return;
-        }
-
-        $.patchStadium({ vertexes: hiddenVertexes });
-        patchedLineKey = nextLineKey;
+            $.setPlayerDisc(player.id, {
+                cGroup,
+                cMask: cf.all,
+            });
+        });
     });
 }

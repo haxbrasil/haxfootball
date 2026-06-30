@@ -10,5 +10,6 @@ export {
     $next,
     $restore,
     $scores,
+    $stateInstanceKey,
     $event,
 } from "@runtime/runtime";
