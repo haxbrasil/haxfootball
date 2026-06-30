@@ -137,6 +137,13 @@ export function buildDesiredRoster(
     );
     if (rotatedRoster) return rotatedRoster;
 
+    const activeRosterWithReplacements = buildActiveRosterWithReplacements(
+        desiredMode,
+        availablePlayers,
+        state,
+    );
+    if (activeRosterWithReplacements) return activeRosterWithReplacements;
+
     if (
         desiredMode !== "training" &&
         isSameModeSelected(desiredMode, snapshot)
@@ -315,6 +322,69 @@ function buildCompletedResultRoster(
             order: stayingWinners.length + index,
         })),
     ];
+}
+
+function buildActiveRosterWithReplacements(
+    desiredMode: DesiredRoomMode,
+    availablePlayers: readonly RoomManagementPlayer[],
+    state?: RoomManagerState,
+): readonly RoomRosterPlayer[] | null {
+    if (!state?.activeRoster) return null;
+    if (state.activeRoster.mode !== desiredMode) return null;
+
+    const rosterSize = getDesiredRosterSize(
+        desiredMode,
+        availablePlayers.length,
+    );
+    if (state.activeRoster.players.length !== rosterSize) return null;
+
+    const availablePlayersById = new Map(
+        availablePlayers.map((player) => [player.id, player]),
+    );
+    const missingActiveRosterPlayers = state.activeRoster.players.filter(
+        (player) => !availablePlayersById.has(player.playerId),
+    );
+    if (missingActiveRosterPlayers.length === 0) return null;
+
+    const activeRosterPlayerIds = new Set(
+        state.activeRoster.players.map((player) => player.playerId),
+    );
+    const replacementCandidates = availablePlayers.filter(
+        (player) => !activeRosterPlayerIds.has(player.id),
+    );
+    const replacementResult = state.activeRoster.players.reduce<{
+        players: readonly RoomRosterPlayer[];
+        nextReplacementIndex: number;
+    } | null>(
+        (result, rosterPlayer) => {
+            if (!result) return null;
+
+            if (availablePlayersById.has(rosterPlayer.playerId)) {
+                return {
+                    ...result,
+                    players: [...result.players, rosterPlayer],
+                };
+            }
+
+            const replacement =
+                replacementCandidates[result.nextReplacementIndex];
+            if (!replacement) return null;
+
+            return {
+                players: [
+                    ...result.players,
+                    {
+                        ...rosterPlayer,
+                        playerId: replacement.id,
+                    },
+                ],
+                nextReplacementIndex: result.nextReplacementIndex + 1,
+            };
+        },
+        { players: [], nextReplacementIndex: 0 },
+    );
+
+    return replacementResult?.players ?? null;
 }
 
 function buildPreservedActiveRoster(

@@ -708,6 +708,93 @@ describe("planRoomManagement", () => {
         });
     });
 
+    it("allows normal AFK detection on a later pre-play after readiness completes", () => {
+        const players = [
+            createPlayer(1, { team: Team.RED }),
+            createPlayer(2, { team: Team.BLUE }),
+            createPlayer(3, { team: Team.RED }),
+            createPlayer(4, { team: Team.BLUE }),
+        ];
+        const ready = planRoomManagement(
+            createSnapshot({
+                nowMs: 3_000,
+                players,
+                game: createGame({
+                    selectedMode: GAME_MODE.FLAG,
+                    activeMode: GAME_MODE.FLAG,
+                    running: true,
+                    paused: true,
+                    inspection: beforePlay("flag:first"),
+                }),
+            }),
+            {
+                ...createState(),
+                readiness: {
+                    matchStartedAtMs: 2_000,
+                    waitingPlayerIds: [1],
+                    warningSentPlayerIds: [1],
+                },
+                activeRoster: {
+                    mode: "flag",
+                    startedAtMs: 2_000,
+                    players: [
+                        { playerId: 1, team: Team.RED, order: 0 },
+                        { playerId: 2, team: Team.BLUE, order: 1 },
+                        { playerId: 3, team: Team.RED, order: 2 },
+                        { playerId: 4, team: Team.BLUE, order: 3 },
+                    ],
+                },
+                lastActivity: [{ playerId: 1, atMs: 3_000 }],
+            },
+        );
+        const laterPrePlay = planRoomManagement(
+            createSnapshot({
+                nowMs: 9_000,
+                players,
+                game: createGame({
+                    selectedMode: GAME_MODE.FLAG,
+                    activeMode: GAME_MODE.FLAG,
+                    running: true,
+                    inspection: beforePlay("flag:second"),
+                }),
+            }),
+            ready.state,
+        );
+
+        expect(laterPrePlay.trace.reason).toBe("pre-play afk pause started");
+        expect(laterPrePlay.actions).toContainEqual({
+            type: "pause-game",
+            paused: true,
+            reason: "afk-warning",
+        });
+        expect(laterPrePlay.state.checkedPrePlayInstanceKeys).toEqual([
+            "flag:second",
+        ]);
+    });
+
+    it("clears checked pre-play keys when a new game starts", () => {
+        const startedState = recordGameStart(
+            createSnapshot({
+                nowMs: 1_000,
+                players: [
+                    createPlayer(1, { team: Team.RED }),
+                    createPlayer(2, { team: Team.BLUE }),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.CLASSIC,
+                    activeMode: GAME_MODE.CLASSIC,
+                    running: true,
+                }),
+            }),
+            {
+                ...createState(),
+                checkedPrePlayInstanceKeys: ["PRESNAP:1"],
+            },
+        );
+
+        expect(startedState.checkedPrePlayInstanceKeys).toEqual([]);
+    });
+
     it("shows confirmed readiness avatars and clears them when the game stops", () => {
         const state: RoomManagerState = {
             ...createState(),
@@ -1092,6 +1179,54 @@ describe("planRoomManagement", () => {
             team: Team.SPECTATORS,
             reason: "mode-roster",
         });
+    });
+
+    it("replaces an active Flag player who becomes AFK with a waiting spectator", () => {
+        const decision = planRoomManagement(
+            createSnapshot({
+                visibleActionDelayMs: 0,
+                players: [
+                    createPlayer(1),
+                    createPlayer(2, { team: Team.BLUE }),
+                    createPlayer(3, { team: Team.RED }),
+                    createPlayer(4, { team: Team.BLUE }),
+                    createPlayer(5),
+                ],
+                game: createGame({
+                    selectedMode: GAME_MODE.FLAG,
+                    activeMode: GAME_MODE.FLAG,
+                    running: true,
+                    inspection: beforePlay(),
+                }),
+            }),
+            {
+                ...createState(),
+                autoAfkPlayerIds: [1],
+                activeRoster: {
+                    mode: "flag",
+                    startedAtMs: 0,
+                    players: [
+                        { playerId: 1, team: Team.RED, order: 0 },
+                        { playerId: 2, team: Team.BLUE, order: 1 },
+                        { playerId: 3, team: Team.RED, order: 2 },
+                        { playerId: 4, team: Team.BLUE, order: 3 },
+                    ],
+                },
+            },
+        );
+
+        expect(moveActions(decision.actions)).toContainEqual({
+            type: "move-player",
+            playerId: 5,
+            team: Team.RED,
+            reason: "mode-roster",
+        });
+        expect(decision.state.activeRoster?.players).toEqual([
+            { playerId: 5, team: Team.RED, order: 0 },
+            { playerId: 2, team: Team.BLUE, order: 1 },
+            { playerId: 3, team: Team.RED, order: 2 },
+            { playerId: 4, team: Team.BLUE, order: 3 },
+        ]);
     });
 
     it("adds players back to Training when they leave AFK", () => {

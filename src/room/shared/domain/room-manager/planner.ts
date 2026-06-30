@@ -84,6 +84,21 @@ function getPlayersByIds(
     return players.filter((player) => playerIdSet.has(player.id));
 }
 
+function needsKnownAfkRosterReplacement(ctx: ManagerContext): boolean {
+    if (!ctx.state.activeRoster) return false;
+    if (ctx.state.activeRoster.mode !== ctx.desiredMode) return false;
+
+    const availablePlayerIds = new Set(
+        ctx.availablePlayers.map((player) => player.id),
+    );
+
+    return ctx.state.activeRoster.players.some(
+        (player) =>
+            ctx.afkPlayerIds.has(player.playerId) &&
+            !availablePlayerIds.has(player.playerId),
+    );
+}
+
 function scheduleModeSyncAfterStop(
     ctx: ManagerContext,
     reason: string,
@@ -348,20 +363,15 @@ function getPrePlayInstanceKey(ctx: ManagerContext): string | null {
     return ctx.snapshot.game.inspection?.instanceKey ?? null;
 }
 
-function addCheckedPrePlayInstanceKey(
-    state: RoomManagerState,
-    instanceKey: string,
-): readonly string[] {
-    return Array.from(
-        new Set([...state.checkedPrePlayInstanceKeys, instanceKey]),
-    );
+function checkedPrePlayInstanceKey(instanceKey: string): readonly string[] {
+    return [instanceKey];
 }
 
 function addCurrentPrePlayInstanceKey(ctx: ManagerContext): readonly string[] {
     const instanceKey = getPrePlayInstanceKey(ctx);
 
     return instanceKey
-        ? addCheckedPrePlayInstanceKey(ctx.state, instanceKey)
+        ? checkedPrePlayInstanceKey(instanceKey)
         : ctx.state.checkedPrePlayInstanceKeys;
 }
 
@@ -919,6 +929,7 @@ const afkPrePlayCheckRule: MainRule = {
             ctx.state.afkCheck === null &&
             instanceKey !== null &&
             !ctx.state.checkedPrePlayInstanceKeys.includes(instanceKey) &&
+            !needsKnownAfkRosterReplacement(ctx) &&
             (ctx.snapshot.game.activeMode === "flag" ||
                 ctx.snapshot.game.activeMode === "classic")
         );
@@ -945,10 +956,8 @@ const afkPrePlayCheckRule: MainRule = {
                 actions: [],
                 state: {
                     ...ctx.state,
-                    checkedPrePlayInstanceKeys: addCheckedPrePlayInstanceKey(
-                        ctx.state,
-                        instanceKey,
-                    ),
+                    checkedPrePlayInstanceKeys:
+                        checkedPrePlayInstanceKey(instanceKey),
                 },
                 reason: "pre-play afk check passed",
             };
@@ -996,10 +1005,8 @@ const afkPrePlayCheckRule: MainRule = {
                     startedAtMs: ctx.snapshot.nowMs,
                     warningSentPlayerIds: inactivePlayerIds,
                 },
-                checkedPrePlayInstanceKeys: addCheckedPrePlayInstanceKey(
-                    nextState,
-                    instanceKey,
-                ),
+                checkedPrePlayInstanceKeys:
+                    checkedPrePlayInstanceKey(instanceKey),
                 afkWarningPlayerIds: inactivePlayerIds,
                 afkPausedPlayerIds: inactivePlayerIds,
                 afkPauseStartedAtMs: ctx.snapshot.nowMs,
@@ -1501,6 +1508,7 @@ export function recordGameStart(
         afkPauseStartedAtMs: null,
         afkPauseBaseline: [],
         afkReminderAt: [],
+        checkedPrePlayInstanceKeys: [],
     };
 }
 
