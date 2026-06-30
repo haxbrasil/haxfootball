@@ -1,40 +1,17 @@
 import { z } from "zod";
 import { createEnv } from "./validator";
 
-const roomServerPropertiesSchema = z.object({
-    name: z.string(),
-    geo: z
-        .object({
-            code: z.string(),
-            lat: z.number(),
-            lon: z.number(),
-        })
-        .optional(),
-    max_player_count: z.number(),
-    show_in_room_list: z.boolean(),
-    password: z.string().nullable().optional(),
-    no_player: z.boolean(),
-    algorithmic_room_management_enabled: z.boolean().optional(),
-    algorithmic_room_management_afk_activity_detection_enabled: z
-        .boolean()
-        .optional(),
-});
-
-const roomServerEnvSchema = {
-    ROOM_PROPERTIES_JSON: z.preprocess((value) => {
-        if (typeof value !== "string") {
-            return value;
-        }
-
-        try {
-            return JSON.parse(value) as unknown;
-        } catch {
-            return value;
-        }
-    }, roomServerPropertiesSchema),
+const roomServerBaseEnvSchema = {
+    ROOM_NAME: z.string().trim().min(1),
+    ROOM_PUBLIC: z.stringbool(),
+    MAX_PLAYERS: z.coerce.number().int().min(1).max(30),
+    ROOM_PASSWORD: z.string().trim().min(1).optional(),
+    NO_PLAYER: z.stringbool(),
     ROOM_TOKEN: z.string().default(""),
     PROXY: z.string().trim().min(1).optional(),
     DEBUG: z.stringbool().default(false),
+    ROOM_MANAGER_ENABLED: z.stringbool().optional(),
+    ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED: z.stringbool().optional(),
     LANGUAGE: z.string().trim().min(1).optional(),
     TUTORIAL_LINK: z
         .string()
@@ -60,6 +37,21 @@ const roomServerEnvSchema = {
     HAXFOOTBALL_INCIDENT_LEVEL: z.enum(["normal", "full"]).default("normal"),
 } satisfies z.ZodRawShape;
 
+const roomServerEnvSchema = z.object(roomServerBaseEnvSchema).and(
+    z.union([
+        z.object({
+            GEO_CODE: z.string().trim().min(1),
+            GEO_LAT: z.coerce.number(),
+            GEO_LON: z.coerce.number(),
+        }),
+        z.object({
+            GEO_CODE: z.undefined().optional(),
+            GEO_LAT: z.undefined().optional(),
+            GEO_LON: z.undefined().optional(),
+        }),
+    ]),
+);
+
 export const env = createEnv(
     {
         schema: roomServerEnvSchema,
@@ -71,7 +63,20 @@ export const env = createEnv(
         const commId = rawEnv.__ROOM_COMM_ID ?? rawEnv.ROOM_COMM_ID;
 
         return {
-            roomProperties: rawEnv.ROOM_PROPERTIES_JSON,
+            roomName: rawEnv.ROOM_NAME,
+            roomPublic: rawEnv.ROOM_PUBLIC,
+            maxPlayers: rawEnv.MAX_PLAYERS,
+            roomPassword: rawEnv.ROOM_PASSWORD,
+            noPlayer: rawEnv.NO_PLAYER,
+            ...(rawEnv.GEO_CODE
+                ? {
+                      geo: {
+                          code: rawEnv.GEO_CODE,
+                          lat: rawEnv.GEO_LAT,
+                          lon: rawEnv.GEO_LON,
+                      },
+                  }
+                : {}),
             roomToken: rawEnv.ROOM_TOKEN,
             ...(rawEnv.PROXY ? { proxy: rawEnv.PROXY } : {}),
             ...(rawEnv.LANGUAGE ? { language: rawEnv.LANGUAGE } : {}),
@@ -84,17 +89,14 @@ export const env = createEnv(
                 maxRecords: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS,
             },
             incidentLevel: rawEnv.HAXFOOTBALL_INCIDENT_LEVEL,
-            roomManagerEnabled:
-                rawEnv.ROOM_PROPERTIES_JSON.algorithmic_room_management_enabled,
+            roomManagerEnabled: rawEnv.ROOM_MANAGER_ENABLED,
             roomManagerAfkActivityDetectionEnabled:
-                rawEnv.ROOM_PROPERTIES_JSON
-                    .algorithmic_room_management_afk_activity_detection_enabled,
+                rawEnv.ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED,
         };
     },
 );
 
 export type RoomServerEnvironment = typeof env;
-export type RoomServerProperties = RoomServerEnvironment["roomProperties"];
 export type RoomApiReadinessEnvironment = NonNullable<
     RoomServerEnvironment["apiReadiness"]
 >;

@@ -25,7 +25,7 @@ importers:
         version: 0.2.13
       '@haxbrasil/haxfootball-api-sdk':
         specifier: github:haxbrasil/haxfootball-api-sdk
-        version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/7f9f494dc5fbfee9d121b3bc710ed3bc7f08dab0
+        version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/4231c16e65ff844df9f7e6e66f80cb7a133ecd9d
       '@lingui/core':
         specifier: ^5.9.5
         version: 5.9.5(@lingui/babel-plugin-lingui-macro@5.9.5(babel-plugin-macros@3.1.0)(typescript@5.9.3))(babel-plugin-macros@3.1.0)
@@ -1150,8 +1150,8 @@ packages:
     resolution: {integrity: sha512-Z4IhxpEHXYHmwjk4gHR+ZLd3rcUHdeNjdS9VY6/kGEnO2etUsPEFugUq3CsFAK6xaIs0RiLzHqqWz4NWzxFN4A==, tarball: https://npm.pkg.github.com/download/@haxbrasil/haxball-rs/0.2.13/7de0cb98ed0b5b8381d7204f5d90874a6b1a4642}
     engines: {node: '>= 18'}
 
-  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/7f9f494dc5fbfee9d121b3bc710ed3bc7f08dab0':
-    resolution: {gitHosted: true, integrity: sha512-Tb6CdjiJ1sxTE81SJdnszwGoi8ZLZIkkGZJsnEyS0CdZ5VbXjpgBLNLOXks2W30xYLTvGSGqR6mRwtoxgA4X9A==, tarball: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/7f9f494dc5fbfee9d121b3bc710ed3bc7f08dab0}
+  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/4231c16e65ff844df9f7e6e66f80cb7a133ecd9d':
+    resolution: {gitHosted: true, integrity: sha512-z1sjN2G+QG65E7m97wy7XzFLJpRNpxXk8YAgxkpr9FN+mUfJHzutgBMdOKL2ahsmRNnUKmNHa8KVx6IQGH31Hg==, tarball: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/4231c16e65ff844df9f7e6e66f80cb7a133ecd9d}
     version: 0.1.0
     engines: {node: '>=20'}
 
@@ -4163,7 +4163,7 @@ snapshots:
 
   '@haxbrasil/haxball-rs@0.2.13': {}
 
-  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/7f9f494dc5fbfee9d121b3bc710ed3bc7f08dab0': {}
+  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/4231c16e65ff844df9f7e6e66f80cb7a133ecd9d': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:

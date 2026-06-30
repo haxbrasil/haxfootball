@@ -33,7 +33,10 @@ async function bootstrap() {
                 const filePath = resolve(directory, filename);
 
                 await mkdir(directory, { recursive: true });
-                await writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`);
+                await writeFile(
+                    filePath,
+                    `${JSON.stringify(payload, null, 2)}\n`,
+                );
                 console.error(`Local desync incident dumped: ${filePath}`);
             } catch (error) {
                 console.error("Failed to dump local desync incident:", error);

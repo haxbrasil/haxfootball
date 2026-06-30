@@ -71,10 +71,7 @@ export function $setLineOfScrimmageBlockingCollision(enabled: boolean) {
             const baseGroup = teamCollisionGroup(cf, player.team);
             if (baseGroup === 0) return;
 
-            const losGroup = teamLineOfScrimmageCollisionGroup(
-                cf,
-                player.team,
-            );
+            const losGroup = teamLineOfScrimmageCollisionGroup(cf, player.team);
             if (losGroup === 0) return;
 
             const disc = $.getPlayerDiscProperties(player.id);

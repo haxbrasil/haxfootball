@@ -1,13 +1,14 @@
 import { HBInit } from "@haxbrasil/haxball-rs";
 import { createModule, updateRoomModules } from "@core/module";
 import { api } from "@api/client";
-import { env, type RoomServerEnvironment } from "@env/room-server";
+import { env } from "@env/room-server";
 import { initI18n } from "@i18n";
 import { IncidentRecorder } from "@room/shared/domain/incidents";
 import {
     createRoomIncidentReporter,
     type RoomIncidentReporter,
 } from "@room/managed/modules/incidents";
+import { createRoomConfig } from "./room-server-config";
 
 const incidentRecorder = new IncidentRecorder({
     ...(env.incidentBuffer.seconds
@@ -98,35 +99,6 @@ bootstrap().catch((error) => {
             process.exit(1);
         });
 });
-
-function createRoomConfig(
-    environment: RoomServerEnvironment,
-    baseConfig: RoomConfigObject,
-): RoomConfigObject {
-    const { roomProperties } = environment;
-
-    return {
-        ...baseConfig,
-        roomName: roomProperties.name,
-        maxPlayers: roomProperties.max_player_count,
-        public: roomProperties.show_in_room_list,
-        noPlayer: roomProperties.no_player,
-        token: environment.roomToken,
-        ...(roomProperties.password
-            ? { password: roomProperties.password }
-            : {}),
-        ...(roomProperties.geo
-            ? {
-                  geo: {
-                      code: roomProperties.geo.code,
-                      lat: roomProperties.geo.lat,
-                      lon: roomProperties.geo.lon,
-                  },
-              }
-            : {}),
-        ...(environment.proxy ? { proxy: environment.proxy } : {}),
-    };
-}
 
 function installCrashIncidentHandlers(reporter: RoomIncidentReporter): void {
     const flush = async (
