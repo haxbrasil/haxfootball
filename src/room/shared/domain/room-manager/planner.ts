@@ -20,7 +20,7 @@ import type {
 } from "./types";
 
 const AFK_PRE_PLAY_INACTIVE_MS = 5_000;
-const AFK_PRE_PLAY_GRACE_MS = 5_000;
+const AFK_PRE_PLAY_GRACE_MS = 10_000;
 const FIRST_PLAY_READINESS_GRACE_MS = 10_000;
 const READINESS_WAITING_AVATAR = "❌";
 const READINESS_CONFIRMED_AVATAR = "✅";

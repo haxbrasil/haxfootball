@@ -50,10 +50,12 @@ type AuthenticationModuleOptions = {
 type AuthenticationState = {
     sessionStore: PlayerSessionStore;
     preJoinSessions: Map<number, PreJoinSession>;
+    guestRegisterReminderIntervals: Map<number, ReturnType<typeof setInterval>>;
     renamingPlayerIds: Set<number>;
 };
 
 const SIGN_IN_TIMEOUT_MS = 30_000;
+const GUEST_REGISTER_REMINDER_MS = 15_000;
 
 export function createAuthenticationModule({
     roomId,
@@ -63,6 +65,7 @@ export function createAuthenticationModule({
     const state: AuthenticationState = {
         sessionStore,
         preJoinSessions: new Map(),
+        guestRegisterReminderIntervals: new Map(),
         renamingPlayerIds: new Set(),
     };
     const roomsWithAnnouncementFilter = new WeakSet<Room>();
@@ -157,6 +160,7 @@ export function createAuthenticationModule({
 
             const session = state.sessionStore.get(player.id);
             clearSessionTimeout(session);
+            stopGuestRegisterReminder(state, player.id);
             state.sessionStore.delete(player.id);
 
             return isAuthenticationPendingSession(session) ? false : undefined;
@@ -262,12 +266,7 @@ export function createAuthenticationModule({
             const blockedFieldTarget = getBlockedFieldTarget(state, operation);
 
             if (blockedFieldTarget) {
-                room.send({
-                    message: t`🔐 You need to register before you can play. Register in our Discord: ${env.DISCORD_LINK}`,
-                    color: COLOR.SYSTEM,
-                    to: blockedFieldTarget.id,
-                    sound: "notification",
-                });
+                sendRegisterReminder(room, blockedFieldTarget.id);
 
                 return false;
             }
@@ -691,10 +690,13 @@ function requirePassword({
             return;
         }
 
+        stopGuestRegisterReminder(state, playerId);
         state.sessionStore.delete(playerId);
 
         room.kick(playerId, t`Sign-in timed out.`);
     }, SIGN_IN_TIMEOUT_MS);
+
+    stopGuestRegisterReminder(state, playerId);
 
     state.sessionStore.set(playerId, {
         kind: "signing-in",
@@ -728,6 +730,8 @@ function acceptGuest({
         return;
     }
 
+    stopGuestRegisterReminder(state, playerId);
+
     state.sessionStore.set(playerId, {
         kind: "guest",
         playerId: backendPlayerId,
@@ -739,12 +743,8 @@ function acceptGuest({
         return;
     }
 
-    room.send({
-        message: t`🔐 You need to register before you can play. Register in our Discord: ${env.DISCORD_LINK}`,
-        color: COLOR.SYSTEM,
-        to: playerId,
-        sound: "notification",
-    });
+    sendRegisterReminder(room, playerId);
+    startGuestRegisterReminder(state, room, playerId);
 }
 
 async function acceptSignedIn({
@@ -781,6 +781,8 @@ async function acceptSignedIn({
         return;
     }
 
+    stopGuestRegisterReminder(state, playerId);
+
     state.sessionStore.set(playerId, {
         kind: "signed-in",
         account: {
@@ -811,6 +813,52 @@ async function getAccountPermissions(
     }
 
     return result.data.role.permissions;
+}
+
+function sendRegisterReminder(room: Room, playerId: number): void {
+    room.send({
+        message: t`🔐 You need to register before you can play. Register in our Discord: ${env.DISCORD_LINK}`,
+        color: COLOR.SYSTEM,
+        to: playerId,
+        sound: "notification",
+    });
+}
+
+function startGuestRegisterReminder(
+    state: AuthenticationState,
+    room: Room,
+    playerId: number,
+): void {
+    stopGuestRegisterReminder(state, playerId);
+
+    state.guestRegisterReminderIntervals.set(
+        playerId,
+        setInterval(() => {
+            if (state.sessionStore.get(playerId)?.kind !== "guest") {
+                stopGuestRegisterReminder(state, playerId);
+                return;
+            }
+
+            if (!room.getPlayer(playerId)) {
+                stopGuestRegisterReminder(state, playerId);
+                return;
+            }
+
+            sendRegisterReminder(room, playerId);
+        }, GUEST_REGISTER_REMINDER_MS),
+    );
+}
+
+function stopGuestRegisterReminder(
+    state: AuthenticationState,
+    playerId: number,
+): void {
+    const interval = state.guestRegisterReminderIntervals.get(playerId);
+
+    if (!interval) return;
+
+    clearInterval(interval);
+    state.guestRegisterReminderIntervals.delete(playerId);
 }
 
 function releasePlayerJoin(

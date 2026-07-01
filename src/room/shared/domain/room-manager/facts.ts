@@ -109,14 +109,18 @@ export function buildStandardCurrentRoster(
         (player) => player.team === Team.BLUE,
     ).length;
     const fieldCount = redCount + blueCount;
+    const rosterSize = getDesiredRosterSize(
+        desiredMode,
+        availablePlayers.length,
+    );
 
     if (redCount !== blueCount) return null;
 
-    if (desiredMode === "flag" && (fieldCount === 4 || fieldCount === 6)) {
+    if (desiredMode === "flag" && fieldCount === rosterSize) {
         return currentRoster;
     }
 
-    if (desiredMode === "classic" && fieldCount === 8) {
+    if (desiredMode === "classic" && fieldCount === rosterSize) {
         return currentRoster;
     }
 
@@ -149,7 +153,18 @@ export function buildDesiredRoster(
         isSameModeSelected(desiredMode, snapshot)
     ) {
         const currentFieldRoster = buildCurrentFieldRoster(availablePlayers);
-        if (currentFieldRoster.length > 0) return currentFieldRoster;
+        if (
+            currentFieldRoster.length >=
+            getDesiredRosterSize(desiredMode, availablePlayers.length)
+        ) {
+            return currentFieldRoster;
+        }
+
+        const expandedCurrentRoster = buildExpandedCurrentRoster(
+            desiredMode,
+            availablePlayers,
+        );
+        if (expandedCurrentRoster) return expandedCurrentRoster;
     }
 
     const preservedActiveRoster = buildPreservedActiveRoster(
@@ -409,6 +424,61 @@ function buildPreservedActiveRoster(
     if (preservedPlayers.length !== rosterSize) return null;
 
     return preservedPlayers;
+}
+
+function buildExpandedCurrentRoster(
+    desiredMode: DesiredRoomMode,
+    availablePlayers: readonly RoomManagementPlayer[],
+): readonly RoomRosterPlayer[] | null {
+    if (desiredMode !== "flag" && desiredMode !== "classic") return null;
+
+    const rosterSize = getDesiredRosterSize(
+        desiredMode,
+        availablePlayers.length,
+    );
+    const currentRoster = buildCurrentFieldRoster(availablePlayers);
+    if (currentRoster.length === 0 || currentRoster.length >= rosterSize) {
+        return null;
+    }
+
+    const selectedSpectators = availablePlayers
+        .filter((player) => !isFieldTeam(player.team))
+        .slice(0, rosterSize - currentRoster.length);
+    if (selectedSpectators.length < rosterSize - currentRoster.length) {
+        return null;
+    }
+
+    return selectedSpectators.reduce<{
+        players: readonly RoomRosterPlayer[];
+        redCount: number;
+        blueCount: number;
+    }>(
+        (result, player, index) => {
+            const team =
+                result.redCount <= result.blueCount ? Team.RED : Team.BLUE;
+
+            return {
+                players: [
+                    ...result.players,
+                    {
+                        playerId: player.id,
+                        team,
+                        order: currentRoster.length + index,
+                    },
+                ],
+                redCount: result.redCount + (team === Team.RED ? 1 : 0),
+                blueCount: result.blueCount + (team === Team.BLUE ? 1 : 0),
+            };
+        },
+        {
+            players: currentRoster,
+            redCount: currentRoster.filter((player) => player.team === Team.RED)
+                .length,
+            blueCount: currentRoster.filter(
+                (player) => player.team === Team.BLUE,
+            ).length,
+        },
+    ).players;
 }
 
 export function getSnakeTeam(index: number): FieldTeam {

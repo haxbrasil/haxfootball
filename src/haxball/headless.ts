@@ -40,6 +40,7 @@ declare global {
         | "small"
         | "small-bold"
         | "small-italic";
+    type GameStatus = "stopped" | "running" | "paused" | "resuming";
 
     interface Position {
         x: number;
@@ -135,6 +136,7 @@ declare global {
         CollisionFlags: CollisionFlagsObject;
         getPlayer(playerId: number): PlayerObject | null;
         getPlayerList(): PlayerObject[];
+        getGameStatus(): GameStatus;
         onPlayerJoin?: (player: PlayerObject) => void;
         onPlayerLeave?: (player: PlayerObject) => void;
         onPlayerChat?: (

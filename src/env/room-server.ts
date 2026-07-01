@@ -13,12 +13,8 @@ const roomServerBaseEnvSchema = {
     ROOM_MANAGER_ENABLED: z.stringbool().optional(),
     ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED: z.stringbool().optional(),
     LANGUAGE: z.string().trim().min(1).optional(),
-    TUTORIAL_LINK: z
-        .string()
-        .trim()
-        .min(1)
-        .default("youtube.com/watch?v=Z09dlI3MR28"),
-    DISCORD_LINK: z.string().trim().min(1).default("discord.gg/q8ay8PmEkp"),
+    TUTORIAL_LINK: z.string().trim().min(1),
+    DISCORD_LINK: z.string().trim().min(1),
     PUBLIC_WEB_BASE_URL: z.string().trim().min(1).optional(),
     __ROOM_ID: z.string().trim().min(1).optional(),
     ROOM_API_ROOM_ID: z.string().trim().min(1).optional(),

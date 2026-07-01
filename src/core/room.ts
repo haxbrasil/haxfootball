@@ -454,6 +454,10 @@ export class Room {
         return this.room.getScores();
     }
 
+    public getGameStatus(): GameStatus {
+        return this.room.getGameStatus();
+    }
+
     public setScore(red: number, blue: number): void {
         this.room.setScore(red, blue);
     }

@@ -259,6 +259,51 @@ describe("planRoomManagement", () => {
         });
     });
 
+    it("expands running Flag 2v2 to 3v3 when two spectators are available", () => {
+        const snapshot = createSnapshot({
+            visibleActionDelayMs: 0,
+            players: [
+                createPlayer(1, { team: Team.RED }),
+                createPlayer(2, { team: Team.RED }),
+                createPlayer(3, { team: Team.BLUE }),
+                createPlayer(4, { team: Team.BLUE }),
+                createPlayer(5),
+                createPlayer(6),
+            ],
+            game: createGame({
+                selectedMode: GAME_MODE.FLAG,
+                activeMode: GAME_MODE.FLAG,
+                running: true,
+                inspection: beforePlay(),
+            }),
+        });
+        const checked = planRoomManagement(snapshot, createState());
+        const decision = planRoomManagement(snapshot, checked.state);
+
+        expect(moveActions(decision.actions)).toEqual([
+            {
+                type: "move-player",
+                playerId: 5,
+                team: Team.RED,
+                reason: "mode-roster",
+            },
+            {
+                type: "move-player",
+                playerId: 6,
+                team: Team.BLUE,
+                reason: "mode-roster",
+            },
+        ]);
+        expect(decision.state.activeRoster?.players).toEqual([
+            { playerId: 1, team: Team.RED, order: 0 },
+            { playerId: 2, team: Team.RED, order: 1 },
+            { playerId: 3, team: Team.BLUE, order: 2 },
+            { playerId: 4, team: Team.BLUE, order: 3 },
+            { playerId: 5, team: Team.RED, order: 4 },
+            { playerId: 6, team: Team.BLUE, order: 5 },
+        ]);
+    });
+
     it("creates Classic 4v4 when 10 available players are all spectators", () => {
         const due = planRoomManagement(
             createSnapshot({
@@ -867,7 +912,7 @@ describe("planRoomManagement", () => {
         expect(stopped.state.readiness).toBeNull();
     });
 
-    it("normal AFK check runs once per pre-play key and expires after five seconds", () => {
+    it("normal AFK check runs once per pre-play key and expires after ten seconds", () => {
         const started = planRoomManagement(
             createSnapshot({
                 nowMs: 6_000,
@@ -938,7 +983,7 @@ describe("planRoomManagement", () => {
 
         const expired = planRoomManagement(
             createSnapshot({
-                nowMs: 11_000,
+                nowMs: 16_000,
                 players: [createPlayer(1, { team: Team.RED })],
                 game: createGame({
                     selectedMode: GAME_MODE.CLASSIC,

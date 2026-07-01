@@ -334,11 +334,21 @@ export function createRoomManagerModule({
                     gameRuntimeStore.stopGame();
                 });
                 return;
-            case "pause-game":
+            case "pause-game": {
+                const gameStatus = room.getGameStatus();
+
+                if (
+                    (action.paused && gameStatus !== "running") ||
+                    (!action.paused && gameStatus !== "paused")
+                ) {
+                    return;
+                }
+
                 runOwnAction(() => {
                     room.pauseGame(action.paused);
                 });
                 return;
+            }
             case "set-pre-play-timeout-hold":
                 gameRuntimeStore.setPrePlayTimeoutHold(action.held);
                 return;
