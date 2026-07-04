@@ -20,6 +20,11 @@ const roomServerBaseEnvSchema = {
     ROOM_API_ROOM_ID: z.string().trim().min(1).optional(),
     __ROOM_COMM_ID: z.string().trim().min(1).optional(),
     ROOM_COMM_ID: z.string().trim().min(1).optional(),
+    __ROOM_API_URL: z.string().trim().min(1).optional(),
+    ROOM_API_URL: z.string().trim().min(1).optional(),
+    __ROOM_API_JWT: z.string().trim().min(1).optional(),
+    ROOM_API_JWT: z.string().trim().min(1).optional(),
+    ROOM_LIVE_STATE_CONTRACT_JSON: z.string().trim().min(1).optional(),
     HAXFOOTBALL_INCIDENT_BUFFER_SECONDS: z.coerce
         .number()
         .int()
@@ -57,6 +62,8 @@ export const env = createEnv(
     (rawEnv) => {
         const roomId = rawEnv.__ROOM_ID ?? rawEnv.ROOM_API_ROOM_ID;
         const commId = rawEnv.__ROOM_COMM_ID ?? rawEnv.ROOM_COMM_ID;
+        const apiUrl = rawEnv.__ROOM_API_URL ?? rawEnv.ROOM_API_URL;
+        const apiJwt = rawEnv.__ROOM_API_JWT ?? rawEnv.ROOM_API_JWT;
 
         return {
             roomName: rawEnv.ROOM_NAME,
@@ -79,7 +86,10 @@ export const env = createEnv(
             ...(rawEnv.PUBLIC_WEB_BASE_URL
                 ? { publicWebBaseUrl: rawEnv.PUBLIC_WEB_BASE_URL }
                 : {}),
-            ...(roomId && commId ? { apiReadiness: { roomId, commId } } : {}),
+            ...(roomId && commId && apiUrl && apiJwt
+                ? { apiReadiness: { roomId, commId, apiUrl, apiJwt } }
+                : {}),
+            liveStateContractJson: rawEnv.ROOM_LIVE_STATE_CONTRACT_JSON,
             incidentBuffer: {
                 seconds: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_SECONDS,
                 maxRecords: rawEnv.HAXFOOTBALL_INCIDENT_BUFFER_MAX_RECORDS,

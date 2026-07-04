@@ -33,7 +33,9 @@ async function bootstrap() {
     const { getConfig, createModules } = await import("@room/managed");
 
     const modules = createModules({
+        commId: env.apiReadiness?.commId,
         incidentReporter,
+        liveStateContractJson: env.liveStateContractJson,
         publicWebBaseUrl: env.publicWebBaseUrl,
         ...(env.roomManagerAfkActivityDetectionEnabled !== undefined
             ? {
@@ -45,6 +47,7 @@ async function bootstrap() {
             ? { roomManagerEnabled: env.roomManagerEnabled }
             : {}),
         roomId: env.apiReadiness?.roomId,
+        roomName: env.roomName,
     });
 
     const room = HBInit(createRoomConfig(env, getConfig()));

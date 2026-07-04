@@ -1,5 +1,6 @@
 import { getConfig } from "@room/shared/domain/config";
 import { env } from "@env/room";
+import { parseJson } from "@common/general/json";
 import { createSharedRoomModules } from "@room/shared/modules";
 import { createRoomSetupModule } from "@room/shared/modules/room-setup";
 import { createPlayerSessionStore } from "@room/shared/domain/player-sessions";
@@ -9,6 +10,10 @@ import { createManagedAuthorization } from "./domain/authorization";
 import { createManagedAdminModule } from "./modules/admin";
 import { createAuthenticationModule } from "./modules/authentication";
 import { createManagedLifecycleModule } from "./modules/lifecycle";
+import {
+    createManagedLiveStateModule,
+    type LiveStateContract,
+} from "./modules/live-state";
 import { createManagedMatchPersistence } from "./modules/match-persistence";
 import {
     createManagedIncidentModule,
@@ -20,9 +25,12 @@ import {
 } from "./modules/room-events";
 
 type ManagedRoomModulesOptions = {
+    commId?: string | undefined;
     incidentReporter?: RoomIncidentReporter | undefined;
+    liveStateContractJson?: string | undefined;
     publicWebBaseUrl?: string | undefined;
     roomId?: string | undefined;
+    roomName?: string | undefined;
     roomManagerAfkActivityDetectionEnabled?: boolean | undefined;
     roomManagerEnabled?: boolean | undefined;
 };
@@ -76,11 +84,32 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
               reporter: options.incidentReporter,
           })
         : null;
+    const liveStateOptions =
+        options.commId && options.roomId
+            ? {
+                  commId: options.commId,
+                  roomId: options.roomId,
+              }
+            : null;
+    const liveState = liveStateOptions
+        ? createManagedLiveStateModule({
+              commId: liveStateOptions.commId,
+              getPlayerSession: sessionStore.get,
+              liveStateContract: parseJson<LiveStateContract>(
+                  options.liveStateContractJson,
+                  { label: "live state contract JSON" },
+              ),
+              roomId: liveStateOptions.roomId,
+              roomName:
+                  options.roomName ?? getConfig().roomName ?? "HaxFootball",
+          })
+        : null;
     const downstreamModules = [
         roomEvents,
         matchPersistence.module,
         ...sharedModules,
         ...(incidents ? [incidents] : []),
+        ...(liveState ? [liveState] : []),
         ...(lifecycle ? [lifecycle] : []),
     ];
 
