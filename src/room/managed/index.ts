@@ -1,4 +1,5 @@
 import { getConfig } from "@room/shared/domain/config";
+import type { Module } from "@core/module";
 import { env } from "@env/room";
 import { parseJson } from "@common/general/json";
 import { createSharedRoomModules } from "@room/shared/modules";
@@ -8,7 +9,7 @@ import { createGameScoreStore } from "@room/shared/domain/game-score";
 import { createGameModeStore } from "@room/shared/domain/game-mode";
 import { createManagedAuthorization } from "./domain/authorization";
 import { createManagedAdminModule } from "./modules/admin";
-import { createAuthenticationModule } from "./modules/authentication";
+import { createAuthenticationController } from "./modules/authentication";
 import { createManagedLifecycleModule } from "./modules/lifecycle";
 import {
     createManagedLiveStateModule,
@@ -91,8 +92,15 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
                   roomId: options.roomId,
               }
             : null;
+    const downstreamModules: Module[] = [];
+    const authentication = createAuthenticationController({
+        roomId: options.roomId,
+        downstreamModules,
+        sessionStore,
+    });
     const liveState = liveStateOptions
         ? createManagedLiveStateModule({
+              commandHandlers: authentication.liveCommandHandlers,
               commId: liveStateOptions.commId,
               getPlayerSession: sessionStore.get,
               liveStateContract: parseJson<LiveStateContract>(
@@ -104,22 +112,18 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
                   options.roomName ?? getConfig().roomName ?? "HaxFootball",
           })
         : null;
-    const downstreamModules = [
+    downstreamModules.push(
         roomEvents,
         matchPersistence.module,
         ...sharedModules,
         ...(incidents ? [incidents] : []),
         ...(liveState ? [liveState] : []),
         ...(lifecycle ? [lifecycle] : []),
-    ];
+    );
 
     return [
         createRoomSetupModule(),
-        createAuthenticationModule({
-            roomId: options.roomId,
-            downstreamModules,
-            sessionStore,
-        }),
+        authentication.module,
         createManagedAdminModule({ authorization }),
         ...downstreamModules,
     ];

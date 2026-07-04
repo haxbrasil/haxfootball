@@ -9,6 +9,7 @@ import { Room } from "@core/room";
 import { COLOR } from "@common/general/color";
 import { env } from "@env/room";
 import { t } from "@lingui/core/macro";
+import { z } from "zod";
 import type {
     ResolveSessionInput,
     SessionAccount,
@@ -17,6 +18,7 @@ import type {
     PlayerSession,
     PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
+import type { LiveStateCommandHandler } from "./live-state";
 import { Team, isFieldTeam } from "@runtime/models";
 
 type PreJoinSession =
@@ -47,6 +49,11 @@ type AuthenticationModuleOptions = {
     sessionStore: PlayerSessionStore;
 };
 
+export type AuthenticationController = {
+    module: Module;
+    liveCommandHandlers: Record<string, LiveStateCommandHandler>;
+};
+
 type AuthenticationState = {
     sessionStore: PlayerSessionStore;
     preJoinSessions: Map<number, PreJoinSession>;
@@ -56,12 +63,30 @@ type AuthenticationState = {
 
 const SIGN_IN_TIMEOUT_MS = 30_000;
 const GUEST_REGISTER_REMINDER_MS = 15_000;
+const confirmLiveRegistrationPayloadSchema = z.object({
+    accountName: z.string().min(1).max(25),
+    accountUuid: z.string().uuid(),
+    discordUserId: z.string().min(1),
+    roomPlayerId: z.number().int().nonnegative(),
+});
 
 export function createAuthenticationModule({
     roomId,
     downstreamModules,
     sessionStore,
 }: AuthenticationModuleOptions): Module {
+    return createAuthenticationController({
+        roomId,
+        downstreamModules,
+        sessionStore,
+    }).module;
+}
+
+export function createAuthenticationController({
+    roomId,
+    downstreamModules,
+    sessionStore,
+}: AuthenticationModuleOptions): AuthenticationController {
     const state: AuthenticationState = {
         sessionStore,
         preJoinSessions: new Map(),
@@ -82,7 +107,7 @@ export function createAuthenticationModule({
         roomsWithAnnouncementFilter.add(room);
     };
 
-    return createModule()
+    const module = createModule()
         .onBeforePlayerJoin((_room, player) =>
             resolvePlayerBeforeJoin({
                 state,
@@ -273,6 +298,20 @@ export function createAuthenticationModule({
 
             return true;
         });
+
+    return {
+        module,
+        liveCommandHandlers: {
+            "account-registration.confirm-player": ({ command, room }) =>
+                confirmLiveRegistration({
+                    commandPayload: command.payload,
+                    downstreamModules,
+                    room,
+                    roomId,
+                    state,
+                }),
+        },
+    };
 }
 
 function getBlockedFieldTarget(
@@ -755,6 +794,7 @@ async function acceptSignedIn({
     backendPlayerId,
     canonicalName,
     downstreamModules,
+    releaseDownstream = true,
 }: {
     state: AuthenticationState;
     room: Room;
@@ -763,6 +803,7 @@ async function acceptSignedIn({
     backendPlayerId: string;
     canonicalName: string;
     downstreamModules: Module[];
+    releaseDownstream?: boolean;
 }): Promise<void> {
     const player = room.getPlayer(playerId);
 
@@ -799,7 +840,81 @@ async function acceptSignedIn({
         sound: "notification",
     });
 
-    releasePlayerJoin(room, playerId, downstreamModules);
+    if (releaseDownstream) {
+        releasePlayerJoin(room, playerId, downstreamModules);
+    }
+}
+
+async function confirmLiveRegistration({
+    commandPayload,
+    downstreamModules,
+    room,
+    roomId,
+    state,
+}: {
+    commandPayload: unknown;
+    downstreamModules: Module[];
+    room: Room;
+    roomId?: string | undefined;
+    state: AuthenticationState;
+}): Promise<{ signedIn: true }> {
+    if (!roomId) {
+        throw new Error("Live registration is unavailable in this room");
+    }
+
+    const input = confirmLiveRegistrationPayloadSchema.parse(commandPayload);
+    const player = room.getPlayer(input.roomPlayerId);
+
+    if (!player) {
+        throw new Error("Player is no longer in the room");
+    }
+
+    if (player.name !== input.accountName) {
+        throw new Error("Player name no longer matches the registered account");
+    }
+
+    const session = state.sessionStore.get(player.id);
+
+    if (session?.kind !== "guest") {
+        throw new Error("Player is not waiting as a guest");
+    }
+
+    const accountResult = await api.accounts.get(input.accountUuid);
+
+    if (!accountResult.ok) {
+        throw new Error("Account could not be loaded");
+    }
+
+    const account = accountResult.data;
+
+    if (
+        account.name !== input.accountName ||
+        account.externalId !== input.discordUserId
+    ) {
+        throw new Error("Account does not match the Discord confirmation");
+    }
+
+    const associationResult = await api.players.associateAccount(
+        session.playerId,
+        { accountUuid: account.uuid },
+    );
+
+    if (!associationResult.ok) {
+        throw new Error("Player could not be linked to the account");
+    }
+
+    await acceptSignedIn({
+        state,
+        room,
+        playerId: player.id,
+        account,
+        backendPlayerId: session.playerId,
+        canonicalName: account.name,
+        downstreamModules,
+        releaseDownstream: false,
+    });
+
+    return { signedIn: true };
 }
 
 async function getAccountPermissions(

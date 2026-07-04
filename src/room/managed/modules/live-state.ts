@@ -28,7 +28,8 @@ type LiveStateDocumentSnapshot = {
 };
 
 type LiveStateDocumentProvider = () => LiveStateDocumentSnapshot[];
-type LiveStateCommandHandler = (input: {
+
+export type LiveStateCommandHandler = (input: {
     command: LiveRoomControlCommand;
     room: Room;
 }) => unknown | Promise<unknown>;
@@ -140,7 +141,11 @@ export function createManagedLiveStateModule({
             throw new Error(`Unsupported live room command '${command.name}'`);
         }
 
-        return handler({ command, room: linkedRoom });
+        const result = await handler({ command, room: linkedRoom });
+
+        scheduleSnapshot();
+
+        return result;
     };
 
     return createModule()
