@@ -56,8 +56,8 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
     buildStadium({
         measures: {
             name: "Flag",
-            size: { width: 610.4, height: 276.5 },
-            field: { width: 1041.6, height: 372.4 },
+            size: { width: 610.4, height: 304.15 },
+            field: { width: 1041.6, height: 409.64 },
             endZones: { depth: 86.8 },
             goal: { width: 67.2 },
             yard: {
@@ -68,9 +68,9 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
                 },
             },
             hashMarks: {
-                bandTopY: -56,
-                bandBottomY: 56,
-                markHeight: 14,
+                bandTopY: -61.6,
+                bandBottomY: 61.6,
+                markHeight: 15.4,
                 subdivisionYards: 2,
             },
             ticks: {
@@ -95,8 +95,8 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
             collisionSidelines: {
                 leftX: -434,
                 rightX: 434,
-                topY: -262.5,
-                bottomY: 262.5,
+                topY: -288.75,
+                bottomY: 288.75,
                 segment: {
                     vis: false,
                     color: COLOR_SCHEMA.GOAL_POSTS.SEGMENT,
@@ -109,8 +109,8 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
             ballBoundaries: {
                 leftX: -562.8,
                 rightX: 562.8,
-                topY: 252,
-                bottomY: -252,
+                topY: 277.2,
+                bottomY: -277.2,
                 leftSegment: {
                     vis: false,
                     color: COLOR_SCHEMA.BOUNDARIES.LEFT,
@@ -126,7 +126,7 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
                 {
                     rect: {
                         x: [-596.4, 596.4],
-                        y: [-245, 245],
+                        y: [-269.5, 269.5],
                     },
                     side: "outside",
                     props: { cMask: ["ball"], bCoef: 1.5 },
@@ -135,7 +135,7 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
                 {
                     rect: {
                         x: [-610.4, 610.4],
-                        y: [-262.5, 262.5],
+                        y: [-288.75, 288.75],
                     },
                     side: "outside",
                     props: { bCoef: 0.9 },
