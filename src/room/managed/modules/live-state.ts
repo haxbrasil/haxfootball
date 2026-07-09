@@ -3,7 +3,10 @@ import { api } from "@api/client";
 import { createModule, type Module } from "@core/module";
 import type { Room } from "@core/room";
 import { toApiTeam } from "@room/managed/domain/api-event-fields";
-import type { PlayerSessionReader } from "@room/shared/domain/player-sessions";
+import {
+    getPlayerPlayEligibility,
+    type PlayerSessionReader,
+} from "@room/shared/domain/player-sessions";
 import type {
     LiveRoomAttachment,
     LiveRoomControlCommand,
@@ -35,6 +38,7 @@ export type LiveStateCommandHandler = (input: {
 }) => unknown | Promise<unknown>;
 
 type ManagedLiveStateModuleOptions = {
+    allowGuestPlay: boolean;
     commId: string;
     commandHandlers?: Record<string, LiveStateCommandHandler> | undefined;
     documentProvider?: LiveStateDocumentProvider | undefined;
@@ -47,6 +51,7 @@ type ManagedLiveStateModuleOptions = {
 const SNAPSHOT_INTERVAL_MS = 5_000;
 
 export function createManagedLiveStateModule({
+    allowGuestPlay,
     commId,
     commandHandlers,
     documentProvider,
@@ -65,7 +70,8 @@ export function createManagedLiveStateModule({
         if (!linkedRoom) return undefined;
 
         revision += 1;
-        return buildSnapshot({
+        return buildManagedLiveStateSnapshot({
+            allowGuestPlay,
             documentProvider,
             desyncedPlayerIds,
             getPlayerSession,
@@ -172,7 +178,8 @@ export function createManagedLiveStateModule({
         .onTeamGoal(() => scheduleSnapshot());
 }
 
-function buildSnapshot({
+export function buildManagedLiveStateSnapshot({
+    allowGuestPlay,
     documentProvider,
     desyncedPlayerIds,
     getPlayerSession,
@@ -181,6 +188,7 @@ function buildSnapshot({
     roomName,
     revision,
 }: {
+    allowGuestPlay: boolean;
     documentProvider: LiveStateDocumentProvider | undefined;
     desyncedPlayerIds: Set<number>;
     getPlayerSession: PlayerSessionReader;
@@ -201,6 +209,11 @@ function buildSnapshot({
         },
         players: room.getPlayerList().map((player) => {
             const session = getPlayerSession(player.id);
+            const eligibility = getPlayerPlayEligibility({
+                allowGuestPlay,
+                managedRoom: true,
+                session,
+            });
 
             return {
                 roomPlayerId: player.id,
@@ -210,22 +223,13 @@ function buildSnapshot({
                 avatar: null,
                 desynced: desyncedPlayerIds.has(player.id),
                 sessionKind: session?.kind ?? null,
-                playable: session
-                    ? session.kind === "guest" || session.kind === "signed-in"
-                    : null,
-                playBlockedReason: playBlockedReason(session?.kind ?? null),
+                playable: eligibility.playable,
+                playBlockedReason:
+                    eligibility.playBlockedReason === "none"
+                        ? null
+                        : eligibility.playBlockedReason,
             };
         }),
         stateDocuments: liveStateContract ? (documentProvider?.() ?? []) : [],
     };
-}
-
-function playBlockedReason(kind: string | null): string | null {
-    switch (kind) {
-        case "resolving":
-        case "signing-in":
-            return kind;
-        default:
-            return null;
-    }
 }

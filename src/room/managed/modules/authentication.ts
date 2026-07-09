@@ -14,9 +14,10 @@ import type {
     ResolveSessionInput,
     SessionAccount,
 } from "@haxbrasil/haxfootball-api-sdk";
-import type {
-    PlayerSession,
-    PlayerSessionStore,
+import {
+    getPlayerPlayEligibility,
+    type PlayerSession,
+    type PlayerSessionStore,
 } from "@room/shared/domain/player-sessions";
 import type { LiveStateCommandHandler } from "./live-state";
 import { Team, isFieldTeam } from "@runtime/models";
@@ -44,6 +45,7 @@ type SessionIdentityPlayer = Pick<
 >;
 
 type AuthenticationModuleOptions = {
+    allowGuestPlay: boolean;
     roomId?: string | undefined;
     downstreamModules: Module[];
     sessionStore: PlayerSessionStore;
@@ -55,6 +57,7 @@ export type AuthenticationController = {
 };
 
 type AuthenticationState = {
+    allowGuestPlay: boolean;
     sessionStore: PlayerSessionStore;
     preJoinSessions: Map<number, PreJoinSession>;
     guestRegisterReminderIntervals: Map<number, ReturnType<typeof setInterval>>;
@@ -71,11 +74,13 @@ const confirmLiveRegistrationPayloadSchema = z.object({
 });
 
 export function createAuthenticationModule({
+    allowGuestPlay,
     roomId,
     downstreamModules,
     sessionStore,
 }: AuthenticationModuleOptions): Module {
     return createAuthenticationController({
+        allowGuestPlay,
         roomId,
         downstreamModules,
         sessionStore,
@@ -83,11 +88,13 @@ export function createAuthenticationModule({
 }
 
 export function createAuthenticationController({
+    allowGuestPlay,
     roomId,
     downstreamModules,
     sessionStore,
 }: AuthenticationModuleOptions): AuthenticationController {
     const state: AuthenticationState = {
+        allowGuestPlay,
         sessionStore,
         preJoinSessions: new Map(),
         guestRegisterReminderIntervals: new Map(),
@@ -331,7 +338,11 @@ function getBlockedFieldTarget(
     return (
         operation.targetPlayers.find((player) => {
             const session = state.sessionStore.get(player.id);
-            return session?.kind !== "signed-in";
+            return !getPlayerPlayEligibility({
+                allowGuestPlay: state.allowGuestPlay,
+                managedRoom: true,
+                session,
+            }).playable;
         }) ?? null
     );
 }
@@ -782,6 +793,11 @@ function acceptGuest({
         return;
     }
 
+    if (state.allowGuestPlay) {
+        sendGuestRegistrationInvitation(room, playerId);
+        return;
+    }
+
     sendRegisterReminder(room, playerId);
     startGuestRegisterReminder(state, room, playerId);
 }
@@ -933,6 +949,15 @@ async function getAccountPermissions(
 function sendRegisterReminder(room: Room, playerId: number): void {
     room.send({
         message: t`🔐 You need to register before you can play. Register in our Discord: ${env.DISCORD_LINK}`,
+        color: COLOR.SYSTEM,
+        to: playerId,
+        sound: "notification",
+    });
+}
+
+function sendGuestRegistrationInvitation(room: Room, playerId: number): void {
+    room.send({
+        message: t`🔐 You are playing as a guest. Register in our Discord: ${env.DISCORD_LINK}`,
         color: COLOR.SYSTEM,
         to: playerId,
         sound: "notification",

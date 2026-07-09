@@ -26,6 +26,8 @@ import {
 } from "./modules/room-events";
 
 type ManagedRoomModulesOptions = {
+    allowGuestPlay?: boolean | undefined;
+    autoManageNativeAdmins?: boolean | undefined;
     commId?: string | undefined;
     incidentReporter?: RoomIncidentReporter | undefined;
     liveStateContractJson?: string | undefined;
@@ -39,6 +41,8 @@ type ManagedRoomModulesOptions = {
 export { getConfig };
 
 export function createModules(options: ManagedRoomModulesOptions = {}) {
+    const allowGuestPlay = options.allowGuestPlay ?? false;
+    const autoManageNativeAdmins = options.autoManageNativeAdmins ?? false;
     const sessionStore = createPlayerSessionStore();
     const gameScoreStore = createGameScoreStore();
     const gameModeStore = createGameModeStore();
@@ -54,12 +58,13 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         env.ROOM_MANAGER_ENABLED ?? roomManagerLaunchEnabled;
     const sharedModules = createSharedRoomModules({
         authorization,
-        autoManageNativeAdmins: false,
+        autoManageNativeAdmins,
         gameModeStore,
         gameScoreStore,
         getPlayerSession: sessionStore.get,
         matchEvents: matchPersistence.matchEvents,
         roomManager: {
+            allowGuestPlay,
             ...(options.roomManagerAfkActivityDetectionEnabled !== undefined
                 ? {
                       afkActivityDetectionEnabled:
@@ -94,12 +99,14 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
             : null;
     const downstreamModules: Module[] = [];
     const authentication = createAuthenticationController({
+        allowGuestPlay,
         roomId: options.roomId,
         downstreamModules,
         sessionStore,
     });
     const liveState = liveStateOptions
         ? createManagedLiveStateModule({
+              allowGuestPlay,
               commandHandlers: authentication.liveCommandHandlers,
               commId: liveStateOptions.commId,
               getPlayerSession: sessionStore.get,

@@ -46,6 +46,12 @@ async function bootstrap() {
         ...(env.roomManagerEnabled !== undefined
             ? { roomManagerEnabled: env.roomManagerEnabled }
             : {}),
+        ...(env.allowGuestPlay !== undefined
+            ? { allowGuestPlay: env.allowGuestPlay }
+            : {}),
+        ...(env.autoManageNativeAdmins !== undefined
+            ? { autoManageNativeAdmins: env.autoManageNativeAdmins }
+            : {}),
         roomId: env.apiReadiness?.roomId,
         roomName: env.roomName,
     });

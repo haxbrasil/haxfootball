@@ -1,5 +1,6 @@
 import type { GameRuntimeSnapshot } from "../game-runtime";
 import type { GameModeName } from "../game-mode";
+import type { PlayerPlayBlockedReason } from "../player-sessions";
 import { Team, type FieldTeam } from "@runtime/models";
 
 export type RoomManagerStatus = "active" | "suspended" | "disabled";
@@ -12,7 +13,7 @@ export type RoomManagementPlayer = {
     team: TeamID;
     admin: boolean;
     playable: boolean;
-    playBlockedReason: "none" | "guest" | "resolving" | "signing-in";
+    playBlockedReason: PlayerPlayBlockedReason;
 };
 
 export type RoomManagementSnapshot = {
@@ -121,6 +122,7 @@ export type RoomManagementMessage =
               | "manager.eligibility.register"
               | "manager.status.enabled"
               | "manager.status.disabled"
+              | "manager.status.launch-disabled"
               | "manager.status.resumed"
               | "manager.status.suspended"
               | "manager.afk.marked"

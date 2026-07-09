@@ -6,8 +6,11 @@ const resolvePath = (target: string) => path.resolve(__dirname, target);
 export default defineConfig({
     resolve: {
         alias: {
+            "@lingui/core/macro": resolvePath("src/test/lingui-macro.ts"),
+            "@api": resolvePath("src/api"),
             "@common": resolvePath("src/common"),
             "@core": resolvePath("src/core"),
+            "@env": resolvePath("src/env"),
             "@haxball": resolvePath("src/haxball"),
             "@environment": resolvePath("src/environments"),
             "@modes": resolvePath("src/modes"),

@@ -38,6 +38,7 @@ export function createModules(options: ManualRoomModulesOptions = {}) {
             getPlayerSession: sessionStore.get,
             officialAdmins,
             roomManager: {
+                allowGuestPlay: true,
                 ...(options.roomManagerAfkActivityDetectionEnabled !== undefined
                     ? {
                           afkActivityDetectionEnabled:

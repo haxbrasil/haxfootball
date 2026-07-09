@@ -12,6 +12,8 @@ const roomServerBaseEnvSchema = {
     DEBUG: z.stringbool().default(false),
     ROOM_MANAGER_ENABLED: z.stringbool().optional(),
     ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED: z.stringbool().optional(),
+    ROOM_ALLOW_GUEST_PLAY: z.stringbool().optional(),
+    ROOM_AUTO_MANAGE_NATIVE_ADMINS: z.stringbool().optional(),
     LANGUAGE: z.string().trim().min(1).optional(),
     TUTORIAL_LINK: z.string().trim().min(1),
     DISCORD_LINK: z.string().trim().min(1),
@@ -98,6 +100,8 @@ export const env = createEnv(
             roomManagerEnabled: rawEnv.ROOM_MANAGER_ENABLED,
             roomManagerAfkActivityDetectionEnabled:
                 rawEnv.ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED,
+            allowGuestPlay: rawEnv.ROOM_ALLOW_GUEST_PLAY,
+            autoManageNativeAdmins: rawEnv.ROOM_AUTO_MANAGE_NATIVE_ADMINS,
         };
     },
 );

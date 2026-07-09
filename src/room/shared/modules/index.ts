@@ -23,6 +23,7 @@ import { createPlayerAccessModule } from "./player-access";
 import { createRoomManagerModule } from "./room-manager";
 
 type SharedRoomManagerOptions = {
+    allowGuestPlay: boolean;
     launchEnabled: boolean;
     managedRoom: boolean;
     afkActivityDetectionEnabled?: boolean;
@@ -79,6 +80,7 @@ export function createSharedRoomModules({
             ...(matchEvents ? { matchEvents } : {}),
         }),
         createRoomManagerModule({
+            allowGuestPlay: roomManager.allowGuestPlay,
             authorization,
             afkActivityDetectionEnabled,
             enabled: roomManagerEnabled,

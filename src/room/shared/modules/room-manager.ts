@@ -12,7 +12,10 @@ import { CommandCategory } from "../domain/command-categories";
 import type { GameModeStore } from "../domain/game-mode";
 import { applyGameModeRoomSettings } from "../domain/game-mode-room-settings";
 import type { GameRuntimeStore } from "../domain/game-runtime";
-import type { PlayerSessionReader } from "../domain/player-sessions";
+import {
+    getPlayerPlayEligibility,
+    type PlayerSessionReader,
+} from "../domain/player-sessions";
 import {
     DEFAULT_ROOM_MANAGER_STATE,
     ROOM_MANAGER_DEFAULT_VISIBLE_ACTION_DELAY_MS,
@@ -36,6 +39,7 @@ const ROOM_MANAGER_COMMAND = {
 } as const;
 
 type RoomManagerModuleOptions = {
+    allowGuestPlay: boolean;
     authorization: RoomAuthorization;
     enabled: boolean;
     afkActivityDetectionEnabled: boolean;
@@ -48,31 +52,21 @@ type RoomManagerModuleOptions = {
 };
 
 function getPlayerEligibility({
+    allowGuestPlay,
     managedRoom,
     playerId,
     getPlayerSession,
 }: {
+    allowGuestPlay: boolean;
     managedRoom: boolean;
     playerId: number;
     getPlayerSession: PlayerSessionReader;
 }): Pick<RoomManagementPlayer, "playable" | "playBlockedReason"> {
-    if (!managedRoom) {
-        return { playable: true, playBlockedReason: "none" };
-    }
-
-    const session = getPlayerSession(playerId);
-
-    switch (session?.kind) {
-        case "signed-in":
-            return { playable: true, playBlockedReason: "none" };
-        case "signing-in":
-            return { playable: false, playBlockedReason: "signing-in" };
-        case "guest":
-            return { playable: false, playBlockedReason: "guest" };
-        case "resolving":
-        case undefined:
-            return { playable: false, playBlockedReason: "resolving" };
-    }
+    return getPlayerPlayEligibility({
+        allowGuestPlay,
+        managedRoom,
+        session: getPlayerSession(playerId),
+    });
 }
 
 function formatPlayerName(
@@ -108,6 +102,8 @@ function formatManagerMessage(message: RoomManagementMessage): string {
             return t`🧭 Management enabled.`;
         case "manager.status.disabled":
             return t`🧭 Management disabled. Teams remain locked.`;
+        case "manager.status.launch-disabled":
+            return t`🧭 Management was disabled when this room was launched.`;
         case "manager.status.resumed":
             return t`🧭 Management resumed.`;
         case "manager.status.suspended":
@@ -186,6 +182,7 @@ function getMessageColor(message: RoomManagementMessage): number {
         case "manager.afk.unavailable":
             return COLOR.WARNING;
         case "manager.status.disabled":
+        case "manager.status.launch-disabled":
         case "manager.status.suspended":
             return COLOR.ADMIN;
         default:
@@ -206,6 +203,7 @@ function normalizeManagerSubcommand(command: CommandSpec): string {
 }
 
 export function createRoomManagerModule({
+    allowGuestPlay,
     afkActivityDetectionEnabled,
     authorization,
     enabled,
@@ -240,6 +238,7 @@ export function createRoomManagerModule({
             team: player.team,
             admin: player.admin,
             ...getPlayerEligibility({
+                allowGuestPlay,
                 managedRoom,
                 playerId: player.id,
                 getPlayerSession,
@@ -473,6 +472,13 @@ export function createRoomManagerModule({
 
         switch (subcommand) {
             case "on": {
+                if (!enabled) {
+                    sendMessage(room, player.id, {
+                        id: "manager.status.launch-disabled",
+                    });
+                    return { hideMessage: true };
+                }
+
                 state = setManagerStatus(state, "active");
                 sendMessage(room, "room", { id: "manager.status.enabled" });
                 void eventSink?.({
@@ -502,6 +508,13 @@ export function createRoomManagerModule({
                 return { hideMessage: true };
             }
             case "resume": {
+                if (!enabled) {
+                    sendMessage(room, player.id, {
+                        id: "manager.status.launch-disabled",
+                    });
+                    return { hideMessage: true };
+                }
+
                 state = setManagerStatus(state, "active");
                 sendMessage(room, "room", { id: "manager.status.resumed" });
                 void eventSink?.({
