@@ -91,6 +91,7 @@ export function Punt({ downState }: { downState: DownState }) {
         $setBallMoveable();
         $unlockBall();
         $setBallKickForce("normal");
+        $setBallActive();
     });
 
     const getPlayersBeyondBallLine = (state: GameState) =>
@@ -124,7 +125,9 @@ export function Punt({ downState }: { downState: DownState }) {
         $setBallInactive();
 
         $dispose(() => {
-            $setBallActive();
+            $setBallUnmoveable();
+            $lockBall();
+            $setBallInactive();
         });
 
         $effect(($) => {
@@ -145,6 +148,7 @@ export function Punt({ downState }: { downState: DownState }) {
                 downState: nextDownState,
             },
             wait: ticks({ seconds: 1 }),
+            disposal: "IMMEDIATE",
         });
     }
 

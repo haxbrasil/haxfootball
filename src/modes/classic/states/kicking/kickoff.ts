@@ -9,6 +9,7 @@ import {
     $trapTeamInEndZone,
     $untrapAllTeams,
     $setBallKickForce,
+    $lockBall,
     $setBallMoveable,
     $setBallUnmoveable,
     $trapPlayerInMidField,
@@ -114,6 +115,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         $untrapAllTeams();
         $setBallMoveable();
         $setBallKickForce("normal");
+        $setBallActive();
     });
 
     $checkpoint({
@@ -185,7 +187,9 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         $setBallInactive();
 
         $dispose(() => {
-            $setBallActive();
+            $setBallUnmoveable();
+            $lockBall();
+            $setBallInactive();
         });
 
         $effect(($) => {
@@ -206,6 +210,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
                 downState: nextDownState,
             },
             wait: ticks({ seconds: 1 }),
+            disposal: "IMMEDIATE",
         });
     }
 

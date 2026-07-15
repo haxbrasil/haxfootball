@@ -152,18 +152,12 @@ export function $trapTeamInMidField(team: Team) {
 
 export function $lockBall() {
     $effect(($) => {
-        const ball = $.getDiscProperties(0);
-        if (ball?.invMass === 0.000001) return;
-
         $.setBall({ invMass: 0.000001 });
     });
 }
 
 export function $unlockBall() {
     $effect(($) => {
-        const ball = $.getDiscProperties(0);
-        if (ball?.invMass === 1) return;
-
         $.setBall({ invMass: 1 });
     });
 }
@@ -188,9 +182,6 @@ export function $setBallKickForce(force: "fast" | "strong" | "normal") {
     })();
 
     $effect(($) => {
-        const ball = $.getDiscProperties(0);
-        if (ball?.invMass === invMass) return;
-
         $.setBall({ invMass });
     });
 }

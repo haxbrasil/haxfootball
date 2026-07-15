@@ -93,6 +93,7 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
         $setBallMoveable();
         $unlockBall();
         $setBallKickForce("normal");
+        $setBallActive();
     });
 
     const getPlayersBeyondBallLine = (state: GameState) =>
@@ -129,7 +130,9 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
         $setBallInactive();
 
         $dispose(() => {
-            $setBallActive();
+            $setBallUnmoveable();
+            $lockBall();
+            $setBallInactive();
         });
 
         $effect(($) => {
@@ -150,6 +153,7 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
                 downState: nextDownState,
             },
             wait: ticks({ seconds: 1 }),
+            disposal: "IMMEDIATE",
         });
     }
 
