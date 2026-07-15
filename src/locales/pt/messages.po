@@ -82,6 +82,11 @@ msgstr "{0} caiu na end zone"
 msgid "{0} left from the end zone"
 msgstr "{0} saiu da end zone"
 
+#. placeholder {0}: player.name
+#: src/modes/classic/shared/commands/handlers/set-score.ts:72
+msgid "{0} set the score."
+msgstr "{0} alterou o placar."
+
 #. placeholder {0}: frame.player.name
 #. placeholder {0}: frame.quarterback.name
 #: src/modes/classic/states/scrimmage/blitz.ts:369
@@ -420,6 +425,10 @@ msgstr "⚠️ Apenas admins podem pedir reposicionamento."
 msgid "⚠️ Only admins can change game positioning."
 msgstr "⚠️ Apenas admins podem alterar o posicionamento do jogo."
 
+#: src/modes/classic/shared/commands/handlers/set-score.ts:39
+msgid "⚠️ Only admins can change the score."
+msgstr "⚠️ Apenas admins podem alterar o placar."
+
 #: src/modes/classic/definition/index.ts:244
 #: src/modes/flag/definition/index.ts:247
 msgid "⚠️ Only admins can modify flags."
@@ -534,6 +543,14 @@ msgstr "⚠️ Uso: !los <red/blue> <1-50>."
 #: src/modes/classic/shared/commands/handlers/qb.ts:148
 msgid "⚠️ Usage: !qb [#id|name]."
 msgstr "⚠️ Uso: !qb [#id|name]."
+
+#: src/modes/classic/shared/commands/handlers/set-score.ts:53
+msgid "⚠️ Usage: !setscore <red> <blue> (0-255)."
+msgstr "⚠️ Uso: !setscore <red> <blue> (0-255)."
+
+#: src/modes/classic/shared/commands/handlers/set-score.ts:49
+#~ msgid "⚠️ Usage: !setscore <red> <blue>."
+#~ msgstr "⚠️ Uso: !setscore <red> <blue>."
 
 #: src/room/shared/modules/room-manager.ts:544
 msgid "⚠️ Use !manager on, !manager off, !manager resume, or !manager status."
@@ -1479,7 +1496,7 @@ msgstr "kickoff tocado primeiro por {0}, do time que chutou."
 #~ msgid "Kickoff."
 #~ msgstr "Kickoff."
 
-#: src/modes/classic/definition/commands.ts:65
+#: src/modes/classic/definition/commands.ts:70
 #: src/modes/flag/definition/commands.ts:45
 msgid "List all config flags"
 msgstr "Listar todas as flags de configuração"
@@ -1768,7 +1785,7 @@ msgstr "SAFETY!"
 msgid "SAFETY! Kick within {SAFETY_KICK_TIMEOUT_SECONDS}s."
 msgstr "SAFETY! Chute em até {SAFETY_KICK_TIMEOUT_SECONDS}s."
 
-#: src/modes/classic/definition/commands.ts:55
+#: src/modes/classic/definition/commands.ts:60
 msgid "Set or clear the current quarterback"
 msgstr "Definir ou remover o quarterback atual"
 
@@ -1780,6 +1797,10 @@ msgstr "Definir a descida atual"
 #: src/modes/classic/definition/commands.ts:20
 msgid "Set the distance to first down"
 msgstr "Definir a distância para o first down"
+
+#: src/modes/classic/definition/commands.ts:55
+msgid "Set the game score"
+msgstr "Definir o placar do jogo"
 
 #: src/modes/classic/definition/commands.ts:30
 #: src/modes/flag/definition/commands.ts:15
@@ -1953,7 +1974,7 @@ msgstr "Desfazer a última jogada"
 msgid "Victory for the {0} team!"
 msgstr "Vitória do time {0}!"
 
-#: src/modes/classic/definition/commands.ts:60
+#: src/modes/classic/definition/commands.ts:65
 #: src/modes/flag/definition/commands.ts:40
 msgid "View or set a config flag"
 msgstr "Ver ou alterar uma flag de configuração"

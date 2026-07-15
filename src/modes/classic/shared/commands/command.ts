@@ -3,6 +3,7 @@ import type { DownState } from "@modes/classic/shared/rules/down";
 import { infoCommandHandler } from "@modes/classic/shared/commands/handlers/info";
 import { qbCommandHandler } from "@modes/classic/shared/commands/handlers/qb";
 import { scoreCommandHandler } from "@modes/classic/shared/commands/handlers/score";
+import { setScoreCommandHandler } from "@modes/classic/shared/commands/handlers/set-score";
 import { undoCommandHandler } from "@modes/classic/shared/commands/handlers/undo";
 import { CLASSIC_COMMAND } from "@modes/classic/shared/commands/names";
 import {
@@ -21,6 +22,7 @@ const sharedCommandHandlers: SharedCommandHandlers = {
     [CLASSIC_COMMAND.UNDO]: undoCommandHandler,
     [CLASSIC_COMMAND.INFO]: infoCommandHandler,
     [CLASSIC_COMMAND.SCORE]: scoreCommandHandler,
+    [CLASSIC_COMMAND.SET_SCORE]: setScoreCommandHandler,
     [CLASSIC_COMMAND.QUARTERBACK]: qbCommandHandler,
 };
 
@@ -39,6 +41,7 @@ const isSharedCommandEnabled = (
         case CLASSIC_COMMAND.INFO:
             return options.info !== false && options.info !== undefined;
         case CLASSIC_COMMAND.SCORE:
+        case CLASSIC_COMMAND.SET_SCORE:
             return options.score !== false;
         case CLASSIC_COMMAND.QUARTERBACK:
             return options.qb !== undefined;

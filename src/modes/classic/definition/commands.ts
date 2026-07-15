@@ -50,6 +50,11 @@ export const CLASSIC_COMMAND_DEFINITIONS: CommandDefinition[] = [
         description: t`Show the score`,
     },
     {
+        name: CLASSIC_COMMAND.SET_SCORE,
+        category: CommandCategory.Game,
+        description: t`Set the game score`,
+    },
+    {
         name: CLASSIC_COMMAND.QUARTERBACK,
         category: CommandCategory.Game,
         description: t`Set or clear the current quarterback`,

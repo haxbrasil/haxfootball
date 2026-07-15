@@ -33,6 +33,13 @@ export const classicGlobalSchema = defineGlobalSchema({
                 [team]: state.scores[team] + points,
             },
         }),
+        setScore: (state, red: number, blue: number) => ({
+            ...state,
+            scores: {
+                [Team.RED]: red,
+                [Team.BLUE]: blue,
+            },
+        }),
         updateSnapProfile: (state, playerId: number, position: Position) => {
             const existingProfile = state.snapProfile.find(
                 (profile) => profile.playerId === playerId,
