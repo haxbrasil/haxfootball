@@ -19,7 +19,7 @@ export const {
     },
     flags: {
         LOS_BLOCKING: {
-            description: t`Blocks player crossings over the LOS during presnap positioning.`,
+            description: t`Blocks player crossings over the LOS during presnap and punt positioning.`,
             getValue: (config) => config.flags.losBlocking,
             setValue: (config, value) => {
                 config.flags = {

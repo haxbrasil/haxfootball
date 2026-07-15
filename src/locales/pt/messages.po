@@ -282,7 +282,7 @@ msgstr "⏪ {0} anulou a jogada! Voltando para o último checkpoint..."
 msgid "⏱️ {HIKE_WARNING_SECONDS_REMAINING}s left to hike."
 msgstr "⏱️ {HIKE_WARNING_SECONDS_REMAINING}s para fazer o hike."
 
-#: src/modes/classic/states/kicking/kickoff.ts:168
+#: src/modes/classic/states/kicking/kickoff.ts:170
 msgid "⏱️ {KICKOFF_WARNING_SECONDS_REMAINING}s left to kick off."
 msgstr "⏱️ {KICKOFF_WARNING_SECONDS_REMAINING}s para chutar o kickoff."
 
@@ -594,8 +594,8 @@ msgstr "⚠️ Você não pode banir esse jogador."
 msgid "⚠️ You cannot kick this player."
 msgstr "⚠️ Você não pode expulsar esse jogador."
 
-#: src/modes/classic/states/kicking/punt.ts:173
-#: src/modes/classic/states/kicking/safety.ts:178
+#: src/modes/classic/states/kicking/punt.ts:190
+#: src/modes/classic/states/kicking/safety.ts:182
 msgid "⚠️ You cannot kick while a teammate is past the ball line."
 msgstr "⚠️ Você não pode chutar enquanto um companheiro estiver além da linha de scrimmage."
 
@@ -618,7 +618,7 @@ msgstr "⚠️ Você não pode dar hike enquanto um companheiro estiver além da
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ Você não pode usar esse comando agora."
 
-#: src/modes/classic/states/kicking/punt.ts:179
+#: src/modes/classic/states/kicking/punt.ts:196
 msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ Você deve voltar para trás da linha da bola para permitir o punt!"
 
@@ -887,12 +887,12 @@ msgstr "🏈 HaxFootball - Futebol Americano 🏈"
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
-#: src/modes/classic/states/kicking/kickoff.ts:100
-#: src/modes/classic/states/kicking/kickoff.ts:108
+#: src/modes/classic/states/kicking/kickoff.ts:101
+#: src/modes/classic/states/kicking/kickoff.ts:109
 msgid "🏈 Kickoff for {kickingTeamName}."
 msgstr "🏈 Kickoff para {kickingTeamName}."
 
-#: src/modes/classic/states/kicking/kickoff.ts:95
+#: src/modes/classic/states/kicking/kickoff.ts:96
 msgid "🏈 Kickoff for {kickingTeamName}. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 msgstr "🏈 Kickoff para {kickingTeamName}. Chute em até {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 
@@ -1288,6 +1288,9 @@ msgid "ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 msgstr "bola posicionada na linha de {KICKOFF_OUT_OF_BOUNDS_YARD_LINE} jardas."
 
 #: src/modes/classic/config.ts:22
+msgid "Blocks player crossings over the LOS during presnap and punt positioning."
+msgstr "Bloqueia jogadores de cruzarem a LOS durante o posicionamento de pré-snap e punt."
+
 #: src/modes/flag/config.ts:21
 msgid "Blocks player crossings over the LOS during presnap positioning."
 msgstr "Bloqueia jogadores de cruzarem a LOS durante o pré-snap."
@@ -1456,12 +1459,12 @@ msgstr "Interceptação"
 msgid "kick the PAT."
 msgstr "chute o extra point."
 
-#: src/modes/classic/states/kicking/punt.ts:136
-#: src/modes/classic/states/kicking/safety.ts:141
+#: src/modes/classic/states/kicking/punt.ts:152
+#: src/modes/classic/states/kicking/safety.ts:144
 msgid "kicking team loses possession."
 msgstr "time que chutaria perde a posse."
 
-#: src/modes/classic/states/kicking/kickoff.ts:150
+#: src/modes/classic/states/kicking/kickoff.ts:152
 msgid "Kickoff"
 msgstr "Kickoff"
 
@@ -1469,7 +1472,7 @@ msgstr "Kickoff"
 #~ msgid "kickoff caught first by the kicking team ({0})."
 #~ msgstr "kickoff tocado primeiro pelo time que chutou ({0})."
 
-#: src/modes/classic/states/kicking/kickoff.ts:196
+#: src/modes/classic/states/kicking/kickoff.ts:200
 msgid "kickoff clock expired"
 msgstr "tempo para o kickoff esgotado"
 
@@ -1643,7 +1646,7 @@ msgstr "PICK-SIX de {0}!"
 #~ msgid "punt caught first by the kicking team ({0})."
 #~ msgstr "Punt tocado primeiro pelo time que chutou ({0})."
 
-#: src/modes/classic/states/kicking/punt.ts:135
+#: src/modes/classic/states/kicking/punt.ts:151
 msgid "punt clock expired"
 msgstr "tempo para o punt esgotado"
 
@@ -1708,7 +1711,7 @@ msgstr "O quarterback {0} saiu na end zone"
 msgid "quarterback run is live."
 msgstr "corrida do quarterback liberada."
 
-#: src/modes/classic/states/kicking/kickoff.ts:197
+#: src/modes/classic/states/kicking/kickoff.ts:201
 msgid "receiving team gets the ball at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 msgstr "time retornador fica com a bola na linha de {KICKOFF_OUT_OF_BOUNDS_YARD_LINE} jardas."
 
@@ -1742,7 +1745,7 @@ msgstr "Reposicionar jogadores"
 msgid "Requires a selected quarterback before the offense can snap."
 msgstr "Exige que um quarterback seja selecionado antes que o ataque possa dar o snap."
 
-#: src/modes/classic/states/kicking/safety.ts:110
+#: src/modes/classic/states/kicking/safety.ts:111
 msgid "Safety"
 msgstr "Safety"
 
@@ -1763,7 +1766,7 @@ msgstr "Retorno de chute de safety"
 msgid "safety kick touched first by {0} from the kicking team."
 msgstr "chute de safety tocado primeiro por {0}, do time que chutou."
 
-#: src/modes/classic/states/kicking/safety.ts:140
+#: src/modes/classic/states/kicking/safety.ts:143
 msgid "safety-kick clock expired"
 msgstr "tempo para o chute de safety esgotado"
 

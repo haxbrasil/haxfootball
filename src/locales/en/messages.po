@@ -282,7 +282,7 @@ msgstr "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgid "⏱️ {HIKE_WARNING_SECONDS_REMAINING}s left to hike."
 msgstr "⏱️ {HIKE_WARNING_SECONDS_REMAINING}s left to hike."
 
-#: src/modes/classic/states/kicking/kickoff.ts:168
+#: src/modes/classic/states/kicking/kickoff.ts:170
 msgid "⏱️ {KICKOFF_WARNING_SECONDS_REMAINING}s left to kick off."
 msgstr "⏱️ {KICKOFF_WARNING_SECONDS_REMAINING}s left to kick off."
 
@@ -594,8 +594,8 @@ msgstr "⚠️ You cannot ban this player."
 msgid "⚠️ You cannot kick this player."
 msgstr "⚠️ You cannot kick this player."
 
-#: src/modes/classic/states/kicking/punt.ts:173
-#: src/modes/classic/states/kicking/safety.ts:178
+#: src/modes/classic/states/kicking/punt.ts:190
+#: src/modes/classic/states/kicking/safety.ts:182
 msgid "⚠️ You cannot kick while a teammate is past the ball line."
 msgstr "⚠️ You cannot kick while a teammate is past the ball line."
 
@@ -618,7 +618,7 @@ msgstr "⚠️ You cannot snap while a teammate is past the LOS."
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ You cannot use that command right now."
 
-#: src/modes/classic/states/kicking/punt.ts:179
+#: src/modes/classic/states/kicking/punt.ts:196
 msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ You must get back behind the ball line to allow the punt!"
 
@@ -887,12 +887,12 @@ msgstr "🏈 HaxFootball - American Football 🏈"
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
-#: src/modes/classic/states/kicking/kickoff.ts:100
-#: src/modes/classic/states/kicking/kickoff.ts:108
+#: src/modes/classic/states/kicking/kickoff.ts:101
+#: src/modes/classic/states/kicking/kickoff.ts:109
 msgid "🏈 Kickoff for {kickingTeamName}."
 msgstr "🏈 Kickoff for {kickingTeamName}."
 
-#: src/modes/classic/states/kicking/kickoff.ts:95
+#: src/modes/classic/states/kicking/kickoff.ts:96
 msgid "🏈 Kickoff for {kickingTeamName}. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 msgstr "🏈 Kickoff for {kickingTeamName}. Kick within {KICKOFF_KICK_TIMEOUT_SECONDS}s."
 
@@ -1288,6 +1288,9 @@ msgid "ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 msgstr "ball spotted at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 
 #: src/modes/classic/config.ts:22
+msgid "Blocks player crossings over the LOS during presnap and punt positioning."
+msgstr "Blocks player crossings over the LOS during presnap and punt positioning."
+
 #: src/modes/flag/config.ts:21
 msgid "Blocks player crossings over the LOS during presnap positioning."
 msgstr "Blocks player crossings over the LOS during presnap positioning."
@@ -1456,12 +1459,12 @@ msgstr "Interception"
 msgid "kick the PAT."
 msgstr "kick the PAT."
 
-#: src/modes/classic/states/kicking/punt.ts:136
-#: src/modes/classic/states/kicking/safety.ts:141
+#: src/modes/classic/states/kicking/punt.ts:152
+#: src/modes/classic/states/kicking/safety.ts:144
 msgid "kicking team loses possession."
 msgstr "kicking team loses possession."
 
-#: src/modes/classic/states/kicking/kickoff.ts:150
+#: src/modes/classic/states/kicking/kickoff.ts:152
 msgid "Kickoff"
 msgstr "Kickoff"
 
@@ -1469,7 +1472,7 @@ msgstr "Kickoff"
 #~ msgid "kickoff caught first by the kicking team ({0})."
 #~ msgstr "kickoff caught first by the kicking team ({0})."
 
-#: src/modes/classic/states/kicking/kickoff.ts:196
+#: src/modes/classic/states/kicking/kickoff.ts:200
 msgid "kickoff clock expired"
 msgstr "kickoff clock expired"
 
@@ -1643,7 +1646,7 @@ msgstr "PICK-SIX by {0}!"
 #~ msgid "punt caught first by the kicking team ({0})."
 #~ msgstr "punt caught first by the kicking team ({0})."
 
-#: src/modes/classic/states/kicking/punt.ts:135
+#: src/modes/classic/states/kicking/punt.ts:151
 msgid "punt clock expired"
 msgstr "punt clock expired"
 
@@ -1708,7 +1711,7 @@ msgstr "Quarterback {0} went out in the end zone"
 msgid "quarterback run is live."
 msgstr "quarterback run is live."
 
-#: src/modes/classic/states/kicking/kickoff.ts:197
+#: src/modes/classic/states/kicking/kickoff.ts:201
 msgid "receiving team gets the ball at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 msgstr "receiving team gets the ball at the {KICKOFF_OUT_OF_BOUNDS_YARD_LINE}-yard line."
 
@@ -1742,7 +1745,7 @@ msgstr "Reposition players"
 msgid "Requires a selected quarterback before the offense can snap."
 msgstr "Requires a selected quarterback before the offense can snap."
 
-#: src/modes/classic/states/kicking/safety.ts:110
+#: src/modes/classic/states/kicking/safety.ts:111
 msgid "Safety"
 msgstr "Safety"
 
@@ -1763,7 +1766,7 @@ msgstr "Safety kick return"
 msgid "safety kick touched first by {0} from the kicking team."
 msgstr "safety kick touched first by {0} from the kicking team."
 
-#: src/modes/classic/states/kicking/safety.ts:140
+#: src/modes/classic/states/kicking/safety.ts:143
 msgid "safety-kick clock expired"
 msgstr "safety-kick clock expired"
 
