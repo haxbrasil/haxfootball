@@ -12,5 +12,15 @@ export function createRoomSetupModule(): Module {
         room.lockTeams();
         room.setScoreLimit(0);
         room.setTimeLimit(10);
+
+        if (env.HAXBALL_RS_DESYNC_CHECKER_ENABLED !== undefined) {
+            room.setDesyncCheckerEnabled(env.HAXBALL_RS_DESYNC_CHECKER_ENABLED);
+        }
+
+        if (env.HAXBALL_RS_DESYNC_CHECKER_INTERVAL_TICKS !== undefined) {
+            room.setDesyncCheckerIntervalTicks(
+                env.HAXBALL_RS_DESYNC_CHECKER_INTERVAL_TICKS,
+            );
+        }
     });
 }

@@ -462,6 +462,14 @@ export class Room {
         this.room.setScore(red, blue);
     }
 
+    public setDesyncCheckerEnabled(enabled: boolean): void {
+        this.room.setDesyncCheckerEnabled(enabled);
+    }
+
+    public setDesyncCheckerIntervalTicks(intervalTicks: number): void {
+        this.room.setDesyncCheckerIntervalTicks(intervalTicks);
+    }
+
     public setScoreLimit(limit: number): void {
         this.room.setScoreLimit(limit);
     }

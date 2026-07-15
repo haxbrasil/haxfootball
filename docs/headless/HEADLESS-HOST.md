@@ -186,6 +186,13 @@ room.setRequireRecaptcha(required);
 Controls whether joining players must pass recaptcha.
 
 ```ts
+room.setDesyncCheckerEnabled(enabled);
+room.setDesyncCheckerIntervalTicks(intervalTicks);
+```
+
+Enables or disables periodic live-client checksum comparisons and configures the positive number of game ticks between comparisons. The checker is enabled by default.
+
+```ts
 room.setKickRateLimit(min, rate, burst);
 ```
 
