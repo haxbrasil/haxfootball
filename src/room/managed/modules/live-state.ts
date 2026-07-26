@@ -49,6 +49,8 @@ type ManagedLiveStateModuleOptions = {
 };
 
 const SNAPSHOT_INTERVAL_MS = 5_000;
+const RECONNECT_INITIAL_DELAY_MS = 1_000;
+const RECONNECT_MAX_DELAY_MS = 30_000;
 
 export function createManagedLiveStateModule({
     allowGuestPlay,
@@ -64,6 +66,9 @@ export function createManagedLiveStateModule({
     let linkedRoom: Room | null = null;
     let revision = 0;
     let snapshotInterval: ReturnType<typeof setInterval> | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    let reconnectAttempt = 0;
+    let connecting = false;
     const desyncedPlayerIds = new Set<number>();
 
     const snapshotProvider = () => {
@@ -86,26 +91,57 @@ export function createManagedLiveStateModule({
         connection?.sendSnapshot();
     };
 
+    const clearSnapshotInterval = () => {
+        if (!snapshotInterval) return;
+
+        clearInterval(snapshotInterval);
+        snapshotInterval = null;
+    };
+
     const scheduleSnapshot = () => {
         setTimeout(sendSnapshot, 0);
     };
 
-    const connect = (room: Room) => {
-        linkedRoom = room;
+    const scheduleReconnect = () => {
+        if (reconnectTimeout || !linkedRoom) return;
 
-        if (connection) {
-            return;
+        const delay = Math.min(
+            RECONNECT_INITIAL_DELAY_MS * 2 ** reconnectAttempt,
+            RECONNECT_MAX_DELAY_MS,
+        );
+        reconnectAttempt += 1;
+
+        reconnectTimeout = setTimeout(() => {
+            reconnectTimeout = null;
+            connect();
+        }, delay);
+    };
+
+    const connect = (room?: Room) => {
+        if (room) {
+            linkedRoom = room;
         }
+
+        if (!linkedRoom || connection || connecting) return;
+
+        connecting = true;
 
         void api.rooms
             .attachLive({
                 commId,
+                onAccepted: () => {
+                    reconnectAttempt = 0;
+                    clearSnapshotInterval();
+                    snapshotInterval = setInterval(
+                        sendSnapshot,
+                        SNAPSHOT_INTERVAL_MS,
+                    );
+                },
                 onClose: () => {
-                    if (snapshotInterval) {
-                        clearInterval(snapshotInterval);
-                        snapshotInterval = null;
-                    }
+                    clearSnapshotInterval();
                     connection = null;
+                    connecting = false;
+                    scheduleReconnect();
                 },
                 onCommand: handleCommand,
                 onError: (error) => {
@@ -113,6 +149,11 @@ export function createManagedLiveStateModule({
                 },
                 onRejected: (error) => {
                     console.error("Live state connection rejected:", error);
+                    const rejectedConnection = connection;
+                    connection = null;
+                    connecting = false;
+                    rejectedConnection?.close();
+                    scheduleReconnect();
                 },
                 roomId,
                 snapshotProvider,
@@ -122,13 +163,12 @@ export function createManagedLiveStateModule({
             })
             .then((nextConnection) => {
                 connection = nextConnection;
-                snapshotInterval = setInterval(
-                    sendSnapshot,
-                    SNAPSHOT_INTERVAL_MS,
-                );
+                connecting = false;
             })
             .catch((error) => {
+                connecting = false;
                 console.error("Failed to connect live state socket:", error);
+                scheduleReconnect();
             });
     };
 
