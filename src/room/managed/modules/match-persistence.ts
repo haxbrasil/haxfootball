@@ -105,19 +105,6 @@ export function createManagedMatchPersistence({
             currentSession.lastScore,
         );
         const elapsedSeconds = getElapsedSeconds(currentSession);
-
-        // The live host waits for native callbacks to return, while
-        // stopRecording waits for the live host. Leave the callback first.
-        setTimeout(() => {
-            finalizeSession(room, currentSession, elapsedSeconds);
-        }, 0);
-    };
-
-    const finalizeSession = (
-        room: Room,
-        currentSession: MatchSession,
-        elapsedSeconds: number,
-    ): void => {
         const replayBytes = currentSession.replay.stop(room);
 
         if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {

@@ -65,8 +65,7 @@ afterEach(() => {
 });
 
 describe("managed match persistence callback safety", () => {
-    it("stops the replay after the game-stop callback returns", async () => {
-        vi.useFakeTimers();
+    it("stops the replay before the game-stop callback returns", () => {
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
@@ -92,15 +91,10 @@ describe("managed match persistence callback safety", () => {
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onGameStop", room, null);
 
-        expect(stopRecording).not.toHaveBeenCalled();
-
-        await vi.runOnlyPendingTimersAsync();
-
         expect(stopRecording).toHaveBeenCalledOnce();
     });
 
-    it("stops the replay after the last-player-leave callback returns", async () => {
-        vi.useFakeTimers();
+    it("stops the replay before the last-player-leave callback returns", () => {
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
@@ -132,15 +126,10 @@ describe("managed match persistence callback safety", () => {
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onPlayerLeave", room, player);
 
-        expect(stopRecording).not.toHaveBeenCalled();
-
-        await vi.runOnlyPendingTimersAsync();
-
         expect(stopRecording).toHaveBeenCalledOnce();
     });
 
     it("persists the final score and recording after leaving the callback", async () => {
-        vi.useFakeTimers();
         ensureEventSchema.mockResolvedValue(null);
         createMatch.mockResolvedValue({
             ok: true,
@@ -188,7 +177,6 @@ describe("managed match persistence callback safety", () => {
 
         expect(createMatch).not.toHaveBeenCalled();
 
-        await vi.runOnlyPendingTimersAsync();
         await vi.waitFor(() => {
             expect(associateRecording).toHaveBeenCalledOnce();
         });
