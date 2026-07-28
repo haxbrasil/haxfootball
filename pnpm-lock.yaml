@@ -21,11 +21,11 @@ importers:
   .:
     dependencies:
       '@haxbrasil/haxball-rs':
-        specifier: 0.2.25
-        version: 0.2.25
+        specifier: 0.2.26
+        version: 0.2.26
       '@haxbrasil/haxfootball-api-sdk':
-        specifier: github:haxbrasil/haxfootball-api-sdk#fbd2977183c32b5fb37913433618c6bd3cf85eb9
-        version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/fbd2977183c32b5fb37913433618c6bd3cf85eb9
+        specifier: github:haxbrasil/haxfootball-api-sdk#8868d1c9c3b36758179217a2159dfe8f0ec97080
+        version: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/8868d1c9c3b36758179217a2159dfe8f0ec97080
       '@lingui/core':
         specifier: ^5.9.5
         version: 5.9.5(@lingui/babel-plugin-lingui-macro@5.9.5(babel-plugin-macros@3.1.0)(typescript@5.9.3))(babel-plugin-macros@3.1.0)
@@ -1154,12 +1154,12 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@haxbrasil/haxball-rs@0.2.25':
-    resolution: {integrity: sha512-tHyiJlgnkDWfVSq7r2nR84S5bR41bxMG+TIHdIWVaYHjC7JIoSKZWwEEc5g2pfHXBFFFX1L6ueEkJD2rHxqoMQ==, tarball: https://npm.pkg.github.com/download/@haxbrasil/haxball-rs/0.2.25/019967cf6cdfa385222bd783084bd322cc78355e}
+  '@haxbrasil/haxball-rs@0.2.26':
+    resolution: {integrity: sha512-vFrRGyNH5mMCoSBKtL6/JDvGY6ROm/JKT9TzCPUd0vKxxzq34v3ZnlDau8G1jv/5rDduSMkv2iVNprukquCK3w==, tarball: https://npm.pkg.github.com/download/@haxbrasil/haxball-rs/0.2.26/593cbb832085f2c4a7b46f90b8046fd8e766d6e1}
     engines: {node: '>= 18'}
 
-  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/fbd2977183c32b5fb37913433618c6bd3cf85eb9':
-    resolution: {gitHosted: true, integrity: sha512-3/oWymCtEWdC7hssgOvWIpOeY4gf7wSqRcKaKxPsNElkEsPAXIgBFKUKZSMv7Rr0DaM5FzzkT2eAZTFYzfUqjQ==, tarball: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/fbd2977183c32b5fb37913433618c6bd3cf85eb9}
+  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/8868d1c9c3b36758179217a2159dfe8f0ec97080':
+    resolution: {gitHosted: true, integrity: sha512-NetzhCIMspTHPupdNmeyrshG2k8F/21D/K0K+2ZgVfVnDV2u+uzFC7ntR6xOpH+mmVlYlhWvAGW4QxQsnz2KSg==, tarball: https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/8868d1c9c3b36758179217a2159dfe8f0ec97080}
     version: 0.1.0
     engines: {node: '>=20'}
 
@@ -4180,9 +4180,9 @@ snapshots:
     dependencies:
       graphql: 16.14.2
 
-  '@haxbrasil/haxball-rs@0.2.25': {}
+  '@haxbrasil/haxball-rs@0.2.26': {}
 
-  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/fbd2977183c32b5fb37913433618c6bd3cf85eb9':
+  '@haxbrasil/haxfootball-api-sdk@https://codeload.github.com/haxbrasil/haxfootball-api-sdk/tar.gz/8868d1c9c3b36758179217a2159dfe8f0ec97080':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.2)
       graphql: 16.14.2

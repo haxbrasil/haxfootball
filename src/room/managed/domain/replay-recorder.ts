@@ -32,4 +32,18 @@ export class ReplayRecorder {
             return null;
         }
     }
+
+    snapshot(room: Room): Uint8Array | null {
+        if (!this.recording) return null;
+
+        try {
+            return room.snapshotRecording();
+        } catch (error) {
+            console.error(
+                "Failed to snapshot HaxBall replay recording:",
+                error,
+            );
+            return null;
+        }
+    }
 }

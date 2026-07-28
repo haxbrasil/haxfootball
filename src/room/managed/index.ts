@@ -51,6 +51,7 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         gameModeReader: gameModeStore.get,
         gameScoreReader: gameScoreStore.get,
         publicWebBaseUrl: options.publicWebBaseUrl,
+        roomId: options.roomId,
         sessionStore,
     });
     const roomManagerLaunchEnabled = options.roomManagerEnabled ?? true;

@@ -5,39 +5,13 @@ import { createPlayerSessionStore } from "@room/shared/domain/player-sessions";
 import { createManagedMatchPersistence } from "./match-persistence";
 
 const ensureEventSchema = vi.hoisted(() => vi.fn<() => Promise<null>>());
-const createMatch = vi.hoisted(() =>
-    vi.fn<(body: unknown) => Promise<{ ok: true; data: { id: string } }>>(),
-);
-const addEvent = vi.hoisted(() =>
+const request = vi.hoisted(() =>
     vi.fn<
-        (
-            id: string,
-            event: unknown,
-        ) => Promise<{ ok: true; data: { id: string } }>
-    >(),
-);
-const updateMatch = vi.hoisted(() =>
-    vi.fn<
-        (
-            id: string,
-            body: unknown,
-        ) => Promise<{ ok: true; data: { id: string } }>
-    >(),
-);
-const associateRecording = vi.hoisted(() =>
-    vi.fn<
-        (
-            id: string,
-            body: unknown,
-        ) => Promise<{ ok: true; data: { id: string } }>
-    >(),
-);
-const createRecording = vi.hoisted(() =>
-    vi.fn<
-        (body: unknown) => Promise<{
-            ok: true;
-            data: { id: string; url: string };
-        }>
+        (input: {
+            path: string;
+            body?: Record<string, unknown>;
+            [key: string]: unknown;
+        }) => Promise<{ ok: true; data: unknown }>
     >(),
 );
 
@@ -46,17 +20,7 @@ vi.mock("@room/managed/domain/event-schema", () => ({
 }));
 
 vi.mock("@api/client", () => ({
-    api: {
-        matches: {
-            create: createMatch,
-            addEvent,
-            update: updateMatch,
-            associateRecording,
-        },
-        recordings: {
-            create: createRecording,
-        },
-    },
+    api: { request },
 }));
 
 afterEach(() => {
@@ -69,24 +33,8 @@ describe("managed match persistence callback safety", () => {
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
-        const room = {
-            getPlayerList: () => [],
-            getScores: () => ({
-                red: 0,
-                blue: 0,
-                time: 5,
-                scoreLimit: 0,
-                timeLimit: 0,
-            }),
-            send: vi.fn<() => void>(),
-            startRecording: vi.fn<() => boolean>(() => true),
-            stopRecording,
-        } as unknown as Room;
-        const persistence = createManagedMatchPersistence({
-            gameModeReader: () => "classic",
-            gameScoreReader: () => ({ red: 0, blue: 0 }),
-            sessionStore: createPlayerSessionStore(),
-        });
+        const room = createRoom({ time: 5, stopRecording });
+        const persistence = createPersistence();
 
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onGameStop", room, null);
@@ -104,24 +52,8 @@ describe("managed match persistence callback safety", () => {
             team: Team.RED,
             admin: false,
         } as PlayerObject;
-        const room = {
-            getPlayerList: () => [],
-            getScores: () => ({
-                red: 0,
-                blue: 0,
-                time: 5,
-                scoreLimit: 0,
-                timeLimit: 0,
-            }),
-            send: vi.fn<() => void>(),
-            startRecording: vi.fn<() => boolean>(() => true),
-            stopRecording,
-        } as unknown as Room;
-        const persistence = createManagedMatchPersistence({
-            gameModeReader: () => "classic",
-            gameScoreReader: () => ({ red: 0, blue: 0 }),
-            sessionStore: createPlayerSessionStore(),
-        });
+        const room = createRoom({ time: 5, stopRecording });
+        const persistence = createPersistence();
 
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onPlayerLeave", room, player);
@@ -129,69 +61,151 @@ describe("managed match persistence callback safety", () => {
         expect(stopRecording).toHaveBeenCalledOnce();
     });
 
-    it("persists the final score and recording after leaving the callback", async () => {
-        ensureEventSchema.mockResolvedValue(null);
-        createMatch.mockResolvedValue({
-            ok: true,
-            data: { id: "match-1" },
-        });
-        updateMatch.mockResolvedValue({
-            ok: true,
-            data: { id: "match-1" },
-        });
-        createRecording.mockResolvedValue({
-            ok: true,
-            data: {
-                id: "recording-1",
-                url: "https://example.com/recording-1",
-            },
-        });
-        associateRecording.mockResolvedValue({
-            ok: true,
-            data: { id: "match-1" },
-        });
-        const stopRecording = vi.fn<() => Uint8Array>(() =>
-            Uint8Array.from([1, 2, 3]),
-        );
-        const room = {
-            getPlayerList: () => [],
-            getScores: () => ({
-                red: 6,
-                blue: 7,
-                time: 31,
-                scoreLimit: 0,
-                timeLimit: 0,
-            }),
-            send: vi.fn<() => void>(),
-            startRecording: vi.fn<() => boolean>(() => true),
-            stopRecording,
-        } as unknown as Room;
-        const persistence = createManagedMatchPersistence({
-            gameModeReader: () => "classic",
-            gameScoreReader: () => ({ red: 6, blue: 7 }),
-            sessionStore: createPlayerSessionStore(),
-        });
+    it("creates a pending match immediately and discards a short game", async () => {
+        installSuccessfulRequests();
+        const room = createRoom({ time: 5 });
+        const persistence = createPersistence();
 
         persistence.module.call("onGameStart", room, null);
         persistence.module.call("onGameStop", room, null);
 
-        expect(createMatch).not.toHaveBeenCalled();
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({ status: "discarded" }),
+            );
+        });
+
+        expect(request).toHaveBeenCalledWith(
+            expect.objectContaining({
+                method: "POST",
+                path: "/matches",
+                body: expect.objectContaining({
+                    status: "pending",
+                    roomId: "room-1",
+                }),
+            }),
+        );
+        expect(recordingCheckpointRequests()).toHaveLength(0);
+    });
+
+    it("checkpoints and completes an eligible match with its recording", async () => {
+        installSuccessfulRequests();
+        const stopRecording = vi.fn<() => Uint8Array>(() =>
+            Uint8Array.from([1, 2, 3]),
+        );
+        const room = createRoom({ time: 31, stopRecording });
+        const persistence = createPersistence();
+
+        persistence.module.call("onGameStart", room, null);
+        persistence.module.call("onGameStop", room, null);
 
         await vi.waitFor(() => {
-            expect(associateRecording).toHaveBeenCalledOnce();
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({
+                    status: "completed",
+                    completionReason: "normal",
+                    score: { red: 6, blue: 7 },
+                }),
+            );
         });
 
-        expect(updateMatch).toHaveBeenCalledWith("match-1", {
-            status: "completed",
-            endedAt: expect.any(String),
-            score: {
-                red: 6,
-                blue: 7,
-            },
-        });
-        expect(createRecording).toHaveBeenCalledOnce();
-        expect(associateRecording).toHaveBeenCalledWith("match-1", {
-            recordingId: "recording-1",
-        });
+        expect(recordingCheckpointRequests()).toHaveLength(1);
+        expect(stopRecording).toHaveBeenCalledOnce();
     });
 });
+
+function createPersistence() {
+    return createManagedMatchPersistence({
+        gameModeReader: () => "classic",
+        gameScoreReader: () => ({ red: 6, blue: 7 }),
+        roomId: "room-1",
+        sessionStore: createPlayerSessionStore(),
+    });
+}
+
+function createRoom({
+    time,
+    stopRecording = vi.fn<() => Uint8Array>(() => Uint8Array.from([1, 2, 3])),
+}: {
+    time: number;
+    stopRecording?: () => Uint8Array;
+}): Room {
+    return {
+        getPlayerList: () => [],
+        getScores: () => ({
+            red: 6,
+            blue: 7,
+            time,
+            scoreLimit: 0,
+            timeLimit: 0,
+        }),
+        send: vi.fn<() => void>(),
+        startRecording: vi.fn<() => boolean>(() => true),
+        snapshotRecording: vi.fn<() => Uint8Array>(() =>
+            Uint8Array.from([1, 2]),
+        ),
+        stopRecording,
+    } as unknown as Room;
+}
+
+function installSuccessfulRequests(): void {
+    ensureEventSchema.mockResolvedValue(null);
+    request.mockImplementation(
+        async ({
+            path,
+            body,
+        }: {
+            path: string;
+            body?: Record<string, unknown>;
+        }) => {
+            if (path === "/matches") {
+                return {
+                    ok: true,
+                    data: { id: "match-1", recording: null },
+                };
+            }
+
+            if (path.endsWith("/checkpoints")) {
+                const events = (body?.["events"] ?? []) as Array<{
+                    producerSequence: number;
+                }>;
+                const lastEvent = events[events.length - 1];
+
+                return {
+                    ok: true,
+                    data: {
+                        acknowledgedProducerSequence:
+                            lastEvent?.producerSequence ?? 0,
+                        match: {
+                            id: "match-1",
+                            recording:
+                                body?.["status"] === "completed"
+                                    ? {
+                                          url: "https://example.com/recording",
+                                      }
+                                    : null,
+                        },
+                    },
+                };
+            }
+
+            return {
+                ok: true,
+                data: { revision: 1, sizeBytes: 3 },
+            };
+        },
+    );
+}
+
+function checkpointBodies(): Array<Record<string, unknown>> {
+    return request.mock.calls
+        .map(([input]) => input)
+        .filter(({ path }) => path.endsWith("/checkpoints"))
+        .flatMap(({ body }) => (body ? [body] : []));
+}
+
+function recordingCheckpointRequests(): unknown[] {
+    return request.mock.calls
+        .map(([input]) => input)
+        .filter(({ path }) => path.endsWith("/recording-checkpoint"));
+}

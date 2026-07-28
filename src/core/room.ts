@@ -668,6 +668,10 @@ export class Room {
         return this.room.stopRecording();
     }
 
+    public snapshotRecording(): Uint8Array | null {
+        return this.room.snapshotRecording();
+    }
+
     public dispatch(
         operation: Extract<
             RoomDispatchOperationObject,

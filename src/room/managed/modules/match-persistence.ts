@@ -1,9 +1,4 @@
-import type {
-    AddMatchEventInput,
-    CreateMatchInput,
-    MatchEventInput,
-    Recording,
-} from "@haxbrasil/haxfootball-api-sdk";
+import type { MatchEventInput } from "@haxbrasil/haxfootball-api-sdk";
 import { api } from "@api/client";
 import { COLOR } from "@common/general/color";
 import { createModule, type Module } from "@core/module";
@@ -31,6 +26,9 @@ import {
 import { t } from "@lingui/core/macro";
 
 const MIN_PERSISTED_MATCH_SECONDS = 30;
+const CHECKPOINT_INTERVAL_SECONDS = 2;
+const RECORDING_CHECKPOINT_INTERVAL_SECONDS = 10;
+const TERMINAL_RETRY_DELAY_MS = 5_000;
 
 type MatchScore = {
     red: number;
@@ -38,14 +36,27 @@ type MatchScore = {
     time: number;
 };
 
+type CheckpointEvent = MatchEventInput & {
+    id: string;
+    producerSequence: number;
+};
+
+type MatchStatus = "pending" | "ongoing" | "completed" | "discarded";
+
 type MatchSession = {
+    sessionId: string;
     startedAt: Date;
     endedAt: Date | null;
     matchId: string | null;
     lastScore: MatchScore | null;
-    matchCreationStarted: boolean;
     ended: boolean;
-    events: MatchEventInput[];
+    creationQueued: boolean;
+    checkpointRevision: number;
+    recordingRevision: number;
+    nextProducerSequence: number;
+    lastCheckpointScheduledElapsed: number;
+    lastRecordingScheduledElapsed: number;
+    events: CheckpointEvent[];
     gameEvents: RuntimeMatchEvent[];
     playerIds: Map<number, string>;
     fieldParticipantRoomIds: Set<number>;
@@ -56,13 +67,25 @@ type CreateManagedMatchPersistenceOptions = {
     gameModeReader: GameModeReader;
     gameScoreReader: GameScoreReader;
     publicWebBaseUrl?: string | undefined;
+    roomId?: string | undefined;
     sessionStore: PlayerSessionStore;
+};
+
+type MatchResponse = {
+    id: string;
+    recording: { url: string } | null;
+};
+
+type CheckpointResponse = {
+    acknowledgedProducerSequence: number;
+    match: MatchResponse;
 };
 
 export function createManagedMatchPersistence({
     gameModeReader,
     gameScoreReader,
     publicWebBaseUrl,
+    roomId,
     sessionStore,
 }: CreateManagedMatchPersistenceOptions): {
     module: Module;
@@ -77,18 +100,34 @@ export function createManagedMatchPersistence({
         });
     };
 
-    const persistIfEligible = (currentSession: MatchSession): void => {
-        if (currentSession.matchId || currentSession.matchCreationStarted) {
-            return;
-        }
-        if (getElapsedSeconds(currentSession) < MIN_PERSISTED_MATCH_SECONDS) {
-            return;
-        }
-
-        currentSession.matchCreationStarted = true;
+    const scheduleCheckpoint = (
+        room: Room,
+        currentSession: MatchSession,
+        status?: MatchStatus,
+    ): void => {
         enqueue(async () => {
-            await createMatch(currentSession);
-            await flushBufferedData(currentSession, sessionStore.get);
+            await ensureMatch(currentSession, roomId);
+            await flushCheckpoint(
+                room,
+                currentSession,
+                sessionStore.get,
+                status,
+            );
+        });
+    };
+
+    const scheduleRecordingCheckpoint = (
+        room: Room,
+        currentSession: MatchSession,
+        finalBytes?: Uint8Array | null,
+    ): void => {
+        enqueue(async () => {
+            await ensureMatch(currentSession, roomId);
+            const bytes = finalBytes ?? currentSession.replay.snapshot(room);
+
+            if (bytes) {
+                await uploadRecordingCheckpoint(currentSession, bytes);
+            }
         });
     };
 
@@ -107,37 +146,80 @@ export function createManagedMatchPersistence({
         const elapsedSeconds = getElapsedSeconds(currentSession);
         const replayBytes = currentSession.replay.stop(room);
 
-        if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {
-            return;
-        }
+        const persistFinishedSession = async (): Promise<void> => {
+            await ensureMatch(currentSession, roomId);
 
-        currentSession.matchCreationStarted = true;
-        enqueue(async () => {
-            await createMatch(currentSession);
+            if (!currentSession.matchId) {
+                scheduleTerminalRetry();
+                return;
+            }
 
-            try {
-                await flushBufferedData(currentSession, sessionStore.get);
-            } finally {
-                await completeMatch(
+            if (elapsedSeconds < MIN_PERSISTED_MATCH_SECONDS) {
+                const discarded = await flushCheckpoint(
                     room,
                     currentSession,
-                    replayBytes,
-                    publicWebBaseUrl,
+                    sessionStore.get,
+                    "discarded",
                 );
+
+                if (!discarded) {
+                    scheduleTerminalRetry();
+                }
+                return;
             }
-        });
+
+            const ongoing = await flushCheckpoint(
+                room,
+                currentSession,
+                sessionStore.get,
+                "ongoing",
+            );
+
+            if (!ongoing) {
+                scheduleTerminalRetry();
+                return;
+            }
+
+            if (replayBytes) {
+                const uploaded = await uploadRecordingCheckpoint(
+                    currentSession,
+                    replayBytes,
+                );
+
+                if (!uploaded) {
+                    scheduleTerminalRetry();
+                    return;
+                }
+            }
+
+            const response = await flushCheckpoint(
+                room,
+                currentSession,
+                sessionStore.get,
+                "completed",
+            );
+
+            if (response) {
+                announceRecording(room, response.match, publicWebBaseUrl);
+            } else {
+                scheduleTerminalRetry();
+            }
+        };
+        const scheduleTerminalRetry = (): void => {
+            setTimeout(
+                () => enqueue(persistFinishedSession),
+                TERMINAL_RETRY_DELAY_MS,
+            );
+        };
+
+        enqueue(persistFinishedSession);
     };
 
     const matchEvents: RuntimeMatchEventSink = (event) => {
         if (!session || session.ended) return;
 
         session.gameEvents.push(event);
-        if (!session.matchId) return;
-
-        const currentSession = session;
-        enqueue(async () => {
-            await flushBufferedData(currentSession, sessionStore.get);
-        });
+        scheduleCheckpointForImportantEvent(session);
     };
 
     const module = createModule()
@@ -147,13 +229,19 @@ export function createManagedMatchPersistence({
                 return;
             }
 
-            session = {
+            const currentSession: MatchSession = {
+                sessionId: crypto.randomUUID(),
                 startedAt: new Date(),
                 endedAt: null,
                 matchId: null,
                 lastScore: readScore(room, gameScoreReader),
-                matchCreationStarted: false,
                 ended: false,
+                creationQueued: false,
+                checkpointRevision: 0,
+                recordingRevision: 0,
+                nextProducerSequence: 1,
+                lastCheckpointScheduledElapsed: Number.NEGATIVE_INFINITY,
+                lastRecordingScheduledElapsed: Number.NEGATIVE_INFINITY,
                 events: [],
                 gameEvents: [],
                 playerIds: new Map(),
@@ -161,22 +249,48 @@ export function createManagedMatchPersistence({
                 replay: new ReplayRecorder(),
             };
 
-            session.replay.start(room);
+            session = currentSession;
+            currentSession.replay.start(room);
 
             for (const player of room.getPlayerList()) {
                 appendDispatchedMatchPlayerEvent(
-                    session,
+                    currentSession,
                     "onPlayerJoin",
                     player,
                     sessionStore.get,
                 );
             }
+
+            scheduleCheckpoint(room, currentSession, "pending");
         })
         .onGameTick((room) => {
-            if (session) {
-                session.lastScore =
-                    readScore(room, gameScoreReader) ?? session.lastScore;
-                persistIfEligible(session);
+            const currentSession = session;
+            if (!currentSession || currentSession.ended) return;
+
+            currentSession.lastScore =
+                readScore(room, gameScoreReader) ?? currentSession.lastScore;
+            const elapsedSeconds = getElapsedSeconds(currentSession);
+            const status =
+                elapsedSeconds >= MIN_PERSISTED_MATCH_SECONDS
+                    ? "ongoing"
+                    : "pending";
+
+            if (
+                elapsedSeconds -
+                    currentSession.lastCheckpointScheduledElapsed >=
+                CHECKPOINT_INTERVAL_SECONDS
+            ) {
+                currentSession.lastCheckpointScheduledElapsed = elapsedSeconds;
+                scheduleCheckpoint(room, currentSession, status);
+            }
+
+            if (
+                elapsedSeconds >= MIN_PERSISTED_MATCH_SECONDS &&
+                elapsedSeconds - currentSession.lastRecordingScheduledElapsed >=
+                    RECORDING_CHECKPOINT_INTERVAL_SECONDS
+            ) {
+                currentSession.lastRecordingScheduledElapsed = elapsedSeconds;
+                scheduleRecordingCheckpoint(room, currentSession);
             }
         })
         .onPlayerJoin((room, player) => {
@@ -189,7 +303,7 @@ export function createManagedMatchPersistence({
             );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
-            persistIfEligible(session);
+            scheduleCheckpoint(room, session);
         })
         .onPlayerLeave((room, player) => {
             if (!session || session.ended) return;
@@ -203,7 +317,7 @@ export function createManagedMatchPersistence({
                 readScore(room, gameScoreReader) ?? session.lastScore;
 
             if (hasActivePlayers(room)) {
-                persistIfEligible(session);
+                scheduleCheckpoint(room, session);
                 return;
             }
 
@@ -219,7 +333,7 @@ export function createManagedMatchPersistence({
             );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
-            persistIfEligible(session);
+            scheduleCheckpoint(room, session);
         })
         .onGameStop((room) => {
             const currentSession = session;
@@ -228,162 +342,167 @@ export function createManagedMatchPersistence({
             finishSession(room, currentSession);
         });
 
+    function scheduleCheckpointForImportantEvent(
+        currentSession: MatchSession,
+    ): void {
+        enqueue(async () => {
+            await ensureMatch(currentSession, roomId);
+            await flushCheckpoint(
+                null,
+                currentSession,
+                sessionStore.get,
+                undefined,
+            );
+        });
+    }
+
     return { module, matchEvents };
 }
 
-async function createMatch(session: MatchSession): Promise<void> {
-    if (session.matchId) return;
+async function ensureMatch(
+    session: MatchSession,
+    roomId: string | undefined,
+): Promise<void> {
+    if (session.matchId || session.creationQueued) return;
 
-    const eventSchema = await ensureEventSchema();
-    const eventCount = session.events.length;
-    const events = session.events.slice(0, eventCount);
-    const body: CreateMatchInput = {
-        status: "ongoing",
-        gameMode: {
-            name: GAME_MODE_NAME,
-        },
-        initiatedAt: session.startedAt.toISOString(),
-        events,
-        ...(session.lastScore
-            ? {
-                  score: {
-                      red: session.lastScore.red,
-                      blue: session.lastScore.blue,
-                  },
-              }
-            : {}),
-        ...(eventSchema
-            ? {
-                  eventSchema,
-              }
-            : {}),
-    };
+    session.creationQueued = true;
 
-    const result = await api.matches.create(body);
-    if (!result.ok) {
-        console.error("Failed to create match:", result.error);
-        return;
+    try {
+        const eventSchema = await ensureEventSchema();
+        const result = await api.request<MatchResponse>({
+            method: "POST",
+            path: "/matches",
+            body: {
+                status: "pending",
+                sessionId: session.sessionId,
+                ...(roomId ? { roomId } : {}),
+                gameMode: { name: GAME_MODE_NAME },
+                initiatedAt: session.startedAt.toISOString(),
+                ...(session.lastScore
+                    ? {
+                          score: {
+                              red: session.lastScore.red,
+                              blue: session.lastScore.blue,
+                          },
+                      }
+                    : {}),
+                ...(eventSchema ? { eventSchema } : {}),
+            },
+        });
+
+        if (!result.ok) {
+            console.error("Failed to create pending match:", result.error);
+            return;
+        }
+
+        session.matchId = result.data.id;
+    } finally {
+        session.creationQueued = false;
     }
-
-    session.matchId = result.data.id;
-    session.events.splice(0, eventCount);
 }
 
-async function flushBufferedData(
+async function flushCheckpoint(
+    room: Room | null,
     session: MatchSession,
     getPlayerSession: PlayerSessionReader,
-): Promise<void> {
-    if (!session.matchId) return;
+    requestedStatus?: MatchStatus,
+): Promise<CheckpointResponse | null> {
+    if (!session.matchId || !session.lastScore) return null;
 
-    while (session.events.length > 0) {
-        const event = session.events[0];
-        if (!event) break;
-
-        const result = await api.matches.addEvent(session.matchId, event);
-        if (!result.ok) {
-            console.error("Failed to add match event:", result.error);
-            break;
-        }
-
-        session.events.shift();
-    }
-
-    while (session.gameEvents.length > 0) {
-        const rawGameEvent = session.gameEvents[0];
-        if (!rawGameEvent) break;
-
-        const event = toMatchEventInput(
-            session,
-            rawGameEvent,
-            getPlayerSession,
-        );
-        if (!event) {
-            session.gameEvents.shift();
-            continue;
-        }
-
-        const result = await api.matches.addEvent(session.matchId, event);
-        if (!result.ok) {
-            console.error("Failed to add match event:", result.error);
-            break;
-        }
-
-        session.gameEvents.shift();
-    }
-}
-
-async function completeMatch(
-    room: Room,
-    session: MatchSession,
-    replayBytes: Uint8Array | null,
-    publicWebBaseUrl: string | undefined,
-): Promise<void> {
-    if (!session.matchId) return;
-    if (!session.endedAt) return;
-
-    const result = await api.matches.update(session.matchId, {
-        status: "completed",
-        endedAt: session.endedAt.toISOString(),
-        ...(session.lastScore
-            ? {
-                  score: {
-                      red: session.lastScore.red,
-                      blue: session.lastScore.blue,
-                  },
-              }
-            : {}),
-    });
-
-    if (!result.ok) {
-        console.error("Failed to complete match:", result.error);
-        return;
-    }
-
-    const recording = replayBytes
-        ? await uploadRecording(session.matchId, replayBytes)
-        : null;
-
-    if (recording) {
-        const association = await api.matches.associateRecording(
-            session.matchId,
-            {
-                recordingId: recording.id,
+    materializeGameEvents(session, getPlayerSession);
+    const events = [...session.events];
+    const revision = ++session.checkpointRevision;
+    const elapsedSeconds = getElapsedSeconds(session);
+    const status =
+        requestedStatus ??
+        (elapsedSeconds >= MIN_PERSISTED_MATCH_SECONDS ? "ongoing" : "pending");
+    const observedAt =
+        status === "completed" || status === "discarded"
+            ? (session.endedAt ?? new Date()).toISOString()
+            : new Date().toISOString();
+    const result = await api.request<CheckpointResponse>({
+        method: "POST",
+        path: `/matches/${encodeURIComponent(session.matchId)}/checkpoints`,
+        body: {
+            revision,
+            observedAt,
+            elapsedSeconds,
+            score: {
+                red: session.lastScore.red,
+                blue: session.lastScore.blue,
             },
-        );
-
-        if (!association.ok) {
-            console.error("Failed to associate recording:", association.error);
-        } else {
-            const matchUrl =
-                createPublicWebUrl(publicWebBaseUrl, [
-                    "matches",
-                    session.matchId,
-                ]) ?? recording.url;
-
-            room.send({
-                message: t`🎥 Match recorded: ${matchUrl}`,
-                color: COLOR.SYSTEM,
-                sound: "notification",
-            });
-        }
-    }
-}
-
-async function uploadRecording(
-    matchId: string,
-    replayBytes: Uint8Array,
-): Promise<Recording | null> {
-    const result = await api.recordings.create({
-        file: replayBytes,
-        filename: `${matchId}.hbr2`,
+            events,
+            status,
+            ...(status === "completed" ? { completionReason: "normal" } : {}),
+        },
     });
 
     if (!result.ok) {
-        console.error("Failed to upload recording:", result.error);
+        console.error("Failed to checkpoint match:", result.error);
         return null;
     }
 
+    session.events = session.events.filter(
+        (event) =>
+            event.producerSequence > result.data.acknowledgedProducerSequence,
+    );
+
+    if (room) {
+        session.lastScore =
+            readScore(room, () => null, session.lastScore) ?? session.lastScore;
+    }
+
     return result.data;
+}
+
+async function uploadRecordingCheckpoint(
+    session: MatchSession,
+    bytes: Uint8Array,
+): Promise<boolean> {
+    if (!session.matchId) return false;
+
+    const revision = ++session.recordingRevision;
+    const formData = new FormData();
+    const copy = new Uint8Array(bytes.byteLength);
+
+    copy.set(bytes);
+    formData.set("revision", String(revision));
+    formData.set(
+        "file",
+        new Blob([copy], { type: "application/octet-stream" }),
+        `${session.matchId}-checkpoint.hbr2`,
+    );
+
+    const result = await api.request<{
+        revision: number;
+        sizeBytes: number;
+    }>({
+        method: "POST",
+        path: `/matches/${encodeURIComponent(session.matchId)}/recording-checkpoint`,
+        formData,
+    });
+
+    if (!result.ok) {
+        console.error("Failed to upload recording checkpoint:", result.error);
+        return false;
+    }
+
+    return true;
+}
+
+function materializeGameEvents(
+    session: MatchSession,
+    getPlayerSession: PlayerSessionReader,
+): void {
+    while (session.gameEvents.length > 0) {
+        const rawEvent = session.gameEvents.shift();
+        if (!rawEvent) break;
+
+        const event = toMatchEventInput(session, rawEvent, getPlayerSession);
+        if (event) {
+            session.events.push(withProducerIdentity(session, event));
+        }
+    }
 }
 
 function appendDispatchedMatchPlayerEvent(
@@ -401,15 +520,26 @@ function appendDispatchedMatchPlayerEvent(
     });
 
     if (event) {
-        session.events.push(event);
+        session.events.push(withProducerIdentity(session, event));
     }
+}
+
+function withProducerIdentity(
+    session: MatchSession,
+    event: MatchEventInput,
+): CheckpointEvent {
+    return {
+        ...event,
+        id: crypto.randomUUID(),
+        producerSequence: session.nextProducerSequence++,
+    };
 }
 
 function toMatchEventInput(
     session: MatchSession,
     event: RuntimeMatchEvent,
     getPlayerSession: PlayerSessionReader,
-): AddMatchEventInput | null {
+): MatchEventInput | null {
     const backendPlayerId =
         getBackendPlayerId(event.playerId, getPlayerSession) ??
         session.playerIds.get(event.playerId);
@@ -430,13 +560,34 @@ function getBackendPlayerId(
     roomPlayerId: number,
     getPlayerSession: PlayerSessionReader,
 ): string | null {
-    const session = getPlayerSession(roomPlayerId);
+    const playerSession = getPlayerSession(roomPlayerId);
 
-    if (session?.kind === "signed-in" || session?.kind === "guest") {
-        return session.playerId;
+    if (
+        playerSession?.kind === "signed-in" ||
+        playerSession?.kind === "guest"
+    ) {
+        return playerSession.playerId;
     }
 
     return null;
+}
+
+function announceRecording(
+    room: Room,
+    match: MatchResponse,
+    publicWebBaseUrl: string | undefined,
+): void {
+    if (!match.recording) return;
+
+    const matchUrl =
+        createPublicWebUrl(publicWebBaseUrl, ["matches", match.id]) ??
+        match.recording.url;
+
+    room.send({
+        message: t`🎥 Match recorded: ${matchUrl}`,
+        color: COLOR.SYSTEM,
+        sound: "notification",
+    });
 }
 
 function hasActivePlayers(room: Room): boolean {
@@ -463,11 +614,21 @@ function readScore(
     const gameScore = gameScoreReader();
     const nativeScores = room.getScores();
 
-    if (!gameScore && !nativeScores) return previousScore;
+    if (gameScore) {
+        return {
+            red: gameScore.red,
+            blue: gameScore.blue,
+            time: nativeScores?.time ?? previousScore?.time ?? 0,
+        };
+    }
 
-    return {
-        red: gameScore?.red ?? previousScore?.red ?? 0,
-        blue: gameScore?.blue ?? previousScore?.blue ?? 0,
-        time: nativeScores?.time ?? previousScore?.time ?? 0,
-    };
+    if (nativeScores) {
+        return {
+            red: nativeScores.red,
+            blue: nativeScores.blue,
+            time: nativeScores.time,
+        };
+    }
+
+    return previousScore;
 }
