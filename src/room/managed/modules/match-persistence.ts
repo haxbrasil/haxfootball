@@ -144,7 +144,6 @@ export function createManagedMatchPersistence({
             currentSession.lastScore,
         );
         const elapsedSeconds = getElapsedSeconds(currentSession);
-        const replayBytes = currentSession.replay.stop(room);
 
         const persistFinishedSession = async (): Promise<void> => {
             await ensureMatch(currentSession, roomId);
@@ -179,6 +178,8 @@ export function createManagedMatchPersistence({
                 scheduleTerminalRetry();
                 return;
             }
+
+            const replayBytes = currentSession.replay.snapshot(room);
 
             if (replayBytes) {
                 const uploaded = await uploadRecordingCheckpoint(
