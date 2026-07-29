@@ -272,8 +272,8 @@ msgid "↩️ Miss. Your lane reset to 10 targets."
 msgstr "↩️ Errou. Sua área foi reiniciada com 10 alvos."
 
 #. placeholder {0}: player.name
-#: src/modes/classic/shared/commands/handlers/undo.ts:26
-#: src/modes/flag/shared/commands/handlers/undo.ts:26
+#: src/modes/classic/shared/commands/handlers/undo.ts:40
+#: src/modes/flag/shared/commands/handlers/undo.ts:40
 msgid "⏪ {0} calls for an undo! Rewinding to the last checkpoint..."
 msgstr "⏪ {0} anulou a jogada! Voltando para o último checkpoint..."
 
@@ -368,6 +368,11 @@ msgstr "⚙️ Flags disponíveis:"
 msgid "⚙️ Available flags: {0}."
 msgstr "⚙️ Flags disponíveis: {0}."
 
+#: src/modes/classic/shared/commands/handlers/undo.ts:30
+#: src/modes/flag/shared/commands/handlers/undo.ts:30
+msgid "⚠️ Another admin just called for an undo. Please wait a moment."
+msgstr "⚠️ Outro admin acabou de pedir uma anulação. Aguarde um momento."
+
 #: src/modes/classic/states/scrimmage/presnap.ts:588
 msgid "⚠️ Field goal is only available from the defensive side of the field."
 msgstr "⚠️ Field goal está disponível somente no campo da defesa."
@@ -390,8 +395,8 @@ msgstr "⚠️ Valor inválido. Use true/false, on/off, 1/0, yes/no."
 msgid "⚠️ Multiple players matched: {ambiguousNames}. Use !qb #id."
 msgstr "⚠️ Vários jogadores corresponderam: {ambiguousNames}. Use !qb #id."
 
-#: src/modes/classic/shared/commands/handlers/undo.ts:18
-#: src/modes/flag/shared/commands/handlers/undo.ts:18
+#: src/modes/classic/shared/commands/handlers/undo.ts:21
+#: src/modes/flag/shared/commands/handlers/undo.ts:21
 msgid "⚠️ No checkpoints available to undo."
 msgstr "⚠️ Nenhum checkpoint disponível para desfazer."
 
@@ -407,8 +412,8 @@ msgstr "⚠️ Nenhum quarterback selecionado. Use !qb para virar QB antes do re
 msgid "⚠️ Only admins can assign quarterback targets."
 msgstr "⚠️ Apenas admins podem escolher quem será o quarterback."
 
-#: src/modes/classic/shared/commands/handlers/undo.ts:8
-#: src/modes/flag/shared/commands/handlers/undo.ts:8
+#: src/modes/classic/shared/commands/handlers/undo.ts:11
+#: src/modes/flag/shared/commands/handlers/undo.ts:11
 msgid "⚠️ Only admins can call for an undo."
 msgstr "⚠️ Apenas admins podem pedir anulação."
 
@@ -594,7 +599,7 @@ msgstr "⚠️ Você não pode banir esse jogador."
 msgid "⚠️ You cannot kick this player."
 msgstr "⚠️ Você não pode expulsar esse jogador."
 
-#: src/modes/classic/states/kicking/punt.ts:190
+#: src/modes/classic/states/kicking/punt.ts:191
 #: src/modes/classic/states/kicking/safety.ts:182
 msgid "⚠️ You cannot kick while a teammate is past the ball line."
 msgstr "⚠️ Você não pode chutar enquanto um companheiro estiver além da linha de scrimmage."
@@ -618,7 +623,7 @@ msgstr "⚠️ Você não pode dar hike enquanto um companheiro estiver além da
 msgid "⚠️ You cannot use that command right now."
 msgstr "⚠️ Você não pode usar esse comando agora."
 
-#: src/modes/classic/states/kicking/punt.ts:196
+#: src/modes/classic/states/kicking/punt.ts:197
 msgid "⚠️ You must get back behind the ball line to allow the punt!"
 msgstr "⚠️ Você deve voltar para trás da linha da bola para permitir o punt!"
 
@@ -808,7 +813,7 @@ msgstr "🎛️ {0} alterou o modo de jogo para {1}."
 msgid "🎛️ Current game mode: {0}."
 msgstr "🎛️ Modo de jogo atual: {0}."
 
-#: src/room/managed/modules/match-persistence.ts:364
+#: src/room/managed/modules/match-persistence.ts:588
 msgid "🎥 Match recorded: {matchUrl}"
 msgstr "🎥 Partida gravada: {matchUrl}"
 
@@ -1459,7 +1464,7 @@ msgstr "Interceptação"
 msgid "kick the PAT."
 msgstr "chute o extra point."
 
-#: src/modes/classic/states/kicking/punt.ts:152
+#: src/modes/classic/states/kicking/punt.ts:153
 #: src/modes/classic/states/kicking/safety.ts:144
 msgid "kicking team loses possession."
 msgstr "time que chutaria perde a posse."
@@ -1646,7 +1651,7 @@ msgstr "PICK-SIX de {0}!"
 #~ msgid "punt caught first by the kicking team ({0})."
 #~ msgstr "Punt tocado primeiro pelo time que chutou ({0})."
 
-#: src/modes/classic/states/kicking/punt.ts:151
+#: src/modes/classic/states/kicking/punt.ts:152
 msgid "punt clock expired"
 msgstr "tempo para o punt esgotado"
 

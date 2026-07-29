@@ -1,6 +1,9 @@
+import { guard } from "@modes/classic/shared/commands/guard";
 import { $checkpoints, $effect, $restore } from "@runtime/runtime";
 import { t } from "@lingui/core/macro";
 import type { SharedCommandImplementation } from "@modes/classic/shared/commands/types";
+
+const UNDO_GUARD_WINDOW_MS = 1_000;
 
 export const undoCommandHandler: SharedCommandImplementation = ({ player }) => {
     if (!player.admin) {
@@ -16,6 +19,17 @@ export const undoCommandHandler: SharedCommandImplementation = ({ player }) => {
     if (checkpoints.length === 0) {
         $effect(($) => {
             $.send(t`⚠️ No checkpoints available to undo.`, player.id);
+        });
+
+        return { handled: true };
+    }
+
+    if (!guard.tryAcquire("undo", player.id, UNDO_GUARD_WINDOW_MS)) {
+        $effect(($) => {
+            $.send(
+                t`⚠️ Another admin just called for an undo. Please wait a moment.`,
+                player.id,
+            );
         });
 
         return { handled: true };
