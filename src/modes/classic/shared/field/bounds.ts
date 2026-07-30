@@ -306,6 +306,28 @@ export function intersectsGoalPosts(
     return { intersects: false };
 }
 
+export function isPotentialFieldGoalTrajectory(
+    ray: Ray,
+    team: FieldTeam,
+    ballRadius: number,
+): boolean {
+    const goalLine = getGoalLine(team);
+    const uncertaintyMargin =
+        Math.max(0, ballRadius) + MapMeasures.GOAL_POST_RADIUS;
+    const expandedGoalLine = {
+        start: {
+            x: goalLine.start.x,
+            y: goalLine.start.y - uncertaintyMargin,
+        },
+        end: {
+            x: goalLine.end.x,
+            y: goalLine.end.y + uncertaintyMargin,
+        },
+    };
+
+    return intersectRayWithSegment(ray, expandedGoalLine).intersects;
+}
+
 export function getGoalLine(team: FieldTeam): Line {
     return team === Team.RED
         ? MapMeasures.RED_GOAL_LINE

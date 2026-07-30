@@ -41,6 +41,7 @@ import {
     getPositionFromFieldPosition,
     getRayIntersectionWithOuterField,
     intersectsGoalPosts,
+    isPotentialFieldGoalTrajectory,
     offsetXByYards,
     YARD_LENGTH,
 } from "@modes/classic/shared/field";
@@ -236,10 +237,16 @@ export function FieldGoal({
             ray,
             opposite(offensiveTeam),
         );
+        const isPotentialFieldGoal = isPotentialFieldGoalTrajectory(
+            ray,
+            opposite(offensiveTeam),
+            ball.radius,
+        );
         const outOfBoundsPoint = getRayIntersectionWithOuterField(ray);
 
         if (!outOfBoundsPoint) return false;
-        if (!goalIntersection.intersects) return true;
+        if (!isPotentialFieldGoal) return true;
+        if (!goalIntersection.intersects) return false;
 
         const goalDistance = getDistance(ray.origin, goalIntersection.point);
         const outDistance = getDistance(ray.origin, outOfBoundsPoint);
