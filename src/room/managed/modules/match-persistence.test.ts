@@ -90,10 +90,10 @@ describe("managed match persistence callback safety", () => {
 
     it("checkpoints and completes an eligible match with its recording", async () => {
         installSuccessfulRequests();
-        const snapshotRecording = vi.fn<() => Uint8Array>(() =>
-            Uint8Array.from([1, 2, 3]),
+        const snapshotRecordingAsync = vi.fn<() => Promise<Uint8Array>>(
+            async () => Uint8Array.from([1, 2, 3]),
         );
-        const room = createRoom({ time: 31, snapshotRecording });
+        const room = createRoom({ time: 31, snapshotRecordingAsync });
         const persistence = createPersistence();
 
         persistence.module.call("onGameStart", room, null);
@@ -110,7 +110,7 @@ describe("managed match persistence callback safety", () => {
         });
 
         expect(recordingCheckpointRequests()).toHaveLength(1);
-        expect(snapshotRecording).toHaveBeenCalledOnce();
+        expect(snapshotRecordingAsync).toHaveBeenCalledOnce();
     });
 });
 
@@ -125,11 +125,13 @@ function createPersistence() {
 
 function createRoom({
     time,
-    snapshotRecording = vi.fn<() => Uint8Array>(() => Uint8Array.from([1, 2])),
+    snapshotRecordingAsync = vi.fn<() => Promise<Uint8Array>>(async () =>
+        Uint8Array.from([1, 2]),
+    ),
     stopRecording = vi.fn<() => Uint8Array>(() => Uint8Array.from([1, 2, 3])),
 }: {
     time: number;
-    snapshotRecording?: () => Uint8Array;
+    snapshotRecordingAsync?: () => Promise<Uint8Array>;
     stopRecording?: () => Uint8Array;
 }): Room {
     return {
@@ -143,7 +145,7 @@ function createRoom({
         }),
         send: vi.fn<() => void>(),
         startRecording: vi.fn<() => boolean>(() => true),
-        snapshotRecording,
+        snapshotRecordingAsync,
         stopRecording,
     } as unknown as Room;
 }

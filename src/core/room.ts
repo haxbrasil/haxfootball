@@ -672,6 +672,10 @@ export class Room {
         return this.room.snapshotRecording();
     }
 
+    public snapshotRecordingAsync(): Promise<Uint8Array | null> {
+        return this.room.snapshotRecordingAsync();
+    }
+
     public dispatch(
         operation: Extract<
             RoomDispatchOperationObject,

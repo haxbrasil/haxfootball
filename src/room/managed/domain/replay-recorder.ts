@@ -18,11 +18,11 @@ export class ReplayRecorder {
         }
     }
 
-    snapshot(room: Room): Uint8Array | null {
+    async snapshot(room: Room): Promise<Uint8Array | null> {
         if (!this.recording) return null;
 
         try {
-            return room.snapshotRecording();
+            return await room.snapshotRecordingAsync();
         } catch (error) {
             console.error(
                 "Failed to snapshot HaxBall replay recording:",

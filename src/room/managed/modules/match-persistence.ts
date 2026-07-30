@@ -123,7 +123,8 @@ export function createManagedMatchPersistence({
     ): void => {
         enqueue(async () => {
             await ensureMatch(currentSession, roomId);
-            const bytes = finalBytes ?? currentSession.replay.snapshot(room);
+            const bytes =
+                finalBytes ?? (await currentSession.replay.snapshot(room));
 
             if (bytes) {
                 await uploadRecordingCheckpoint(currentSession, bytes);
@@ -179,7 +180,7 @@ export function createManagedMatchPersistence({
                 return;
             }
 
-            const replayBytes = currentSession.replay.snapshot(room);
+            const replayBytes = await currentSession.replay.snapshot(room);
 
             if (replayBytes) {
                 const uploaded = await uploadRecordingCheckpoint(
