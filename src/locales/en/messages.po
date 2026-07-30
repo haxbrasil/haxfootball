@@ -382,7 +382,7 @@ msgstr "⚠️ Field goal is only available from the defensive side of the field
 msgid "⚠️ Flags cannot be changed while a game is in progress."
 msgstr "⚠️ Flags cannot be changed while a game is in progress."
 
-#: src/room/shared/modules/game-commands.ts:82
+#: src/room/shared/modules/game-commands.ts:118
 msgid "⚠️ Game mode cannot be changed while a game is in progress."
 msgstr "⚠️ Game mode cannot be changed while a game is in progress."
 
@@ -519,7 +519,7 @@ msgid "⚠️ Unknown flag. Use !flags to list available flags."
 msgstr "⚠️ Unknown flag. Use !flags to list available flags."
 
 #. placeholder {0}: GAME_MODE_NAMES.join(" or ")
-#: src/room/shared/modules/game-commands.ts:95
+#: src/room/shared/modules/game-commands.ts:131
 msgid "⚠️ Unknown game mode. Use {0}."
 msgstr "⚠️ Unknown game mode. Use {0}."
 
@@ -804,12 +804,12 @@ msgstr "❌ Two-point try failed."
 
 #. placeholder {0}: player.name
 #. placeholder {1}: updatedModeDefinition.label
-#: src/room/shared/modules/game-commands.ts:109
+#: src/room/shared/modules/game-commands.ts:145
 msgid "🎛️ {0} changed the game mode to {1}."
 msgstr "🎛️ {0} changed the game mode to {1}."
 
 #. placeholder {0}: selectedModeDefinition.label
-#: src/room/shared/modules/game-commands.ts:60
+#: src/room/shared/modules/game-commands.ts:96
 msgid "🎛️ Current game mode: {0}."
 msgstr "🎛️ Current game mode: {0}."
 
@@ -888,7 +888,7 @@ msgstr "🏈 Game: {0}"
 msgid "🏈 HaxFootball - American Football 🏈"
 msgstr "🏈 HaxFootball - American Football 🏈"
 
-#: src/room/shared/modules/game-commands.ts:119
+#: src/room/shared/modules/game-commands.ts:155
 msgid "🏈 HaxFootball 2026"
 msgstr "🏈 HaxFootball 2026"
 
@@ -984,6 +984,11 @@ msgstr "📘 {COMMAND_PREFIX}{0}: No description available."
 #: src/room/shared/modules/help.ts:127
 msgid "🔁 Aliases: {formattedAliases}"
 msgstr "🔁 Aliases: {formattedAliases}"
+
+#. placeholder {0}: player.name
+#: src/room/shared/modules/game-commands.ts:83
+msgid "🔄 {0} swapped the red and blue teams."
+msgstr "🔄 {0} swapped the red and blue teams."
 
 #: src/room/shared/modules/room-manager.ts:100
 msgid "🔐 Please register and sign in to play. You can stay as a spectator until then."
@@ -1187,9 +1192,13 @@ msgstr "🚪 Out-of-bounds reception by {0}"
 msgid "🚪 Punt out of bounds"
 msgstr "🚪 Punt out of bounds"
 
-#: src/room/shared/modules/game-commands.ts:71
+#: src/room/shared/modules/game-commands.ts:107
 msgid "🚫 Only admins can change the game mode."
 msgstr "🚫 Only admins can change the game mode."
+
+#: src/room/shared/modules/game-commands.ts:65
+msgid "🚫 Only admins can swap the teams."
+msgstr "🚫 Only admins can swap the teams."
 
 #: src/room/shared/modules/room-manager.ts:463
 msgid "🚫 Only admins can use room manager commands."
@@ -1828,7 +1837,7 @@ msgstr "Show available commands or details for one command"
 msgid "Show game info"
 msgstr "Show game info"
 
-#: src/room/shared/modules/game-commands.ts:28
+#: src/room/shared/modules/game-commands.ts:30
 msgid "Show or change the game mode"
 msgstr "Show or change the game mode"
 
@@ -1836,7 +1845,7 @@ msgstr "Show or change the game mode"
 msgid "Show the Discord invite link"
 msgstr "Show the Discord invite link"
 
-#: src/room/shared/modules/game-commands.ts:23
+#: src/room/shared/modules/game-commands.ts:25
 msgid "Show the game version"
 msgstr "Show the game version"
 
@@ -1852,6 +1861,10 @@ msgstr "Show the tutorial link"
 #: src/room/managed/modules/authentication.ts:746
 msgid "Sign-in timed out."
 msgstr "Sign-in timed out."
+
+#: src/room/shared/modules/game-commands.ts:35
+msgid "Swap the red and blue teams"
+msgstr "Swap the red and blue teams"
 
 #: src/room/shared/modules/room-manager.ts:85
 msgid "their team"

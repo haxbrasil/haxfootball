@@ -5,6 +5,7 @@ import type { GameModeDefinition } from "@modes/types";
 import { t } from "@lingui/core/macro";
 import type { RoomAuthorization } from "../domain/authorization";
 import { CommandCategory } from "../domain/command-categories";
+import { Team } from "@runtime/models";
 import {
     GAME_MODE_NAMES,
     parseGameModeName,
@@ -13,6 +14,7 @@ import {
 
 export const GAME_MODULE_COMMAND = {
     MODE: "mode",
+    SWAP: "swap",
     VERSION: "version",
 } as const;
 
@@ -26,6 +28,11 @@ export const GAME_MODULE_COMMAND_DEFINITIONS: CommandDefinition[] = [
         name: GAME_MODULE_COMMAND.MODE,
         category: CommandCategory.Room,
         description: t`Show or change the game mode`,
+    },
+    {
+        name: GAME_MODULE_COMMAND.SWAP,
+        category: CommandCategory.Room,
+        description: t`Swap the red and blue teams`,
     },
 ];
 
@@ -52,6 +59,35 @@ export function handleGameModuleCommand({
     room: Room;
     selectedModeDefinition: GameModeDefinition;
 }): CommandResponse | null {
+    if (commandName === GAME_MODULE_COMMAND.SWAP) {
+        if (!authorization.canUseManagementCommand(player)) {
+            room.send({
+                message: t`🚫 Only admins can swap the teams.`,
+                color: COLOR.ERROR,
+                to: player.id,
+                sound: "notification",
+            });
+
+            return { hideMessage: true };
+        }
+
+        room.getPlayerList().forEach((currentPlayer) => {
+            if (currentPlayer.team === Team.RED) {
+                room.setTeam(currentPlayer, Team.BLUE);
+            } else if (currentPlayer.team === Team.BLUE) {
+                room.setTeam(currentPlayer, Team.RED);
+            }
+        });
+
+        room.send({
+            message: t`🔄 ${player.name} swapped the red and blue teams.`,
+            color: COLOR.ADMIN,
+            sound: "notification",
+        });
+
+        return { hideMessage: true };
+    }
+
     if (commandName === GAME_MODULE_COMMAND.MODE) {
         const requestedMode = commandArgs[0];
 
