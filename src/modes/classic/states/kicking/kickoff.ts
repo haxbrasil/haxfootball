@@ -1,4 +1,11 @@
-import { $checkpoint, $config, $dispose, $effect, $next } from "@runtime/hooks";
+import {
+    $checkpoint,
+    $config,
+    $dispose,
+    $effect,
+    $next,
+    $scores,
+} from "@runtime/hooks";
 import { Team, type FieldTeam } from "@runtime/models";
 import { distributeOnLine, getMidpoint } from "@common/math/geometry";
 import { opposite } from "@common/game/game";
@@ -36,6 +43,7 @@ import {
     KICKOFF_KICK_TIMEOUT_TICKS,
     KICKOFF_WARNING_SECONDS_REMAINING,
     KICKOFF_WARNING_TICKS,
+    getKickoffTimeoutElapsedTicks,
 } from "@modes/classic/shared/rules/kickoff";
 import type { GameStateInspection } from "@runtime/inspection";
 
@@ -54,6 +62,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     const receivingTeam = opposite(forTeam);
     const config = $config<Config>();
     const kickingTeamName = formatTeamName(forTeam);
+    const isInitialKickoff = $scores()?.time === 0;
 
     $global((state) => state.clearPossessionQuarterback());
 
@@ -83,7 +92,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     });
 
     $effect(($) => {
-        if (config.flags.timeouts) {
+        if (config.flags.timeouts && !isInitialKickoff) {
             const players = $.getPlayerList();
             const kickingTeamPlayers = players.filter(
                 (player) => player.team === forTeam,
@@ -160,7 +169,15 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     function $handleKickoffTimeout() {
         if (!config.flags.timeouts) return;
 
-        const { current: elapsedTicks } = $tick();
+        const scores = $scores();
+        if (!scores) return;
+
+        const elapsedTicks = getKickoffTimeoutElapsedTicks({
+            isInitialKickoff,
+            nativeTime: scores.time,
+            stateElapsedTicks: $tick().current,
+        });
+        if (elapsedTicks === null) return;
 
         if (elapsedTicks === KICKOFF_WARNING_TICKS) {
             $effect(($) => {
