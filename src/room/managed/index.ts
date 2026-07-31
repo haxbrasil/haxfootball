@@ -31,6 +31,7 @@ type ManagedRoomModulesOptions = {
     commId?: string | undefined;
     incidentReporter?: RoomIncidentReporter | undefined;
     liveStateContractJson?: string | undefined;
+    minimumPersistedMatchSeconds?: number | undefined;
     publicWebBaseUrl?: string | undefined;
     roomId?: string | undefined;
     roomName?: string | undefined;
@@ -53,6 +54,12 @@ export function createModules(options: ManagedRoomModulesOptions = {}) {
         publicWebBaseUrl: options.publicWebBaseUrl,
         roomId: options.roomId,
         sessionStore,
+        ...(options.minimumPersistedMatchSeconds !== undefined
+            ? {
+                  minimumPersistedMatchSeconds:
+                      options.minimumPersistedMatchSeconds,
+              }
+            : {}),
     });
     const roomManagerLaunchEnabled = options.roomManagerEnabled ?? true;
     const roomManagerEnabled =

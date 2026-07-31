@@ -112,14 +112,37 @@ describe("managed match persistence callback safety", () => {
         expect(recordingCheckpointRequests()).toHaveLength(1);
         expect(snapshotRecordingAsync).toHaveBeenCalledOnce();
     });
+
+    it("completes a short registered game at the configured threshold", async () => {
+        installSuccessfulRequests();
+        const room = createRoom({ time: 5 });
+        const persistence = createPersistence({
+            minimumPersistedMatchSeconds: 4,
+        });
+
+        persistence.module.call("onGameStart", room, null);
+        persistence.module.call("onGameStop", room, null);
+
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({
+                    status: "completed",
+                    score: { red: 6, blue: 7 },
+                }),
+            );
+        });
+    });
 });
 
-function createPersistence() {
+function createPersistence(
+    options: { minimumPersistedMatchSeconds?: number } = {},
+) {
     return createManagedMatchPersistence({
         gameModeReader: () => "classic",
         gameScoreReader: () => ({ red: 6, blue: 7 }),
         roomId: "room-1",
         sessionStore: createPlayerSessionStore(),
+        ...options,
     });
 }
 

@@ -14,6 +14,7 @@ const roomServerBaseEnvSchema = {
     ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED: z.stringbool().optional(),
     ROOM_ALLOW_GUEST_PLAY: z.stringbool().optional(),
     ROOM_AUTO_MANAGE_NATIVE_ADMINS: z.stringbool().optional(),
+    ROOM_MIN_PERSISTED_MATCH_SECONDS: z.coerce.number().int().min(0).optional(),
     LANGUAGE: z.string().trim().min(1).optional(),
     TUTORIAL_LINK: z.string().trim().min(1),
     DISCORD_LINK: z.string().trim().min(1),
@@ -102,6 +103,8 @@ export const env = createEnv(
                 rawEnv.ROOM_MANAGER_AFK_ACTIVITY_DETECTION_ENABLED,
             allowGuestPlay: rawEnv.ROOM_ALLOW_GUEST_PLAY,
             autoManageNativeAdmins: rawEnv.ROOM_AUTO_MANAGE_NATIVE_ADMINS,
+            minimumPersistedMatchSeconds:
+                rawEnv.ROOM_MIN_PERSISTED_MATCH_SECONDS,
         };
     },
 );

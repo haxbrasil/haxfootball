@@ -6,24 +6,34 @@ describe("room-server policy environment", () => {
         vi.resetModules();
     });
 
-    it("parses explicit guest-play and native-admin booleans", async () => {
+    it("parses explicit championship room controls", async () => {
         const env = await loadEnvironment({
             ROOM_ALLOW_GUEST_PLAY: "true",
             ROOM_AUTO_MANAGE_NATIVE_ADMINS: "false",
+            ROOM_MIN_PERSISTED_MATCH_SECONDS: "4",
         });
 
         expect(env.allowGuestPlay).toBe(true);
         expect(env.autoManageNativeAdmins).toBe(false);
+        expect(env.minimumPersistedMatchSeconds).toBe(4);
     });
 
     it("keeps both policies optional", async () => {
         const env = await loadEnvironment({
             ROOM_ALLOW_GUEST_PLAY: "",
             ROOM_AUTO_MANAGE_NATIVE_ADMINS: "",
+            ROOM_MIN_PERSISTED_MATCH_SECONDS: "",
         });
 
         expect(env.allowGuestPlay).toBeUndefined();
         expect(env.autoManageNativeAdmins).toBeUndefined();
+        expect(env.minimumPersistedMatchSeconds).toBeUndefined();
+    });
+
+    it("rejects negative persistence thresholds", async () => {
+        await expect(
+            loadEnvironment({ ROOM_MIN_PERSISTED_MATCH_SECONDS: "-1" }),
+        ).rejects.toThrow(/ROOM_MIN_PERSISTED_MATCH_SECONDS|>=0/);
     });
 });
 
