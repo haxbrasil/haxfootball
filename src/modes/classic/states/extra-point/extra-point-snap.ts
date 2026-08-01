@@ -286,6 +286,7 @@ export function ExtraPointSnap({
                 fieldPos: nextFieldPos,
                 defensiveFouls: nextDefensiveFouls,
             },
+            ...(options?.wait ? { wait: options.wait } : {}),
             ...(options?.disposal ? { disposal: options.disposal } : {}),
         });
     }
