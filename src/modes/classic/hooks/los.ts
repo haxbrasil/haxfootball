@@ -80,7 +80,7 @@ export function $setLineOfScrimmageBlockingCollision(enabled: boolean) {
             const withoutLos = currentGroup & ~cf.redKO & ~cf.blueKO;
             const cGroup = enabled
                 ? withoutLos | baseGroup | losGroup
-                : withoutLos | baseGroup;
+                : baseGroup;
 
             $.setPlayerDisc(player.id, {
                 cGroup,
