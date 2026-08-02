@@ -183,6 +183,7 @@ declare global {
             event: DeferredOperationAppliedObject,
         ) => void;
         patchStadium(patch: unknown, options?: PatchStadiumOptionsObject): void;
+        setSoftKickoff(team: Exclude<TeamID, 0>): void;
         setScore(red: number, blue: number): void;
     };
 }

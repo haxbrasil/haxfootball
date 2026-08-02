@@ -23,6 +23,7 @@ import {
 } from "@modes/classic/hooks/game";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
 
 type Frame = {
     state: GameState;
@@ -99,6 +100,7 @@ export function ExtraPointSnapInFlight({
             });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: { forTeam: offensiveTeam },
@@ -116,6 +118,7 @@ export function ExtraPointSnapInFlight({
             });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: { forTeam: offensiveTeam },
@@ -185,6 +188,7 @@ export function ExtraPointSnapInFlight({
             });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: { forTeam: offensiveTeam },

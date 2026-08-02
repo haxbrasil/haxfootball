@@ -18,6 +18,7 @@ import {
     getPositionFromFieldPosition,
 } from "@modes/classic/shared/field";
 import { $config, $next, $tick } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/classic/hooks/clock";
 import { t } from "@lingui/core/macro";
 import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
@@ -28,6 +29,7 @@ import { cn } from "@modes/classic/shared/presentation/message";
 import { SAFETY_KICK_TIMEOUT_TICKS } from "@modes/classic/shared/rules/safety";
 import { $setBallActive, $setBallInactive } from "@modes/classic/hooks/game";
 import type { GameStateInspection } from "@runtime/inspection";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const KICKING_TEAM_POSITIONS_OFFSET = {
     start: { x: -50, y: -150 },
@@ -39,6 +41,7 @@ const YARD_LINE_FOR_SAFETY = 25;
 export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
     const config = $config<Config>();
 
+    $stopGameClock(kickingTeam);
     $trapTeamInEndZone(opposite(kickingTeam));
     $setBallKickForce("strong");
     $setBallUnmoveable();
@@ -150,7 +153,9 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
             disposal: "IMMEDIATE",
@@ -188,6 +193,7 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
             return;
         }
 
+        $startGameClock();
         $next({
             to: "SAFETY_KICK_IN_FLIGHT",
             params: {

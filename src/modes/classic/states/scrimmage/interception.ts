@@ -43,6 +43,9 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
 import type { Config } from "@modes/classic/config";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareExtraPointLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const MAX_PATH_DURATION = ticks({ seconds: 2 });
 
@@ -180,7 +183,9 @@ export function Interception({
         $next({
             to: "EXTRA_POINT",
             params: {
-                offensiveTeam: playerTeam,
+                offensiveTeam:
+                    $prepareExtraPointLineOfScrimmageBlocking(playerTeam),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -210,11 +215,14 @@ export function Interception({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getInitialDownState(
-                        playerTeam,
-                        fieldPos,
-                        frame.player.y,
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getInitialDownState(
+                            playerTeam,
+                            fieldPos,
+                            frame.player.y,
+                        ),
                     ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -248,6 +256,7 @@ export function Interception({
                 });
             });
 
+            $stopGameClock(playerTeam);
             $next({
                 to: "SAFETY",
                 params: {
@@ -287,10 +296,13 @@ export function Interception({
                     $next({
                         to: "PRESNAP",
                         params: {
-                            downState: getInitialDownState(playerTeam, {
-                                yards: TOUCHBACK_YARD_LINE,
-                                side: playerTeam,
-                            }),
+                            downState: $prepareDownStateLineOfScrimmageBlocking(
+                                getInitialDownState(playerTeam, {
+                                    yards: TOUCHBACK_YARD_LINE,
+                                    side: playerTeam,
+                                }),
+                            ),
+                            losBlockingPrepared: true,
                         },
                         wait: ticks({ seconds: 1 }),
                     });
@@ -327,6 +339,7 @@ export function Interception({
                         });
                     });
 
+                    $stopGameClock(playerTeam);
                     $next({
                         to: "SAFETY",
                         params: {
@@ -377,11 +390,14 @@ export function Interception({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getInitialDownState(
-                        playerTeam,
-                        fieldPos,
-                        frame.player.y,
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getInitialDownState(
+                            playerTeam,
+                            fieldPos,
+                            frame.player.y,
+                        ),
                     ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });

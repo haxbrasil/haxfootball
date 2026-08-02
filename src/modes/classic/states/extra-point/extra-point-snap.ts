@@ -59,6 +59,8 @@ import {
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { getPointDistance } from "@common/math/geometry";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const DEFENSIVE_FOUL_PENALTY_YARDS = 5;
 
@@ -262,6 +264,7 @@ export function ExtraPointSnap({
     function $failTwoPointAttempt(): never {
         $setBallInactive();
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: {
@@ -279,12 +282,19 @@ export function ExtraPointSnap({
             wait?: number;
         },
     ) {
+        const losBlockingPrepared = typeof options?.wait === "number";
+        if (losBlockingPrepared) {
+            $stopGameClock(offensiveTeam);
+            $prepareLineOfScrimmageBlocking(nextFieldPos);
+        }
+
         $next({
             to: "EXTRA_POINT_RETRY",
             params: {
                 offensiveTeam,
                 fieldPos: nextFieldPos,
                 defensiveFouls: nextDefensiveFouls,
+                losBlockingPrepared,
             },
             ...(options?.wait ? { wait: options.wait } : {}),
             ...(options?.disposal ? { disposal: options.disposal } : {}),
@@ -296,6 +306,7 @@ export function ExtraPointSnap({
             state.incrementScore(offensiveTeam, SCORES.TWO_POINT),
         );
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: {

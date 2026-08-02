@@ -9,6 +9,7 @@ import {
     $tick,
     $config,
 } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/classic/hooks/clock";
 import { ticks } from "@common/general/time";
 import { opposite, type FieldPosition } from "@common/game/game";
 import { type FieldTeam, isFieldTeam } from "@runtime/models";
@@ -48,9 +49,9 @@ import {
     $setLineOfScrimmageBlockingCollision,
 } from "@modes/classic/hooks/los";
 import { type Config } from "@modes/classic/config";
+import { EXTRA_POINT_YARD_LINE } from "@modes/classic/shared/rules/extra-point";
 
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
-const EXTRA_POINT_YARD_LINE = 10;
 
 function $setInitialPlayerPositions(
     offensiveTeam: FieldTeam,
@@ -101,10 +102,12 @@ export function ExtraPointRetry({
     offensiveTeam,
     fieldPos: fieldPosParam,
     defensiveFouls = 0,
+    losBlockingPrepared = false,
 }: {
     offensiveTeam: FieldTeam;
     fieldPos?: FieldPosition;
     defensiveFouls?: number;
+    losBlockingPrepared?: boolean;
 }) {
     const fieldPos: FieldPosition = fieldPosParam ?? {
         yards: EXTRA_POINT_YARD_LINE,
@@ -119,9 +122,14 @@ export function ExtraPointRetry({
     );
     const formationBallPos = calculateSnapBallPosition(offensiveTeam, fieldPos);
 
+    $stopGameClock(offensiveTeam);
     $setLineOfScrimmage(fieldPos);
     if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        if (losBlockingPrepared) {
+            $setLineOfScrimmageBlockingCollision(true);
+        } else {
+            $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        }
     }
     $unsetFirstDownLine();
     $setBallActive();
@@ -192,6 +200,7 @@ export function ExtraPointRetry({
             });
         });
 
+        $startGameClock();
         $next({
             to: "EXTRA_POINT_SNAP",
             params: {
@@ -218,6 +227,7 @@ export function ExtraPointRetry({
             $.send({ message: t`⏱️ PAT window expired.`, color: COLOR.ALERT });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: {

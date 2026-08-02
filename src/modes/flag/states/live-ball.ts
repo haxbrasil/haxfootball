@@ -34,6 +34,7 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import type { FieldPosition } from "@common/game/game";
 import { Stat } from "@modes/flag/stats";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/flag/hooks/los";
 
 type Frame = {
     state: GameState;
@@ -201,7 +202,10 @@ export function LiveBall({
         $next({
             to: "PRESNAP",
             params: {
-                downState: getRestartDownState(opposite(offensiveTeam)),
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    getRestartDownState(opposite(offensiveTeam)),
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -337,7 +341,9 @@ export function LiveBall({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: nextDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -374,7 +380,10 @@ export function LiveBall({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getRestartDownState(opposite(offensiveTeam)),
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getRestartDownState(opposite(offensiveTeam)),
+                    ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 2 }),
             });
@@ -539,7 +548,9 @@ export function LiveBall({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

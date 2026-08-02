@@ -10,6 +10,7 @@ import {
     $tick,
     $config,
 } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/classic/hooks/clock";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
 import { getDistance } from "@common/math/geometry";
@@ -53,11 +54,10 @@ import {
     $setLineOfScrimmageBlockingCollision,
 } from "@modes/classic/hooks/los";
 import { type Config } from "@modes/classic/config";
+import { EXTRA_POINT_YARD_LINE } from "@modes/classic/shared/rules/extra-point";
 
 const LOADING_DURATION = ticks({ seconds: 0.5 });
 const EXTRA_POINT_DECISION_WINDOW = ticks({ seconds: 10 });
-const EXTRA_POINT_YARD_LINE = 10;
-
 function isTooFarFromBall(position: Position | undefined, ballPos: Position) {
     return (
         !position ||
@@ -118,9 +118,11 @@ type Frame = {
 export function ExtraPoint({
     offensiveTeam,
     twoPointLocked = false,
+    losBlockingPrepared = false,
 }: {
     offensiveTeam: FieldTeam;
     twoPointLocked?: boolean;
+    losBlockingPrepared?: boolean;
 }) {
     const fieldPos = {
         yards: EXTRA_POINT_YARD_LINE,
@@ -136,9 +138,14 @@ export function ExtraPoint({
     );
     const formationBallPos = calculateSnapBallPosition(offensiveTeam, fieldPos);
 
+    $stopGameClock(offensiveTeam);
     $setLineOfScrimmage(fieldPos);
     if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        if (losBlockingPrepared) {
+            $setLineOfScrimmageBlockingCollision(true);
+        } else {
+            $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        }
     }
     $unsetFirstDownLine();
     $setBallActive();
@@ -221,6 +228,7 @@ export function ExtraPoint({
             });
         });
 
+        $startGameClock();
         $next({
             to: "EXTRA_POINT_SNAP",
             params: {
@@ -279,6 +287,7 @@ export function ExtraPoint({
             $.send({ message: t`⏱️ PAT window expired.`, color: COLOR.ALERT });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: {
@@ -314,6 +323,7 @@ export function ExtraPoint({
             });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: {
@@ -326,6 +336,7 @@ export function ExtraPoint({
     function $handleKick(frame: Frame) {
         if (!frame.kicker) return;
 
+        $startGameClock();
         $next({
             to: "EXTRA_POINT_KICK",
             params: {

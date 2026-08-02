@@ -34,6 +34,7 @@ import { $createSharedCommandHandler } from "@modes/flag/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/flag/stats";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/flag/hooks/los";
 
 type Frame = {
     player: GameStatePlayer;
@@ -145,7 +146,10 @@ export function QuarterbackRun({
         $next({
             to: "PRESNAP",
             params: {
-                downState: getRestartDownState(opposite(offensiveTeam)),
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    getRestartDownState(opposite(offensiveTeam)),
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -251,7 +255,9 @@ export function QuarterbackRun({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: nextDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -288,7 +294,10 @@ export function QuarterbackRun({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getRestartDownState(opposite(offensiveTeam)),
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getRestartDownState(opposite(offensiveTeam)),
+                    ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 2 }),
             });
@@ -424,7 +433,9 @@ export function QuarterbackRun({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

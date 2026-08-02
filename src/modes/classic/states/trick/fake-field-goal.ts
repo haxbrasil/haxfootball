@@ -34,6 +34,9 @@ import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import type { Config } from "@modes/classic/config";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareExtraPointLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 type Frame = {
     player: GameStatePlayer;
@@ -123,7 +126,9 @@ export function FakeFieldGoal({
         $next({
             to: "EXTRA_POINT",
             params: {
-                offensiveTeam,
+                offensiveTeam:
+                    $prepareExtraPointLineOfScrimmageBlocking(offensiveTeam),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -225,7 +230,9 @@ export function FakeFieldGoal({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: nextDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -259,6 +266,7 @@ export function FakeFieldGoal({
                 });
             });
 
+            $stopGameClock(offensiveTeam);
             $next({
                 to: "SAFETY",
                 params: {
@@ -382,7 +390,9 @@ export function FakeFieldGoal({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

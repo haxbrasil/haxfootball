@@ -1,4 +1,4 @@
-import { type FieldPosition } from "@common/game/game";
+import { opposite, type FieldPosition } from "@common/game/game";
 import { SPECIAL_HIDDEN_POSITION } from "@common/stadium-builder/consts";
 import {
     getLineOfScrimmage,
@@ -6,6 +6,9 @@ import {
 } from "@modes/classic/shared/field";
 import { $effect } from "@runtime/hooks";
 import { Team } from "@runtime/models";
+import type { FieldTeam } from "@runtime/models";
+import { EXTRA_POINT_YARD_LINE } from "@modes/classic/shared/rules/extra-point";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
 
 const losPlanePatch = (fieldPos: FieldPosition) => {
     const [line] = getLineOfScrimmage(fieldPos);
@@ -61,6 +64,38 @@ export function $requestLineOfScrimmageBlocking(
     });
 
     $setLineOfScrimmageBlockingCollision(false);
+}
+
+export function $prepareLineOfScrimmageBlocking(
+    fieldPos: FieldPosition,
+): FieldPosition {
+    $requestLineOfScrimmageBlocking(
+        fieldPos,
+        "classic-prepared-line-of-scrimmage",
+    );
+
+    return fieldPos;
+}
+
+export function $prepareDownStateLineOfScrimmageBlocking<
+    T extends { fieldPos: FieldPosition; offensiveTeam: FieldTeam },
+>(downState: T): T {
+    $stopGameClock(downState.offensiveTeam);
+    $prepareLineOfScrimmageBlocking(downState.fieldPos);
+
+    return downState;
+}
+
+export function $prepareExtraPointLineOfScrimmageBlocking(
+    offensiveTeam: FieldTeam,
+): FieldTeam {
+    $stopGameClock(offensiveTeam);
+    $prepareLineOfScrimmageBlocking({
+        yards: EXTRA_POINT_YARD_LINE,
+        side: opposite(offensiveTeam),
+    });
+
+    return offensiveTeam;
 }
 
 export function $setLineOfScrimmageBlockingCollision(enabled: boolean) {

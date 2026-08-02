@@ -13,7 +13,8 @@ import {
 import { ticks } from "@common/general/time";
 import { findCatchers, opposite } from "@common/game/game";
 import { t } from "@lingui/core/macro";
-import { $before, $dispose, $effect, $next, $event } from "@runtime/runtime";
+import { $before, $dispose, $effect, $event, $next } from "@runtime/runtime";
+import { $startGameClock } from "@modes/classic/hooks/clock";
 import {
     $setFirstDownLine,
     $setLineOfScrimmage,
@@ -51,6 +52,7 @@ import { findEligibleBallCatchers } from "@modes/classic/shared/interaction/rece
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const FIELD_GOAL_LINE_HEIGHT = 200;
 const OFFENSE_LINE_OFFSET_YARDS = 15;
@@ -111,6 +113,7 @@ export function FieldGoal({
         downState.lastBallY,
     );
 
+    $startGameClock();
     $setBallMoveable();
     $unlockBall();
     $setBallActive();
@@ -328,7 +331,11 @@ export function FieldGoal({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: failureDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(
+                            failureDownState,
+                        ),
+                    losBlockingPrepared: true,
                 },
                 wait: FIELD_GOAL_RESULT_DELAY,
             });
@@ -361,7 +368,9 @@ export function FieldGoal({
         $next({
             to: "PRESNAP",
             params: {
-                downState: failureDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(failureDownState),
+                losBlockingPrepared: true,
             },
             wait: FIELD_GOAL_RESULT_DELAY,
         });
@@ -385,7 +394,9 @@ export function FieldGoal({
         $next({
             to: "PRESNAP",
             params: {
-                downState: failureDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(failureDownState),
+                losBlockingPrepared: true,
             },
             wait: FIELD_GOAL_RESULT_DELAY,
         });
@@ -409,7 +420,9 @@ export function FieldGoal({
         $next({
             to: "PRESNAP",
             params: {
-                downState: failureDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(failureDownState),
+                losBlockingPrepared: true,
             },
             wait: FIELD_GOAL_RESULT_DELAY,
         });
@@ -449,7 +462,11 @@ export function FieldGoal({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: failureDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(
+                            failureDownState,
+                        ),
+                    losBlockingPrepared: true,
                 },
                 wait: FIELD_GOAL_RESULT_DELAY,
             });
@@ -472,7 +489,9 @@ export function FieldGoal({
         $next({
             to: "PRESNAP",
             params: {
-                downState: failureDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(failureDownState),
+                losBlockingPrepared: true,
             },
             wait: FIELD_GOAL_RESULT_DELAY,
         });

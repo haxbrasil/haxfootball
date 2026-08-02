@@ -36,6 +36,7 @@ import { $createSharedCommandHandler } from "@modes/flag/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/flag/stats";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/flag/hooks/los";
 
 const MAX_PATH_DURATION = ticks({ seconds: 2 });
 
@@ -171,7 +172,10 @@ export function Interception({
         $next({
             to: "PRESNAP",
             params: {
-                downState: getRestartDownState(opposite(playerTeam)),
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    getRestartDownState(opposite(playerTeam)),
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -201,11 +205,14 @@ export function Interception({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getInitialDownState(
-                        playerTeam,
-                        fieldPos,
-                        frame.player.y,
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getInitialDownState(
+                            playerTeam,
+                            fieldPos,
+                            frame.player.y,
+                        ),
                     ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -242,7 +249,10 @@ export function Interception({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getRestartDownState(opposite(playerTeam)),
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getRestartDownState(opposite(playerTeam)),
+                    ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 2 }),
             });
@@ -278,7 +288,10 @@ export function Interception({
                     $next({
                         to: "PRESNAP",
                         params: {
-                            downState: getRestartDownState(playerTeam),
+                            downState: $prepareDownStateLineOfScrimmageBlocking(
+                                getRestartDownState(playerTeam),
+                            ),
+                            losBlockingPrepared: true,
                         },
                         wait: ticks({ seconds: 1 }),
                     });
@@ -318,9 +331,10 @@ export function Interception({
                     $next({
                         to: "PRESNAP",
                         params: {
-                            downState: getRestartDownState(
-                                opposite(playerTeam),
+                            downState: $prepareDownStateLineOfScrimmageBlocking(
+                                getRestartDownState(opposite(playerTeam)),
                             ),
+                            losBlockingPrepared: true,
                         },
                         wait: ticks({ seconds: 2 }),
                     });
@@ -367,11 +381,14 @@ export function Interception({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getInitialDownState(
-                        playerTeam,
-                        fieldPos,
-                        frame.player.y,
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getInitialDownState(
+                            playerTeam,
+                            fieldPos,
+                            frame.player.y,
+                        ),
                     ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });

@@ -15,6 +15,7 @@ import {
 } from "@modes/classic/hooks/game";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
 
 export function ExtraPointBlockedPass({
     blockerId,
@@ -67,6 +68,7 @@ export function ExtraPointBlockedPass({
             });
         });
 
+        $stopGameClock(offensiveTeam);
         $next({
             to: "KICKOFF",
             params: {

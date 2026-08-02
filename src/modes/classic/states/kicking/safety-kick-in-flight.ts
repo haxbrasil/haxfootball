@@ -20,6 +20,7 @@ import {
 } from "@modes/classic/shared/interaction/reception";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 type Frame = {
     state: GameState;
@@ -76,10 +77,13 @@ export function SafetyKickInFlight({
         $next({
             to: "PRESNAP",
             params: {
-                downState: getInitialDownState(receivingTeam, {
-                    yards: KICKOFF_OUT_OF_BOUNDS_YARD_LINE,
-                    side: receivingTeam,
-                }),
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    getInitialDownState(receivingTeam, {
+                        yards: KICKOFF_OUT_OF_BOUNDS_YARD_LINE,
+                        side: receivingTeam,
+                    }),
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 2 }),
         });
@@ -107,10 +111,13 @@ export function SafetyKickInFlight({
         $next({
             to: "PRESNAP",
             params: {
-                downState: getInitialDownState(receivingTeam, {
-                    yards: KICKOFF_OUT_OF_BOUNDS_YARD_LINE,
-                    side: receivingTeam,
-                }),
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    getInitialDownState(receivingTeam, {
+                        yards: KICKOFF_OUT_OF_BOUNDS_YARD_LINE,
+                        side: receivingTeam,
+                    }),
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 2 }),
         });
@@ -161,11 +168,14 @@ export function SafetyKickInFlight({
         $next({
             to: "PRESNAP",
             params: {
-                downState: getInitialDownState(
-                    receivingTeam,
-                    getFieldPosition(catcher.x),
-                    catcher.y,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    getInitialDownState(
+                        receivingTeam,
+                        getFieldPosition(catcher.x),
+                        catcher.y,
+                    ),
                 ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 2 }),
         });

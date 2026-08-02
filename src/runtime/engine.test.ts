@@ -8,11 +8,13 @@ import {
 import { $effect, $tick } from "./runtime";
 import { Team } from "@runtime/models";
 import type { Room } from "@core/room";
+import type { DiscRef } from "@core/room";
 
 type RoomStubOptions = {
     getPlayerList?: () => PlayerObject[];
     getBallPosition?: () => Position | null;
-    getDiscProperties?: (discIndex: number) => DiscPropertiesObject | null;
+    getBallProperties?: () => DiscPropertiesObject | null;
+    getDiscProperties?: (discIndex: DiscRef) => DiscPropertiesObject | null;
     getPlayerDiscProperties?: (playerId: number) => DiscPropertiesObject | null;
     setPlayerDiscProperties?: (
         playerId: number,
@@ -37,6 +39,7 @@ function createRoomStub(options: RoomStubOptions = {}): Room {
         invalidateCaches: options.invalidateCaches ?? (() => {}),
         getPlayerList: options.getPlayerList ?? (() => []),
         getBallPosition: options.getBallPosition ?? (() => ({ x: 0, y: 0 })),
+        getBallProperties: options.getBallProperties ?? (() => null),
         getDiscProperties: options.getDiscProperties ?? (() => null),
         getPlayerDiscProperties:
             options.getPlayerDiscProperties ?? (() => null),

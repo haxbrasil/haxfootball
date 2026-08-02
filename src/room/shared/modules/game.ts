@@ -210,6 +210,7 @@ export function createGameModule({
             writeGameRuntimeSnapshot();
         })
         .onGameTick((room) => {
+            room.flushPendingGameClockStop();
             engine?.tick();
             syncScores(room);
 

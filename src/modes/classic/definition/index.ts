@@ -20,6 +20,7 @@ import { Team } from "@runtime/models";
 import { CLASSIC_COMMAND_DEFINITIONS } from "./commands";
 import { createEndGameController, getFinalScoreAnnouncement } from "./end-game";
 import { parseFlagName, parseFlagValue, toFlagState } from "./flags";
+import { GAME_BALL_DISC_REF } from "@core/ball";
 
 type ClassicGlobalSnapshot = GlobalSchemaState<typeof classicGlobalSchema>;
 
@@ -31,6 +32,7 @@ export const classicModeDefinition: GameModeDefinition = {
     name: GAME_MODE.CLASSIC,
     label: "Classic",
     stadium,
+    ballDiscRef: GAME_BALL_DISC_REF,
     registry,
     start: {
         state: CLASSIC_STATE.KICKOFF,
@@ -38,7 +40,7 @@ export const classicModeDefinition: GameModeDefinition = {
     },
     room: {
         scoreLimit: 0,
-        timeLimit: 10,
+        timeLimit: 5,
     },
     persistsMatches: true,
     createRuntime() {

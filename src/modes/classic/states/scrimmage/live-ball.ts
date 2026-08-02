@@ -45,6 +45,9 @@ import { COLOR } from "@common/general/color";
 import type { FieldPosition } from "@common/game/game";
 import { Stat } from "@modes/classic/stats";
 import type { Config } from "@modes/classic/config";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import { $prepareExtraPointLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const FUMBLE_CATCHER_DISTANCE = 1.0;
 
@@ -228,7 +231,9 @@ export function LiveBall({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -365,7 +370,9 @@ export function LiveBall({
         $next({
             to: "EXTRA_POINT",
             params: {
-                offensiveTeam,
+                offensiveTeam:
+                    $prepareExtraPointLineOfScrimmageBlocking(offensiveTeam),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -510,7 +517,9 @@ export function LiveBall({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: nextDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -544,6 +553,7 @@ export function LiveBall({
                 });
             });
 
+            $stopGameClock(offensiveTeam);
             $next({
                 to: "SAFETY",
                 params: {
@@ -725,7 +735,9 @@ export function LiveBall({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

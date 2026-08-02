@@ -21,6 +21,7 @@ import {
     $stateInstanceKey,
     $tick,
 } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/classic/hooks/clock";
 import {
     $lockBall,
     $setBallMoveable,
@@ -60,6 +61,7 @@ import { type Config } from "@modes/classic/config";
 import {
     $requestLineOfScrimmageBlocking,
     $setLineOfScrimmageBlockingCollision,
+    $prepareDownStateLineOfScrimmageBlocking,
 } from "@modes/classic/hooks/los";
 import { BLITZ_BASE_DELAY_IN_SECONDS } from "@modes/classic/shared/rules/blitz";
 import {
@@ -137,7 +139,13 @@ function $setInitialPlayerPositions({
     });
 }
 
-export function Presnap({ downState }: { downState: DownState }) {
+export function Presnap({
+    downState,
+    losBlockingPrepared = false,
+}: {
+    downState: DownState;
+    losBlockingPrepared?: boolean;
+}) {
     const { offensiveTeam, downAndDistance, fieldPos } = downState;
     const losBlockingOperationId = `classic-los:${$stateInstanceKey()}`;
 
@@ -161,13 +169,18 @@ export function Presnap({ downState }: { downState: DownState }) {
 
     const ballPos = calculateSnapBallPosition(offensiveTeam, fieldPos);
 
+    $stopGameClock(offensiveTeam);
     $setBallUnmoveable();
     $lockBall();
     $setBallActive();
     $setLineOfScrimmage(fieldPos);
     $setFirstDownLine(offensiveTeam, fieldPos, downAndDistance.distance);
     if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        if (losBlockingPrepared) {
+            $setLineOfScrimmageBlockingCollision(true);
+        } else {
+            $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        }
     }
 
     $effect(($) => {
@@ -332,6 +345,7 @@ export function Presnap({ downState }: { downState: DownState }) {
         });
 
         $global((state) => state.clearSnapProfile());
+        $startGameClock();
 
         $next({
             to: "SNAP",
@@ -795,7 +809,11 @@ export function Presnap({ downState }: { downState: DownState }) {
 
         $next({
             to: "PRESNAP",
-            params: { downState: nextDownState },
+            params: {
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
+            },
             wait: ticks({ seconds: 1 }),
             disposal: "IMMEDIATE",
         });

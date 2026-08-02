@@ -19,6 +19,7 @@ import {
     $stateInstanceKey,
     $tick,
 } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/flag/hooks/clock";
 import {
     $lockBall,
     $setBallMoveable,
@@ -53,6 +54,7 @@ import { type Config } from "@modes/flag/config";
 import {
     $requestLineOfScrimmageBlocking,
     $setLineOfScrimmageBlockingCollision,
+    $prepareDownStateLineOfScrimmageBlocking,
 } from "@modes/flag/hooks/los";
 import { BLITZ_BASE_DELAY_IN_SECONDS } from "@modes/flag/shared/rules/blitz";
 import {
@@ -165,7 +167,13 @@ function $setInitialPlayerPositions({
     });
 }
 
-export function Presnap({ downState }: { downState: DownState }) {
+export function Presnap({
+    downState,
+    losBlockingPrepared = false,
+}: {
+    downState: DownState;
+    losBlockingPrepared?: boolean;
+}) {
     const { offensiveTeam, downAndDistance, fieldPos } = downState;
     const losBlockingOperationId = `flag-los:${$stateInstanceKey()}`;
 
@@ -186,12 +194,17 @@ export function Presnap({ downState }: { downState: DownState }) {
 
     const ballPos = calculateSnapBallPosition(offensiveTeam, fieldPos);
 
+    $stopGameClock(offensiveTeam);
     $setBallUnmoveable();
     $lockBall();
     $setBallActive();
     $setLineOfScrimmage(fieldPos);
     if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        if (losBlockingPrepared) {
+            $setLineOfScrimmageBlockingCollision(true);
+        } else {
+            $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        }
     }
 
     $effect(($) => {
@@ -309,6 +322,7 @@ export function Presnap({ downState }: { downState: DownState }) {
         $global((state) =>
             state.setPossessionQuarterback(player.id, offensiveTeam),
         );
+        $startGameClock();
 
         $next({
             to: "SNAP",
@@ -582,7 +596,11 @@ export function Presnap({ downState }: { downState: DownState }) {
 
         $next({
             to: "PRESNAP",
-            params: { downState: nextDownState },
+            params: {
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
+            },
             wait: ticks({ seconds: 1 }),
             disposal: "IMMEDIATE",
         });

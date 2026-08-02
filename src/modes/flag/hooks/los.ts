@@ -6,6 +6,8 @@ import {
 } from "@modes/flag/shared/field";
 import { $effect } from "@runtime/hooks";
 import { Team } from "@runtime/models";
+import type { FieldTeam } from "@runtime/models";
+import { $stopGameClock } from "@modes/flag/hooks/clock";
 
 const losPlanePatch = (fieldPos: FieldPosition) => {
     const [line] = getLineOfScrimmage(fieldPos);
@@ -61,6 +63,18 @@ export function $requestLineOfScrimmageBlocking(
     });
 
     $setLineOfScrimmageBlockingCollision(false);
+}
+
+export function $prepareDownStateLineOfScrimmageBlocking<
+    T extends { fieldPos: FieldPosition; offensiveTeam: FieldTeam },
+>(downState: T): T {
+    $stopGameClock(downState.offensiveTeam);
+    $requestLineOfScrimmageBlocking(
+        downState.fieldPos,
+        "flag-prepared-line-of-scrimmage",
+    );
+
+    return downState;
 }
 
 export function $setLineOfScrimmageBlockingCollision(enabled: boolean) {

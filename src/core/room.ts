@@ -1,4 +1,8 @@
 import { StadiumObject } from "@haxball/stadium";
+import {
+    NATIVE_CLOCK_BALL_DISC_ID,
+    NATIVE_CLOCK_BALL_START_SPEED,
+} from "@core/ball";
 
 type TeamTarget = "teams" | "red" | "blue";
 type ObjectWithId = { id: number };
@@ -117,6 +121,10 @@ export class Room {
     private pendingStadiumName: string | null = null;
     private registeredCommands: RegisteredCommand[] = [];
     private announcementRecipientFilters: AnnouncementTargetFilter[] = [];
+    private ballDiscRef: DiscRef = NATIVE_CLOCK_BALL_DISC_ID;
+    private gameClockStopped = false;
+    private gameClockKickoffTeam: Exclude<TeamID, 0> = 1;
+    private pendingGameClockStopTeam: Exclude<TeamID, 0> | null = null;
 
     constructor(private room: RoomObject) {}
 
@@ -436,6 +444,8 @@ export class Room {
     }
 
     public stopGame(): void {
+        this.gameClockStopped = false;
+        this.pendingGameClockStopTeam = null;
         this.room.stopGame();
         this.invalidateCaches();
     }
@@ -461,6 +471,68 @@ export class Room {
     public setScore(red: number, blue: number): void {
         this.room.setScore(red, blue);
     }
+
+    public setSoftKickoff(team: Exclude<TeamID, 0>): void {
+        this.room.setSoftKickoff(team);
+        this.invalidateCaches();
+    }
+
+    private applyGameClockStop(team: Exclude<TeamID, 0>): void {
+        this.setSoftKickoff(team);
+        this.setDiscProperties(NATIVE_CLOCK_BALL_DISC_ID, {
+            x: 0,
+            y: 0,
+            xspeed: 0,
+            yspeed: 0,
+            xgravity: 0,
+            ygravity: 0,
+        });
+    }
+
+    public managesGameClock(): boolean {
+        return this.ballDiscRef !== NATIVE_CLOCK_BALL_DISC_ID;
+    }
+
+    public stopGameClock = (team: Exclude<TeamID, 0>): void => {
+        if (!this.managesGameClock()) return;
+
+        const teamChanged = team !== this.gameClockKickoffTeam;
+        this.gameClockKickoffTeam = team;
+
+        if (this.gameClockStopped && !teamChanged) return;
+
+        this.gameClockStopped = true;
+        const status = this.getGameStatus();
+
+        if (status === "paused" || status === "resuming") {
+            this.pendingGameClockStopTeam = team;
+            return;
+        }
+
+        this.pendingGameClockStopTeam = null;
+        this.applyGameClockStop(team);
+    };
+
+    public flushPendingGameClockStop(): void {
+        const team = this.pendingGameClockStopTeam;
+        if (team === null || this.getGameStatus() !== "running") return;
+
+        this.pendingGameClockStopTeam = null;
+        this.applyGameClockStop(team);
+    }
+
+    public startGameClock = (): void => {
+        if (!this.managesGameClock()) return;
+
+        this.gameClockStopped = false;
+        this.pendingGameClockStopTeam = null;
+        this.setDiscProperties(NATIVE_CLOCK_BALL_DISC_ID, {
+            xspeed: NATIVE_CLOCK_BALL_START_SPEED,
+            yspeed: 0,
+            xgravity: 0,
+            ygravity: 0,
+        });
+    };
 
     public setDesyncCheckerEnabled(enabled: boolean): void {
         this.room.setDesyncCheckerEnabled(enabled);
@@ -589,8 +661,38 @@ export class Room {
         this.room.setKickRateLimit(min, rate, burst);
     }
 
+    public setBallDiscRef(discRef: DiscRef): void {
+        this.gameClockStopped = false;
+        this.gameClockKickoffTeam = 1;
+        this.pendingGameClockStopTeam = null;
+        this.ballDiscRef = discRef;
+        this.discPropsCache.clear();
+    }
+
+    public getBallDiscRef(): DiscRef {
+        return this.ballDiscRef;
+    }
+
+    public getBallProperties(): DiscPropertiesObject | null {
+        return this.getDiscProperties(this.ballDiscRef);
+    }
+
     public getBallPosition(): Position | null {
+        const ball = this.getBallProperties();
+
+        if (typeof ball?.x !== "number" || typeof ball.y !== "number") {
+            return null;
+        }
+
+        return { x: ball.x, y: ball.y };
+    }
+
+    public getNativeBallPosition(): Position | null {
         return this.room.getBallPosition();
+    }
+
+    public setBallProperties(properties: DiscPropertiesObject): void {
+        this.setDiscProperties(this.ballDiscRef, properties);
     }
 
     public getDiscCount(): number {

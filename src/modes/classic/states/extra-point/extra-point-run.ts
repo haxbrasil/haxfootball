@@ -26,6 +26,7 @@ import { $global } from "@modes/classic/hooks/global";
 import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
 
 const MAX_PATH_DURATION = ticks({ seconds: 2 });
 
@@ -87,6 +88,7 @@ export function ExtraPointRun({
     }
 
     function $completeAttempt() {
+        $stopGameClock(originalOffensiveTeam);
         $next({
             to: "KICKOFF",
             params: {
@@ -139,6 +141,7 @@ export function ExtraPointRun({
             });
         });
 
+        $stopGameClock(originalOffensiveTeam);
         $next({
             to: "KICKOFF",
             params: {

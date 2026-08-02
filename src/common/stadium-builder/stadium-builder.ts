@@ -611,7 +611,11 @@ export const buildStadium = (
     ];
 
     const planes = [...(features?.planes ?? []), ...(schema?.planes ?? [])];
-    const discs = [...featureDiscs, ...(schema?.discs ?? [])];
+    const schemaDiscs = schema?.discs ?? [];
+    const discs =
+        schema?.ballPhysics === "disc0"
+            ? [...schemaDiscs, ...featureDiscs]
+            : [...featureDiscs, ...schemaDiscs];
 
     const builtSchema: StadiumSchema = {
         name,

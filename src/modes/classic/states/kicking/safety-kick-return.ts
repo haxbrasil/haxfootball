@@ -33,6 +33,9 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
 import type { Config } from "@modes/classic/config";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import { $prepareExtraPointLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 type EndzoneState = "TOUCHBACK" | "Safety";
 type Frame = {
@@ -82,11 +85,14 @@ export function SafetyKickReturn({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: getInitialDownState(
-                            receivingTeam,
-                            fieldPos,
-                            player.y,
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            getInitialDownState(
+                                receivingTeam,
+                                fieldPos,
+                                player.y,
+                            ),
                         ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 1 }),
                 });
@@ -106,10 +112,14 @@ export function SafetyKickReturn({
                         $next({
                             to: "PRESNAP",
                             params: {
-                                downState: getInitialDownState(receivingTeam, {
-                                    yards: TOUCHBACK_YARD_LINE,
-                                    side: receivingTeam,
-                                }),
+                                downState:
+                                    $prepareDownStateLineOfScrimmageBlocking(
+                                        getInitialDownState(receivingTeam, {
+                                            yards: TOUCHBACK_YARD_LINE,
+                                            side: receivingTeam,
+                                        }),
+                                    ),
+                                losBlockingPrepared: true,
                             },
                             wait: ticks({ seconds: 1 }),
                         });
@@ -140,6 +150,7 @@ export function SafetyKickReturn({
                             });
                         });
 
+                        $stopGameClock(receivingTeam);
                         $next({
                             to: "SAFETY",
                             params: {
@@ -249,7 +260,9 @@ export function SafetyKickReturn({
         $next({
             to: "EXTRA_POINT",
             params: {
-                offensiveTeam: receivingTeam,
+                offensiveTeam:
+                    $prepareExtraPointLineOfScrimmageBlocking(receivingTeam),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 3 }),
         });
@@ -294,11 +307,14 @@ export function SafetyKickReturn({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getInitialDownState(
-                        receivingTeam,
-                        fieldPos,
-                        frame.player.y,
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getInitialDownState(
+                            receivingTeam,
+                            fieldPos,
+                            frame.player.y,
+                        ),
                     ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -332,6 +348,7 @@ export function SafetyKickReturn({
                 });
             });
 
+            $stopGameClock(receivingTeam);
             $next({
                 to: "SAFETY",
                 params: {
@@ -371,10 +388,13 @@ export function SafetyKickReturn({
                     $next({
                         to: "PRESNAP",
                         params: {
-                            downState: getInitialDownState(receivingTeam, {
-                                yards: TOUCHBACK_YARD_LINE,
-                                side: receivingTeam,
-                            }),
+                            downState: $prepareDownStateLineOfScrimmageBlocking(
+                                getInitialDownState(receivingTeam, {
+                                    yards: TOUCHBACK_YARD_LINE,
+                                    side: receivingTeam,
+                                }),
+                            ),
+                            losBlockingPrepared: true,
                         },
                         wait: ticks({ seconds: 1 }),
                     });
@@ -415,6 +435,7 @@ export function SafetyKickReturn({
                         });
                     });
 
+                    $stopGameClock(receivingTeam);
                     $next({
                         to: "SAFETY",
                         params: {
@@ -479,11 +500,14 @@ export function SafetyKickReturn({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getInitialDownState(
-                        receivingTeam,
-                        fieldPos,
-                        frame.player.y,
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getInitialDownState(
+                            receivingTeam,
+                            fieldPos,
+                            frame.player.y,
+                        ),
                     ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });

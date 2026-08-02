@@ -5,6 +5,7 @@ import type {
 } from "@core/commands";
 import type { ScoreState } from "@common/game/game";
 import type { Room } from "@core/room";
+import type { DiscRef } from "@core/room";
 import type { StadiumObject } from "@haxball/stadium";
 import type { Engine, EngineOptions, StateRegistry } from "@runtime/engine";
 import type { RuntimeMatchEventSink } from "@runtime/runtime";
@@ -71,6 +72,7 @@ export type GameModeDefinition = {
     name: GameModeName;
     label: string;
     stadium: StadiumObject;
+    ballDiscRef?: DiscRef;
     registry: StateRegistry;
     start: GameModeStart;
     room: {

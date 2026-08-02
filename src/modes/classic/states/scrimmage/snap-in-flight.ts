@@ -29,6 +29,7 @@ import {
 } from "@modes/classic/hooks/game";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 type Frame = {
     state: GameState;
@@ -146,7 +147,11 @@ export function SnapInFlight({
 
         $next({
             to: "PRESNAP",
-            params: { downState: nextDownState },
+            params: {
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
+            },
             wait: ticks({ seconds: 2 }),
         });
     }
@@ -203,7 +208,11 @@ export function SnapInFlight({
 
         $next({
             to: "PRESNAP",
-            params: { downState: nextDownState },
+            params: {
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
+            },
             wait: ticks({ seconds: 2 }),
         });
     }

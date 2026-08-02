@@ -66,6 +66,8 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
 import { getPointDistance } from "@common/math/geometry";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
+import { $prepareExtraPointLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 type Frame = {
     state: GameState;
@@ -301,7 +303,10 @@ export function Snap({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    penaltyResult.downState,
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -385,7 +390,10 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: penaltyResult.downState,
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            penaltyResult.downState,
+                        ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 1 }),
                 });
@@ -407,7 +415,10 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: penaltyResult.downState,
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            penaltyResult.downState,
+                        ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 1 }),
                 });
@@ -443,7 +454,11 @@ export function Snap({
                 $next({
                     to: "EXTRA_POINT",
                     params: {
-                        offensiveTeam,
+                        offensiveTeam:
+                            $prepareExtraPointLineOfScrimmageBlocking(
+                                offensiveTeam,
+                            ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 3 }),
                 });
@@ -533,7 +548,12 @@ export function Snap({
                 });
                 $next({
                     to: "PRESNAP",
-                    params: { downState: penaltyResult.downState },
+                    params: {
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            penaltyResult.downState,
+                        ),
+                        losBlockingPrepared: true,
+                    },
                     wait: ticks({ seconds: 1 }),
                 });
             },
@@ -554,7 +574,12 @@ export function Snap({
                 });
                 $next({
                     to: "PRESNAP",
-                    params: { downState: penaltyResult.downState },
+                    params: {
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            penaltyResult.downState,
+                        ),
+                        losBlockingPrepared: true,
+                    },
                     wait: ticks({ seconds: 1 }),
                 });
             },
@@ -605,7 +630,11 @@ export function Snap({
                 $next({
                     to: "EXTRA_POINT",
                     params: {
-                        offensiveTeam,
+                        offensiveTeam:
+                            $prepareExtraPointLineOfScrimmageBlocking(
+                                offensiveTeam,
+                            ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 3 }),
                 });
@@ -678,7 +707,10 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: penaltyResult.downState,
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            penaltyResult.downState,
+                        ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 1 }),
                 });
@@ -700,7 +732,10 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: penaltyResult.downState,
+                        downState: $prepareDownStateLineOfScrimmageBlocking(
+                            penaltyResult.downState,
+                        ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 1 }),
                 });
@@ -736,7 +771,11 @@ export function Snap({
                 $next({
                     to: "EXTRA_POINT",
                     params: {
-                        offensiveTeam,
+                        offensiveTeam:
+                            $prepareExtraPointLineOfScrimmageBlocking(
+                                offensiveTeam,
+                            ),
+                        losBlockingPrepared: true,
                     },
                     wait: ticks({ seconds: 3 }),
                 });
@@ -849,7 +888,10 @@ export function Snap({
         $next({
             to: "PRESNAP",
             params: {
-                downState: downIncrement.downState,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    downIncrement.downState,
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -917,7 +959,10 @@ export function Snap({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    penaltyResult.downState,
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -985,7 +1030,10 @@ export function Snap({
         $next({
             to: "PRESNAP",
             params: {
-                downState: downIncrement.downState,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    downIncrement.downState,
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

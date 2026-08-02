@@ -43,6 +43,8 @@ import { COLOR } from "@common/general/color";
 import { SCORES } from "@modes/classic/shared/rules/scoring";
 import { Stat } from "@modes/classic/stats";
 import type { Config } from "@modes/classic/config";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 type Frame = {
     state: GameState;
@@ -289,7 +291,10 @@ export function Blitz({
         $next({
             to: "PRESNAP",
             params: {
-                downState: downIncrement.downState,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    downIncrement.downState,
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -437,7 +442,9 @@ export function Blitz({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: nextDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -471,6 +478,7 @@ export function Blitz({
                 });
             });
 
+            $stopGameClock(offensiveTeam);
             $next({
                 to: "SAFETY",
                 params: {
@@ -634,7 +642,9 @@ export function Blitz({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

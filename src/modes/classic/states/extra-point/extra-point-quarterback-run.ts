@@ -23,6 +23,7 @@ import { $global } from "@modes/classic/hooks/global";
 import { $createSharedCommandHandler } from "@modes/classic/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
 
 type Frame = {
     player: GameStatePlayer;
@@ -70,6 +71,7 @@ export function ExtraPointQuarterbackRun({
     }
 
     function $completeAttempt() {
+        $stopGameClock(originalOffensiveTeam);
         $next({
             to: "KICKOFF",
             params: {
@@ -125,6 +127,7 @@ export function ExtraPointQuarterbackRun({
             });
         });
 
+        $stopGameClock(originalOffensiveTeam);
         $next({
             to: "KICKOFF",
             params: {

@@ -32,6 +32,7 @@ import {
     $syncPossessionQuarterbackSelection,
 } from "@modes/classic/hooks/global";
 import { $tick } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/classic/hooks/clock";
 import type { Config } from "@modes/classic/config";
 import { getInitialDownState } from "@modes/classic/shared/rules/down";
 import { KICKOFF_OUT_OF_BOUNDS_YARD_LINE } from "@modes/classic/shared/field";
@@ -46,6 +47,7 @@ import {
     getKickoffTimeoutElapsedTicks,
 } from "@modes/classic/shared/rules/kickoff";
 import type { GameStateInspection } from "@runtime/inspection";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const KICKOFF_START_LINE = {
     [Team.RED]: {
@@ -64,6 +66,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     const kickingTeamName = formatTeamName(forTeam);
     const isInitialKickoff = $scores()?.time === 0;
 
+    $stopGameClock(forTeam);
     $global((state) => state.clearPossessionQuarterback());
 
     $setBallInMiddleOfField();
@@ -224,7 +227,9 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
             disposal: "IMMEDIATE",
@@ -244,6 +249,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
         );
 
         if (kicker) {
+            $startGameClock();
             $next({
                 to: "KICKOFF_IN_FLIGHT",
                 params: {

@@ -35,7 +35,8 @@ const runCollisionEffect = ({
     currentGroup: number;
     enabled: boolean;
 }) => {
-    const setPlayerDisc = vi.fn();
+    const setPlayerDisc =
+        vi.fn<(playerId: number, properties: DiscPropertiesObject) => void>();
 
     $setLineOfScrimmageBlockingCollision(enabled);
 

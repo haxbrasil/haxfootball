@@ -20,6 +20,7 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
 import { getSpeedSquared } from "@common/math/geometry";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
 
 const EXTRA_POINT_RESULT_DELAY = ticks({ seconds: 2 });
 const EXTRA_POINT_SUCCESS_DELAY = ticks({ seconds: 2 });
@@ -88,6 +89,7 @@ export function ExtraPointKick({
                     });
                 });
 
+                $stopGameClock(offensiveTeam);
                 $next({
                     to: "KICKOFF",
                     params: {
@@ -113,6 +115,7 @@ export function ExtraPointKick({
                 });
             }
 
+            $stopGameClock(offensiveTeam);
             $next({
                 to: "KICKOFF",
                 params: {
@@ -139,6 +142,7 @@ export function ExtraPointKick({
                 });
             }
 
+            $stopGameClock(offensiveTeam);
             $next({
                 to: "KICKOFF",
                 params: {
@@ -170,6 +174,7 @@ export function ExtraPointKick({
                 });
             }
 
+            $stopGameClock(offensiveTeam);
             $next({
                 to: "KICKOFF",
                 params: {

@@ -6,6 +6,7 @@ import { ticks } from "@common/general/time";
 import { t } from "@lingui/core/macro";
 import { $dispose, $effect } from "@runtime/hooks";
 import { $config, $next, $stateInstanceKey, $tick } from "@runtime/runtime";
+import { $startGameClock, $stopGameClock } from "@modes/classic/hooks/clock";
 import {
     $lockBall,
     $setBallKickForce,
@@ -35,6 +36,7 @@ import type { GameStateInspection } from "@runtime/inspection";
 import {
     $requestLineOfScrimmageBlocking,
     $setLineOfScrimmageBlockingCollision,
+    $prepareDownStateLineOfScrimmageBlocking,
 } from "@modes/classic/hooks/los";
 
 const KICKING_TEAM_POSITIONS_OFFSET = {
@@ -42,14 +44,23 @@ const KICKING_TEAM_POSITIONS_OFFSET = {
     end: { x: -50, y: 150 },
 };
 
-export function Punt({ downState }: { downState: DownState }) {
+export function Punt({
+    downState,
+    losBlockingPrepared = false,
+}: {
+    downState: DownState;
+    losBlockingPrepared?: boolean;
+}) {
     const { offensiveTeam, fieldPos } = downState;
     const kickingTeam: FieldTeam = offensiveTeam;
     const config = $config<Config>();
     const losBlockingOperationId = `classic-punt-los:${$stateInstanceKey()}`;
 
+    $stopGameClock(kickingTeam);
     if (config.flags.losBlocking) {
-        $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        if (!losBlockingPrepared) {
+            $requestLineOfScrimmageBlocking(fieldPos, losBlockingOperationId);
+        }
         $setLineOfScrimmageBlockingCollision(true);
     }
     $trapTeamInEndZone(opposite(kickingTeam));
@@ -159,7 +170,9 @@ export function Punt({ downState }: { downState: DownState }) {
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
             disposal: "IMMEDIATE",
@@ -204,6 +217,7 @@ export function Punt({ downState }: { downState: DownState }) {
             return;
         }
 
+        $startGameClock();
         $next({
             to: "PUNT_IN_FLIGHT",
             params: { kickingTeam },

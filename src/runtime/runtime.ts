@@ -83,8 +83,6 @@ export type RuntimeMatchEventInput = {
 
 export type RuntimeMatchEventSink = (event: RuntimeMatchEvent) => void;
 
-const BALL_DEFAULT_INDEX = 0;
-
 const mergeProps =
     <T extends Record<string, any>, K>(map: Map<K, T>) =>
     (key: K, props: T) => {
@@ -614,7 +612,7 @@ export function flushRuntime(): {
         setPlayerDisc: (playerId: number, props: DiscProps) =>
             mutations.queuePlayerDisc(playerId, props),
         setBall: (props: DiscProps) =>
-            mutations.queueDisc(BALL_DEFAULT_INDEX, props),
+            mutations.queueDisc(room.getBallDiscRef(), props),
     }) as EffectApi;
 
     for (let i = 0; i < RUNTIME.effects.length; i++) {

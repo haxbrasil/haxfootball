@@ -24,6 +24,8 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/classic/stats";
 import { getSpeedSquared } from "@common/math/geometry";
+import { $stopGameClock } from "@modes/classic/hooks/clock";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const FIELD_GOAL_RESULT_DELAY = ticks({ seconds: 2 });
 const FIELD_GOAL_SUCCESS_DELAY = ticks({ seconds: 3 });
@@ -106,6 +108,7 @@ export function FieldGoalInFlight({
                     });
                 });
 
+                $stopGameClock(offensiveTeam);
                 $next({
                     to: "KICKOFF",
                     params: {
@@ -138,7 +141,11 @@ export function FieldGoalInFlight({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: failureDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(
+                            failureDownState,
+                        ),
+                    losBlockingPrepared: true,
                 },
                 wait: FIELD_GOAL_RESULT_DELAY,
             });
@@ -168,7 +175,11 @@ export function FieldGoalInFlight({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: failureDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(
+                            failureDownState,
+                        ),
+                    losBlockingPrepared: true,
                 },
                 wait: FIELD_GOAL_RESULT_DELAY,
             });
@@ -201,7 +212,11 @@ export function FieldGoalInFlight({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: failureDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(
+                            failureDownState,
+                        ),
+                    losBlockingPrepared: true,
                 },
                 wait: FIELD_GOAL_RESULT_DELAY,
             });

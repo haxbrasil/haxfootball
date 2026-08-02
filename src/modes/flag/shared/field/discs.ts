@@ -2,6 +2,7 @@ import { type FieldPosition } from "@common/game/game";
 import { hexColorToNumber } from "@common/general/color";
 import type { Pair } from "@common/general/types";
 import type { Line } from "@common/math/geometry";
+import { GAME_BALL_DISC_REF } from "@core/ball";
 import {
     BALL_COLOR,
     flagMapMeasures as MapMeasures,
@@ -15,7 +16,7 @@ const SPECIAL_DISC_IDS = {
     INTERCEPTION_PATH: dynamicLineRefs("ball0"),
 };
 
-export const BALL_DISC_ID = 0;
+export const BALL_DISC_ID = GAME_BALL_DISC_REF;
 export const BALL_ACTIVE_COLOR = hexColorToNumber(BALL_COLOR);
 export const BALL_INACTIVE_COLOR = 0x808080;
 export const LOS_BLOCKER_PLANE_REFS = {

@@ -20,6 +20,7 @@ import { $createSharedCommandHandler } from "@modes/flag/shared/commands";
 import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { Stat } from "@modes/flag/stats";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/flag/hooks/los";
 
 export function BlockedPass({
     blockerId,
@@ -113,7 +114,9 @@ export function BlockedPass({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

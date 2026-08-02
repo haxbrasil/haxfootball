@@ -3,6 +3,7 @@ import { mask } from "@common/game/physics";
 import { buildStadium } from "@common/stadium-builder";
 import type { CollisionFlag } from "@haxball/stadium";
 import { SPECIAL_HIDDEN_POSITION } from "@common/stadium-builder/consts";
+import { GAME_BALL_DISC_REF } from "@core/ball";
 
 const COLOR_SCHEMA_RAW = {
     BALL: {
@@ -175,13 +176,7 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
                 kickStrength: 6,
             },
             cameraFollow: "player",
-            ballPhysics: {
-                radius: BALL_RADIUS,
-                bCoef: 0.25,
-                cMask: ["red", "blue", "wall"],
-                color: BALL_COLOR,
-                cGroup: ["ball", "kick", "score"],
-            },
+            ballPhysics: "disc0",
             spawnDistance: 548.8,
             traits: {},
             redSpawnPoints: [],
@@ -202,6 +197,29 @@ export const { stadium: flagStadium, mapMeasures: flagMapMeasures } =
                 },
             ],
             lines: [],
+            discs: [
+                {
+                    pos: [0, 0],
+                    speed: [0, 0],
+                    gravity: [0, 0],
+                    radius: 0,
+                    invMass: 1,
+                    damping: 1,
+                    color: "transparent",
+                    cMask: [],
+                    cGroup: [],
+                },
+                {
+                    ref: GAME_BALL_DISC_REF,
+                    pos: [0, 0],
+                    radius: BALL_RADIUS,
+                    invMass: 1,
+                    bCoef: 0.25,
+                    cMask: ["red", "blue", "wall"],
+                    color: BALL_COLOR,
+                    cGroup: ["ball", "kick", "score"],
+                },
+            ],
             dynamicLines: [
                 {
                     ref: "blue0",

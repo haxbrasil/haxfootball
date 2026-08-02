@@ -37,6 +37,7 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { SCORES } from "@modes/flag/shared/rules/scoring";
 import { Stat } from "@modes/flag/stats";
+import { $prepareDownStateLineOfScrimmageBlocking } from "@modes/flag/hooks/los";
 
 const OFFENSIVE_FOUL_PENALTY_YARDS = 5;
 type Frame = {
@@ -293,7 +294,10 @@ export function Blitz({
         $next({
             to: "PRESNAP",
             params: {
-                downState: penaltyResult.downState,
+                downState: $prepareDownStateLineOfScrimmageBlocking(
+                    penaltyResult.downState,
+                ),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });
@@ -434,7 +438,9 @@ export function Blitz({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: nextDownState,
+                    downState:
+                        $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 1 }),
             });
@@ -471,7 +477,10 @@ export function Blitz({
             $next({
                 to: "PRESNAP",
                 params: {
-                    downState: getRestartDownState(opposite(offensiveTeam)),
+                    downState: $prepareDownStateLineOfScrimmageBlocking(
+                        getRestartDownState(opposite(offensiveTeam)),
+                    ),
+                    losBlockingPrepared: true,
                 },
                 wait: ticks({ seconds: 2 }),
             });
@@ -618,7 +627,9 @@ export function Blitz({
         $next({
             to: "PRESNAP",
             params: {
-                downState: nextDownState,
+                downState:
+                    $prepareDownStateLineOfScrimmageBlocking(nextDownState),
+                losBlockingPrepared: true,
             },
             wait: ticks({ seconds: 1 }),
         });

@@ -201,7 +201,7 @@ const cloneGlobalStateSnapshot = (snapshot: unknown): unknown => {
 
 function getBallSnapshot(room: Room): GameStateBall {
     const ballPos = room.getBallPosition();
-    const disc = room.getDiscProperties(0);
+    const disc = room.getBallProperties();
 
     const radius = disc && typeof disc.radius === "number" ? disc.radius : 0;
     const xspeed = disc && typeof disc.xspeed === "number" ? disc.xspeed : 0;

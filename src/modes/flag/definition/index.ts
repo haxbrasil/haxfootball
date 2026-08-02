@@ -21,6 +21,7 @@ import { Team } from "@runtime/models";
 import { FLAG_COMMAND_DEFINITIONS } from "./commands";
 import { createEndGameController, getFinalScoreAnnouncement } from "./end-game";
 import { parseFlagName, parseFlagValue, toFlagState } from "./flags";
+import { GAME_BALL_DISC_REF } from "@core/ball";
 
 type FlagGlobalSnapshot = GlobalSchemaState<typeof flagGlobalSchema>;
 
@@ -32,6 +33,7 @@ export const flagModeDefinition: GameModeDefinition = {
     name: GAME_MODE.FLAG,
     label: "Flag",
     stadium,
+    ballDiscRef: GAME_BALL_DISC_REF,
     registry,
     start: {
         state: FLAG_STATE.PRESNAP,
@@ -41,7 +43,7 @@ export const flagModeDefinition: GameModeDefinition = {
     },
     room: {
         scoreLimit: 0,
-        timeLimit: 7,
+        timeLimit: 3,
     },
     persistsMatches: false,
     createRuntime() {
