@@ -43,11 +43,20 @@ type CheckpointEvent = MatchEventInput & {
 
 type MatchStatus = "pending" | "ongoing" | "completed" | "discarded";
 
+type CheckpointSnapshot = {
+    score: MatchScore;
+    elapsedSeconds: number;
+    status: MatchStatus;
+    observedAt: string;
+    events: readonly CheckpointEvent[];
+};
+
 type MatchSession = {
     sessionId: string;
     startedAt: Date;
     endedAt: Date | null;
     matchId: string | null;
+    initialScore: MatchScore | null;
     lastScore: MatchScore | null;
     ended: boolean;
     creationQueued: boolean;
@@ -104,30 +113,32 @@ export function createManagedMatchPersistence({
     };
 
     const scheduleCheckpoint = (
-        room: Room,
         currentSession: MatchSession,
         status?: MatchStatus,
     ): void => {
+        const snapshot = captureCheckpointSnapshot(
+            currentSession,
+            sessionStore.get,
+            status,
+        );
+
+        if (!snapshot) return;
+
         enqueue(async () => {
             await ensureMatch(currentSession, roomId);
-            await flushCheckpoint(
-                room,
-                currentSession,
-                sessionStore.get,
-                status,
-            );
+            await flushCheckpoint(currentSession, snapshot);
         });
     };
 
     const scheduleRecordingCheckpoint = (
         room: Room,
         currentSession: MatchSession,
-        finalBytes?: Uint8Array | null,
     ): void => {
+        const bytesPromise = deferReplaySnapshot(currentSession.replay, room);
+
         enqueue(async () => {
             await ensureMatch(currentSession, roomId);
-            const bytes =
-                finalBytes ?? (await currentSession.replay.snapshot(room));
+            const bytes = await bytesPromise;
 
             if (bytes) {
                 await uploadRecordingCheckpoint(currentSession, bytes);
@@ -148,21 +159,32 @@ export function createManagedMatchPersistence({
             currentSession.lastScore,
         );
         const elapsedSeconds = getElapsedSeconds(currentSession);
+        const terminalStatus =
+            elapsedSeconds < minimumPersistedMatchSeconds
+                ? "discarded"
+                : "completed";
+        const finalSnapshot = captureCheckpointSnapshot(
+            currentSession,
+            sessionStore.get,
+            terminalStatus,
+        );
+        const finalReplayBytes =
+            terminalStatus === "completed"
+                ? deferReplaySnapshot(currentSession.replay, room)
+                : null;
 
         const persistFinishedSession = async (): Promise<void> => {
             await ensureMatch(currentSession, roomId);
 
-            if (!currentSession.matchId) {
+            if (!currentSession.matchId || !finalSnapshot) {
                 scheduleTerminalRetry();
                 return;
             }
 
-            if (elapsedSeconds < minimumPersistedMatchSeconds) {
+            if (terminalStatus === "discarded") {
                 const discarded = await flushCheckpoint(
-                    room,
                     currentSession,
-                    sessionStore.get,
-                    "discarded",
+                    finalSnapshot,
                 );
 
                 if (!discarded) {
@@ -172,10 +194,8 @@ export function createManagedMatchPersistence({
             }
 
             const ongoing = await flushCheckpoint(
-                room,
                 currentSession,
-                sessionStore.get,
-                "ongoing",
+                withCheckpointStatus(finalSnapshot, "ongoing"),
             );
 
             if (!ongoing) {
@@ -183,7 +203,7 @@ export function createManagedMatchPersistence({
                 return;
             }
 
-            const replayBytes = await currentSession.replay.snapshot(room);
+            const replayBytes = await finalReplayBytes;
 
             if (replayBytes) {
                 const uploaded = await uploadRecordingCheckpoint(
@@ -198,10 +218,8 @@ export function createManagedMatchPersistence({
             }
 
             const response = await flushCheckpoint(
-                room,
                 currentSession,
-                sessionStore.get,
-                "completed",
+                finalSnapshot,
             );
 
             if (response) {
@@ -234,12 +252,14 @@ export function createManagedMatchPersistence({
                 return;
             }
 
+            const initialScore = readScore(room, gameScoreReader);
             const currentSession: MatchSession = {
                 sessionId: crypto.randomUUID(),
                 startedAt: new Date(),
                 endedAt: null,
                 matchId: null,
-                lastScore: readScore(room, gameScoreReader),
+                initialScore,
+                lastScore: initialScore,
                 ended: false,
                 creationQueued: false,
                 checkpointRevision: 0,
@@ -267,7 +287,7 @@ export function createManagedMatchPersistence({
                 );
             }
 
-            scheduleCheckpoint(room, currentSession, "pending");
+            scheduleCheckpoint(currentSession, "pending");
         })
         .onGameTick((room) => {
             const currentSession = session;
@@ -287,7 +307,7 @@ export function createManagedMatchPersistence({
                 CHECKPOINT_INTERVAL_SECONDS
             ) {
                 currentSession.lastCheckpointScheduledElapsed = elapsedSeconds;
-                scheduleCheckpoint(room, currentSession, status);
+                scheduleCheckpoint(currentSession, status);
             }
 
             if (
@@ -309,7 +329,7 @@ export function createManagedMatchPersistence({
             );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
-            scheduleCheckpoint(room, session);
+            scheduleCheckpoint(session);
         })
         .onPlayerLeave((room, player) => {
             if (!session || session.ended) return;
@@ -323,7 +343,7 @@ export function createManagedMatchPersistence({
                 readScore(room, gameScoreReader) ?? session.lastScore;
 
             if (hasActivePlayers(room)) {
-                scheduleCheckpoint(room, session);
+                scheduleCheckpoint(session);
                 return;
             }
 
@@ -339,7 +359,7 @@ export function createManagedMatchPersistence({
             );
             session.lastScore =
                 readScore(room, gameScoreReader) ?? session.lastScore;
-            scheduleCheckpoint(room, session);
+            scheduleCheckpoint(session);
         })
         .onGameStop((room) => {
             const currentSession = session;
@@ -351,14 +371,16 @@ export function createManagedMatchPersistence({
     function scheduleCheckpointForImportantEvent(
         currentSession: MatchSession,
     ): void {
+        const snapshot = captureCheckpointSnapshot(
+            currentSession,
+            sessionStore.get,
+        );
+
+        if (!snapshot) return;
+
         enqueue(async () => {
             await ensureMatch(currentSession, roomId);
-            await flushCheckpoint(
-                null,
-                currentSession,
-                sessionStore.get,
-                undefined,
-            );
+            await flushCheckpoint(currentSession, snapshot);
         });
     }
 
@@ -384,11 +406,11 @@ async function ensureMatch(
                 ...(roomId ? { roomId } : {}),
                 gameMode: { name: GAME_MODE_NAME },
                 initiatedAt: session.startedAt.toISOString(),
-                ...(session.lastScore
+                ...(session.initialScore
                     ? {
                           score: {
-                              red: session.lastScore.red,
-                              blue: session.lastScore.blue,
+                              red: session.initialScore.red,
+                              blue: session.initialScore.blue,
                           },
                       }
                     : {}),
@@ -408,40 +430,28 @@ async function ensureMatch(
 }
 
 async function flushCheckpoint(
-    room: Room | null,
     session: MatchSession,
-    getPlayerSession: PlayerSessionReader,
-    requestedStatus?: MatchStatus,
+    snapshot: CheckpointSnapshot,
 ): Promise<CheckpointResponse | null> {
-    if (!session.matchId || !session.lastScore) return null;
+    if (!session.matchId) return null;
 
-    materializeGameEvents(session, getPlayerSession);
-    const events = [...session.events];
     const revision = ++session.checkpointRevision;
-    const elapsedSeconds = getElapsedSeconds(session);
-    const status =
-        requestedStatus ??
-        (elapsedSeconds >= session.minimumPersistedMatchSeconds
-            ? "ongoing"
-            : "pending");
-    const observedAt =
-        status === "completed" || status === "discarded"
-            ? (session.endedAt ?? new Date()).toISOString()
-            : new Date().toISOString();
     const result = await api.request<CheckpointResponse>({
         method: "POST",
         path: `/matches/${encodeURIComponent(session.matchId)}/checkpoints`,
         body: {
             revision,
-            observedAt,
-            elapsedSeconds,
+            observedAt: snapshot.observedAt,
+            elapsedSeconds: snapshot.elapsedSeconds,
             score: {
-                red: session.lastScore.red,
-                blue: session.lastScore.blue,
+                red: snapshot.score.red,
+                blue: snapshot.score.blue,
             },
-            events,
-            status,
-            ...(status === "completed" ? { completionReason: "normal" } : {}),
+            events: snapshot.events,
+            status: snapshot.status,
+            ...(snapshot.status === "completed"
+                ? { completionReason: "normal" }
+                : {}),
         },
     });
 
@@ -455,12 +465,54 @@ async function flushCheckpoint(
             event.producerSequence > result.data.acknowledgedProducerSequence,
     );
 
-    if (room) {
-        session.lastScore =
-            readScore(room, () => null, session.lastScore) ?? session.lastScore;
-    }
-
     return result.data;
+}
+
+function captureCheckpointSnapshot(
+    session: MatchSession,
+    getPlayerSession: PlayerSessionReader,
+    requestedStatus?: MatchStatus,
+): CheckpointSnapshot | null {
+    if (!session.lastScore) return null;
+
+    materializeGameEvents(session, getPlayerSession);
+
+    const score = { ...session.lastScore };
+    const elapsedSeconds = getElapsedSeconds(session);
+    const status =
+        requestedStatus ??
+        (elapsedSeconds >= session.minimumPersistedMatchSeconds
+            ? "ongoing"
+            : "pending");
+
+    return {
+        score,
+        elapsedSeconds,
+        status,
+        observedAt: (session.ended
+            ? (session.endedAt ?? new Date())
+            : new Date()
+        ).toISOString(),
+        events: session.events.map((event) => ({ ...event })),
+    };
+}
+
+function withCheckpointStatus(
+    snapshot: CheckpointSnapshot,
+    status: MatchStatus,
+): CheckpointSnapshot {
+    return { ...snapshot, status };
+}
+
+function deferReplaySnapshot(
+    replay: ReplayRecorder,
+    room: Room,
+): Promise<Uint8Array | null> {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            void replay.snapshot(room).then(resolve, () => resolve(null));
+        }, 0);
+    });
 }
 
 async function uploadRecordingCheckpoint(

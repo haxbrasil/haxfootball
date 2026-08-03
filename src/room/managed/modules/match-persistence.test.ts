@@ -29,7 +29,8 @@ afterEach(() => {
 });
 
 describe("managed match persistence callback safety", () => {
-    it("does not stop the replay inside the game-stop callback", () => {
+    it("does not stop the replay inside the game-stop callback", async () => {
+        installSuccessfulRequests();
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
@@ -40,9 +41,15 @@ describe("managed match persistence callback safety", () => {
         persistence.module.call("onGameStop", room, null);
 
         expect(stopRecording).not.toHaveBeenCalled();
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({ status: "discarded" }),
+            );
+        });
     });
 
-    it("does not stop the replay inside the last-player-leave callback", () => {
+    it("does not stop the replay inside the last-player-leave callback", async () => {
+        installSuccessfulRequests();
         const stopRecording = vi.fn<() => Uint8Array>(() =>
             Uint8Array.from([1, 2, 3]),
         );
@@ -59,6 +66,11 @@ describe("managed match persistence callback safety", () => {
         persistence.module.call("onPlayerLeave", room, player);
 
         expect(stopRecording).not.toHaveBeenCalled();
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({ status: "discarded" }),
+            );
+        });
     });
 
     it("creates a pending match immediately and discards a short game", async () => {
@@ -86,6 +98,81 @@ describe("managed match persistence callback safety", () => {
             }),
         );
         expect(recordingCheckpointRequests()).toHaveLength(0);
+    });
+
+    it("persists a delayed short-game checkpoint from its own snapshot", async () => {
+        ensureEventSchema.mockResolvedValue(null);
+        const creationReleased = deferred<void>();
+        request.mockImplementation(
+            async ({
+                path,
+                body,
+            }: {
+                path: string;
+                body?: Record<string, unknown>;
+            }) => {
+                if (path === "/matches") {
+                    await creationReleased.promise;
+                    return {
+                        ok: true,
+                        data: { id: "match-1", recording: null },
+                    };
+                }
+
+                if (path.endsWith("/checkpoints")) {
+                    const events = (body?.["events"] ?? []) as Array<{
+                        producerSequence: number;
+                    }>;
+                    const lastEvent = events[events.length - 1];
+
+                    return {
+                        ok: true,
+                        data: {
+                            acknowledgedProducerSequence:
+                                lastEvent?.producerSequence ?? 0,
+                            match: { id: "match-1", recording: null },
+                        },
+                    };
+                }
+
+                return {
+                    ok: true,
+                    data: { revision: 1, sizeBytes: 3 },
+                };
+            },
+        );
+
+        const room = createRoom({ time: 10 });
+        const persistence = createPersistence();
+
+        persistence.module.call("onGameStart", room, null);
+        persistence.matchEvents({
+            type: "test-event",
+            playerId: 1,
+            sourceState: "test",
+            value: {},
+            tick: 1,
+        });
+        persistence.module.call("onGameStop", room, null);
+
+        room.setTime(37);
+        creationReleased.resolve();
+
+        await vi.waitFor(() => {
+            expect(checkpointBodies()).toContainEqual(
+                expect.objectContaining({ status: "discarded" }),
+            );
+        });
+
+        expect(checkpointBodies()).not.toContainEqual(
+            expect.objectContaining({ status: "ongoing" }),
+        );
+        expect(checkpointBodies()).not.toContainEqual(
+            expect.objectContaining({ elapsedSeconds: 37 }),
+        );
+        expect(
+            checkpointBodies().filter(({ status }) => status === "discarded"),
+        ).toHaveLength(1);
     });
 
     it("checkpoints and completes an eligible match with its recording", async () => {
@@ -146,6 +233,18 @@ function createPersistence(
     });
 }
 
+function deferred<T>(): {
+    promise: Promise<T>;
+    resolve: (value: T) => void;
+} {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((nextResolve) => {
+        resolve = nextResolve;
+    });
+
+    return { promise, resolve };
+}
+
 function createRoom({
     time,
     snapshotRecordingAsync = vi.fn<() => Promise<Uint8Array>>(async () =>
@@ -156,13 +255,15 @@ function createRoom({
     time: number;
     snapshotRecordingAsync?: () => Promise<Uint8Array>;
     stopRecording?: () => Uint8Array;
-}): Room {
+}): Room & { setTime: (time: number) => void } {
+    let currentTime = time;
+
     return {
         getPlayerList: () => [],
         getScores: () => ({
             red: 6,
             blue: 7,
-            time,
+            time: currentTime,
             scoreLimit: 0,
             timeLimit: 0,
         }),
@@ -170,7 +271,10 @@ function createRoom({
         startRecording: vi.fn<() => boolean>(() => true),
         snapshotRecordingAsync,
         stopRecording,
-    } as unknown as Room;
+        setTime: (time: number) => {
+            currentTime = time;
+        },
+    } as unknown as Room & { setTime: (time: number) => void };
 }
 
 function installSuccessfulRequests(): void {
