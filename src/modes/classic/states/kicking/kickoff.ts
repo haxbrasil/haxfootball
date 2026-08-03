@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import {
     $checkpoint,
     $config,
@@ -237,6 +238,7 @@ export function Kickoff({ forTeam = Team.RED }: { forTeam?: FieldTeam }) {
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         $handleKickoffTimeout();
 
         $syncPossessionQuarterbackSelection({

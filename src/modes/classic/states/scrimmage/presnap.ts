@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import { type FieldTeam, isFieldTeam, Team } from "@runtime/models";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { CommandHandleResult, CommandSpec } from "@core/commands";
@@ -836,6 +837,7 @@ export function Presnap({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const selectedQuarterbackId = requireQb
             ? $syncPossessionQuarterbackSelection({
                   team: offensiveTeam,

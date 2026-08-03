@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { $dispose, $effect, $next } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
@@ -220,6 +221,7 @@ export function ExtraPointQuarterbackRun({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(playerId);
         const frame = buildFrame(state);
         if (!frame) return;
 

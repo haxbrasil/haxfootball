@@ -480,8 +480,6 @@ export class Room {
     private applyGameClockStop(team: Exclude<TeamID, 0>): void {
         this.setSoftKickoff(team);
         this.setDiscProperties(NATIVE_CLOCK_BALL_DISC_ID, {
-            x: 0,
-            y: 0,
             xspeed: 0,
             yspeed: 0,
             xgravity: 0,
@@ -533,6 +531,30 @@ export class Room {
             ygravity: 0,
         });
     };
+
+    public syncNativeBallCameraTarget(cameraTargetPlayerId?: number): void {
+        if (!this.managesGameClock()) return;
+
+        const ball = this.getBallProperties();
+        if (typeof ball?.x !== "number" || typeof ball.y !== "number") return;
+
+        const ballX = ball.x;
+        const ballY = ball.y;
+        const player =
+            typeof cameraTargetPlayerId === "number"
+                ? this.getPlayerDiscProperties(cameraTargetPlayerId)
+                : null;
+
+        const target =
+            typeof player?.x === "number" && typeof player.y === "number"
+                ? { x: player.x, y: player.y }
+                : { x: ballX, y: ballY };
+        const nativeBall = this.getDiscProperties(NATIVE_CLOCK_BALL_DISC_ID);
+
+        if (nativeBall?.x === target.x && nativeBall.y === target.y) return;
+
+        this.setDiscProperties(NATIVE_CLOCK_BALL_DISC_ID, target);
+    }
 
     public setDesyncCheckerEnabled(enabled: boolean): void {
         this.room.setDesyncCheckerEnabled(enabled);

@@ -8,8 +8,10 @@ import { Room, type DiscRef } from "@core/room";
 
 function createRawRoom({
     gameStatus = "running",
+    playerDiscs = new Map<number, DiscPropertiesObject>(),
 }: {
     gameStatus?: GameStatus;
+    playerDiscs?: Map<number, DiscPropertiesObject>;
 } = {}) {
     const discs = new Map<DiscRef, DiscPropertiesObject>([
         [NATIVE_CLOCK_BALL_DISC_ID, { x: 0, y: 0 }],
@@ -34,6 +36,9 @@ function createRawRoom({
             });
         }),
         getGameStatus: vi.fn<() => GameStatus>(() => status),
+        getPlayerDiscProperties: vi.fn<
+            (playerId: number) => DiscPropertiesObject | null
+        >((playerId) => playerDiscs.get(playerId) ?? null),
         setSoftKickoff: vi.fn<(team: Exclude<TeamID, 0>) => void>(),
     } as unknown as RoomObject;
 
@@ -71,7 +76,7 @@ describe("Room game ball", () => {
 });
 
 describe("Room game clock", () => {
-    it("stops through soft kickoff and resets the native clock ball", () => {
+    it("stops through soft kickoff without moving the native clock ball", () => {
         const { raw, room } = createRawRoom();
         room.setBallDiscRef(GAME_BALL_DISC_REF);
 
@@ -81,11 +86,13 @@ describe("Room game clock", () => {
         expect(raw.setDiscProperties).toHaveBeenCalledWith(
             NATIVE_CLOCK_BALL_DISC_ID,
             expect.objectContaining({
-                x: 0,
-                y: 0,
                 xspeed: 0,
                 yspeed: 0,
             }),
+        );
+        expect(raw.setDiscProperties).not.toHaveBeenCalledWith(
+            NATIVE_CLOCK_BALL_DISC_ID,
+            expect.objectContaining({ x: expect.any(Number) }),
         );
     });
 
@@ -127,6 +134,7 @@ describe("Room game clock", () => {
 
         room.stopGameClock(1);
         room.startGameClock();
+        room.syncNativeBallCameraTarget();
 
         expect(raw.setSoftKickoff).not.toHaveBeenCalled();
         expect(raw.setDiscProperties).not.toHaveBeenCalled();
@@ -144,5 +152,61 @@ describe("Room game clock", () => {
         room.stopGameClock(2);
 
         expect(raw.setSoftKickoff).toHaveBeenNthCalledWith(2, 2);
+    });
+});
+
+describe("Room native ball camera target", () => {
+    it("tracks the visible game ball without changing clock motion", () => {
+        const { raw, room } = createRawRoom();
+        room.setBallDiscRef(GAME_BALL_DISC_REF);
+
+        room.syncNativeBallCameraTarget();
+
+        expect(raw.setDiscProperties).toHaveBeenCalledWith(
+            NATIVE_CLOCK_BALL_DISC_ID,
+            { x: 120, y: -30 },
+        );
+    });
+
+    it("tracks the declared carrier instead of the physical ball", () => {
+        const { raw, room } = createRawRoom({
+            playerDiscs: new Map([[7, { x: 20, y: 10, radius: 15 }]]),
+        });
+        room.setBallDiscRef(GAME_BALL_DISC_REF);
+
+        room.syncNativeBallCameraTarget(7);
+
+        expect(raw.setDiscProperties).toHaveBeenCalledWith(
+            NATIVE_CLOCK_BALL_DISC_ID,
+            { x: 20, y: 10 },
+        );
+    });
+
+    it("does not infer a carrier from physical ball contact", () => {
+        const { raw, room } = createRawRoom({
+            playerDiscs: new Map([[7, { x: 100, y: -30, radius: 15 }]]),
+        });
+        room.setBallDiscRef(GAME_BALL_DISC_REF);
+
+        room.syncNativeBallCameraTarget();
+
+        expect(raw.setDiscProperties).toHaveBeenCalledWith(
+            NATIVE_CLOCK_BALL_DISC_ID,
+            { x: 120, y: -30 },
+        );
+    });
+
+    it("skips the update when the native ball is already at the target", () => {
+        const { raw, room } = createRawRoom();
+        room.setBallDiscRef(GAME_BALL_DISC_REF);
+        raw.setDiscProperties(NATIVE_CLOCK_BALL_DISC_ID, {
+            x: 120,
+            y: -30,
+        });
+        vi.mocked(raw.setDiscProperties).mockClear();
+
+        room.syncNativeBallCameraTarget();
+
+        expect(raw.setDiscProperties).not.toHaveBeenCalled();
     });
 });

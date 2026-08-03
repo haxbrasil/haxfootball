@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState } from "@runtime/engine";
 import { ticks } from "@common/general/time";
 import { opposite } from "@common/game/game";
@@ -69,6 +70,7 @@ export function FieldGoalInFlight({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const crossedGoalLine =
             calculateDirectionalGain(offensiveTeam, state.ball.x - goalLineX) >=
             0;

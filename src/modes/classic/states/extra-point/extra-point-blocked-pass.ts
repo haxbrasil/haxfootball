@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState } from "@runtime/engine";
 import { $dispose, $effect, $next } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
@@ -48,6 +49,7 @@ export function ExtraPointBlockedPass({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const blocker = state.players.find((player) => player.id === blockerId);
         if (!blocker) return;
 

@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/flag/hooks/camera";
 import type {
     GameState,
     GameStateBall,
@@ -407,6 +408,7 @@ export function Interception({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(playerId);
         $maybeHideInterceptionPath(state);
 
         const frame = buildFrame(state);

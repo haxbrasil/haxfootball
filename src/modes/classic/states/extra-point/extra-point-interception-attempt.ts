@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type {
     GameState,
     GameStateBall,
@@ -177,6 +178,7 @@ export function ExtraPointInterceptionAttempt({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const frame = buildFrame(state);
         if (!frame) return;
 

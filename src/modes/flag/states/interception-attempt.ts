@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/flag/hooks/camera";
 import { GameState, GameStateBall, GameStatePlayer } from "@runtime/engine";
 import { $before, $dispose, $effect, $next, $event } from "@runtime/runtime";
 import { DownState } from "@modes/flag/shared/rules/down";
@@ -183,6 +184,7 @@ export function InterceptionAttempt({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const frame = buildFrame(state);
         if (!frame) return;
 

@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import { $dispose, $effect, $next } from "@runtime/hooks";
 import { type FieldTeam } from "@runtime/models";
 import { ticks } from "@common/general/time";
@@ -195,6 +196,7 @@ export function KickoffInFlight({ kickingTeam }: { kickingTeam: FieldTeam }) {
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         $syncPossessionQuarterbackSelection({
             team: receivingTeam,
             players: state.players,

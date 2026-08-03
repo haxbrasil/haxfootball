@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { Team, type FieldTeam } from "@runtime/models";
 import { distributeOnLine } from "@common/math/geometry";
@@ -180,6 +181,7 @@ export function Punt({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         $handlePuntKickTimeout();
 
         const playersPastBall = getPlayersBeyondBallLine(state);

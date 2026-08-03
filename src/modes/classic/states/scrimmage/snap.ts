@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { ticks } from "@common/general/time";
 import { AVATARS, opposite, setPlayerAvatars } from "@common/game/game";
@@ -549,12 +550,9 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: $prepareDownStateLineOfScrimmageBlocking(
-                            penaltyResult.downState,
-                        ),
-                        losBlockingPrepared: true,
+                        downState: penaltyResult.downState,
                     },
-                    wait: ticks({ seconds: 1 }),
+                    wait: 1,
                 });
             },
             onFirstDown() {
@@ -575,12 +573,9 @@ export function Snap({
                 $next({
                     to: "PRESNAP",
                     params: {
-                        downState: $prepareDownStateLineOfScrimmageBlocking(
-                            penaltyResult.downState,
-                        ),
-                        losBlockingPrepared: true,
+                        downState: penaltyResult.downState,
                     },
-                    wait: ticks({ seconds: 1 }),
+                    wait: 1,
                 });
             },
             onTouchdown() {
@@ -1166,6 +1161,7 @@ export function Snap({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(quarterbackId);
         const frame = buildFrame(state);
         if (!frame) return;
 

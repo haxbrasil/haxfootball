@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { $before, $dispose, $effect, $next, $tick } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
@@ -60,7 +61,6 @@ import type { CommandSpec } from "@core/commands";
 import { COLOR } from "@common/general/color";
 import { getPointDistance } from "@common/math/geometry";
 import { $stopGameClock } from "@modes/classic/hooks/clock";
-import { $prepareLineOfScrimmageBlocking } from "@modes/classic/hooks/los";
 
 const DEFENSIVE_FOUL_PENALTY_YARDS = 5;
 
@@ -277,27 +277,16 @@ export function ExtraPointSnap({
     function $retryExtraPointAttempt(
         nextFieldPos: FieldPosition,
         nextDefensiveFouls: number,
-        options?: {
-            disposal?: "IMMEDIATE" | "DELAYED" | "AFTER_RESUME";
-            wait?: number;
-        },
+        options?: { wait?: number },
     ) {
-        const losBlockingPrepared = typeof options?.wait === "number";
-        if (losBlockingPrepared) {
-            $stopGameClock(offensiveTeam);
-            $prepareLineOfScrimmageBlocking(nextFieldPos);
-        }
-
         $next({
             to: "EXTRA_POINT_RETRY",
             params: {
                 offensiveTeam,
                 fieldPos: nextFieldPos,
                 defensiveFouls: nextDefensiveFouls,
-                losBlockingPrepared,
             },
             ...(options?.wait ? { wait: options.wait } : {}),
-            ...(options?.disposal ? { disposal: options.disposal } : {}),
         });
     }
 
@@ -515,7 +504,7 @@ export function ExtraPointSnap({
                     });
                 });
                 $retryExtraPointAttempt(nextFieldPos, nextDefensiveFouls, {
-                    wait: ticks({ seconds: 1 }),
+                    wait: 1,
                 });
             },
             onFirstDown(yardsGained) {
@@ -532,7 +521,7 @@ export function ExtraPointSnap({
                     });
                 });
                 $retryExtraPointAttempt(nextFieldPos, nextDefensiveFouls, {
-                    wait: ticks({ seconds: 1 }),
+                    wait: 1,
                 });
             },
             onTouchdown() {
@@ -771,6 +760,7 @@ export function ExtraPointSnap({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(quarterbackId);
         $handleBallOutsideZone(state);
 
         const frame = buildFrame(state);

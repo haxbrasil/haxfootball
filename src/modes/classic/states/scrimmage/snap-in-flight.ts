@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import { $dispose, $effect, $next } from "@runtime/hooks";
 import { ticks } from "@common/general/time";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
@@ -281,6 +282,7 @@ export function SnapInFlight({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const frame = buildFrame(state);
 
         $handleDefensiveOutOfBoundsCatch(frame);

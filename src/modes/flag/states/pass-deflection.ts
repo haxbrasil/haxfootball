@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/flag/hooks/camera";
 import { GameState } from "@runtime/engine";
 import { $dispose, $next } from "@runtime/runtime";
 import { DownState } from "@modes/flag/shared/rules/down";
@@ -53,6 +54,7 @@ export function PassDeflection({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         const blocker = state.players.find((p) => p.id === blockerId);
         if (!blocker) return;
 

@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/flag/hooks/camera";
 import { type FieldTeam, isFieldTeam, Team } from "@runtime/models";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { CommandHandleResult, CommandSpec } from "@core/commands";
@@ -625,6 +626,7 @@ export function Presnap({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         $handleHikeTimeoutWarning();
         $handleHikeTimeout();
 

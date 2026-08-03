@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import { Team, type FieldTeam } from "@runtime/models";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { distributeOnLine } from "@common/math/geometry";
@@ -163,6 +164,7 @@ export function Safety({ kickingTeam }: { kickingTeam: FieldTeam }) {
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget();
         $handleSafetyKickTimeout();
 
         const playersPastBall = getPlayersBeyondBallLine(state);

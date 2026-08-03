@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/flag/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import {
     advanceDownState,
@@ -568,6 +569,7 @@ export function LiveBall({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(playerId);
         const frame = buildFrame(state);
         if (!frame) return;
 

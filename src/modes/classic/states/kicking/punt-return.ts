@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import { $config, $dispose, $effect, $next, $event } from "@runtime/hooks";
 import type { FieldTeam } from "@runtime/models";
 import { ticks } from "@common/general/time";
@@ -522,6 +523,7 @@ export function PuntReturn({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(playerId);
         const frame = buildFrame(state);
         if (!frame) return;
 

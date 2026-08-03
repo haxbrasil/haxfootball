@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/classic/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import {
     $checkpoint,
@@ -249,6 +250,7 @@ export function ExtraPointRetry({
     }
 
     function run(_state: GameState) {
+        $syncNativeBallCameraTarget();
         const frame = buildFrame();
         $handleAttemptExpired(frame);
     }

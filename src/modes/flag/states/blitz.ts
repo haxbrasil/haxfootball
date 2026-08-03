@@ -1,3 +1,4 @@
+import { $syncNativeBallCameraTarget } from "@modes/flag/hooks/camera";
 import type { GameState, GameStatePlayer } from "@runtime/engine";
 import { $dispose, $effect, $global, $next, $event } from "@runtime/runtime";
 import { ticks } from "@common/general/time";
@@ -647,6 +648,7 @@ export function Blitz({
     }
 
     function run(state: GameState) {
+        $syncNativeBallCameraTarget(quarterbackId);
         const frame = buildFrame(state);
         if (!frame) return;
 
