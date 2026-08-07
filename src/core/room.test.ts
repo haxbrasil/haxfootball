@@ -39,7 +39,10 @@ function createRawRoom({
         getPlayerDiscProperties: vi.fn<
             (playerId: number) => DiscPropertiesObject | null
         >((playerId) => playerDiscs.get(playerId) ?? null),
-        setSoftKickoff: vi.fn<(team: Exclude<TeamID, 0>) => void>(),
+        setSoftKickoff: vi.fn<(team: Exclude<TeamID, 0>) => void>(() => {
+            // Mirrors the native soft-kickoff behaviour that re-centres disc0.
+            discs.set(NATIVE_CLOCK_BALL_DISC_ID, { x: 0, y: 0 });
+        }),
     } as unknown as RoomObject;
 
     return {
@@ -76,7 +79,7 @@ describe("Room game ball", () => {
 });
 
 describe("Room game clock", () => {
-    it("stops through soft kickoff without moving the native clock ball", () => {
+    it("restores the native camera target after soft kickoff", () => {
         const { raw, room } = createRawRoom();
         room.setBallDiscRef(GAME_BALL_DISC_REF);
 
@@ -90,9 +93,9 @@ describe("Room game clock", () => {
                 yspeed: 0,
             }),
         );
-        expect(raw.setDiscProperties).not.toHaveBeenCalledWith(
+        expect(raw.setDiscProperties).toHaveBeenCalledWith(
             NATIVE_CLOCK_BALL_DISC_ID,
-            expect.objectContaining({ x: expect.any(Number) }),
+            { x: 120, y: -30 },
         );
     });
 

@@ -485,6 +485,10 @@ export class Room {
             xgravity: 0,
             ygravity: 0,
         });
+
+        // Soft kickoff can move disc0 back to the centre. Keep the native
+        // renderer target aligned with the visible game ball in the same tick.
+        this.syncNativeBallCameraTarget();
     }
 
     public managesGameClock(): boolean {
